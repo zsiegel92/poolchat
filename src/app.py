@@ -67,6 +67,7 @@ def post_webhook():
         for entry in data['entry']:
             for messaging_event in entry['messaging']:
                 sender_id = messaging_event['sender']['id']
+                messenger.say(sender_id,"making contact")
                 toDB(sender_id)
                 if 'message' in messaging_event: #message may be of the form
                     if 'text' in messaging_event['message']:

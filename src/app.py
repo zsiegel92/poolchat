@@ -112,39 +112,23 @@ def text_rules(recipient_id, message_text):
 def process_referral(recipient_id,postback_text,ref_text):
     postback_rules(recipient_id,postback_text) #Do nothing with referral for now.
 
-def getStarted(recipient_id,referral_text=None,message_text=None):
-    carpooler = Carpooler.query.filter_by(fbId=recipient_id).first() #Should have been added already
+def getStarted(sender_id,referral_text=None,message_text=None):
+    carpooler = Carpooler.query.filter_by(fbId=sender_id).first() #Should have been added already
     if carpooler is not None:
         messenger.say(sender_id,"There was an error - I already know you.")
-        return carpooler.next()
+        return carpooler.next() #a nodeOb
     carpooler = Carpooler(fbId=sender_id)
     db.session.add(carpooler)
     messenger.say(sender_id,"Added you to my database! =D")
     db.session.commit()
-    (nextType,nextStep,inquiry) = carpooler.next()
-    pester(sender_id,nextType,nextStep,inquiry)
+    node = carpooler.next()
+    pester(sender_id,node)
 
-def pester(sender_id,nextType,nextStep,inquiry):
-    messenger.say(sender_id,"OK! Now I know about %s." % nextStep)
-    messenger.say(sender_id,"Now I need to ask about %s." % nextStep)
-    messenger.say(sender_id,inquiry)
+def pester(sender_id,nextNode):
+    messenger.say(sender_id,"OK! Now I need to know about " + nextNode.nTitle + ". Please respond with a " + nextNode.nType +".")
+    messenger.say(sender_id,nextNode.nQuestion)
 
 
-#    pester(sender_id)
-
-#def pester(recipient_id):
-#    kwargs = {}
-#    carpooler = Carpooler.query.filter_by(fbId=recipient_id).first()
-#    priorities = ['carpoolGroupId','address','email','name','preWindow','need_to_arrive_on_time','num_seats','engaged','state']
-#    priority_feedback = {'carpoolGroupId':'','address':'','email':'','name':'','preWindow':'','need_to_arrive_on_time':'','num_seats':'','engaged':'','state':''}
-#    for priority in priorities:
-#        if getattr(carpooler,priority,None)==None:
-#            messenger.say(recipient_id,'I need to know more about your ' + priority_feedback[priority])
-#            #kwargs[priority]= DEFAULT PRIORITY AND/OR ASK USER RIGHT NOW!
-#            #toDB(recipient_id,**kwargs)
-#            break
-#        else:
-#            messenger.say(recipient_id,'I know everything I need to know about you! Has something changed?')
 
 #def optimize_Group(sender_id):
 #    #TODO:
@@ -182,20 +166,20 @@ def toDB(sender_id,response=None,**kwargs):
         carpooler = Carpooler.query.filter_by(fbId=sender_id).first()
         if carpooler == None:
             getStarted(sender_id,message_text=response)
-        if isTypedRight(response,nextType):
-            pester()
         else:
-            messenger.say(sender_id,"I need you to enter a " + nextType + " so that I can record " + nextStep +"!")
-            messenger.say(sender_id,inquiry)
-        db.session.commit()
-#            (nextStep,inquiry) = carpooler.next()
-
+            nextNode = carpooler.next()
+            if isTypedRight(response,nextNode.nType):
+                messenger.say(sender_id,"OK, now I know that " + nextNode.nTitle + " is " + response + ".")
+                nextNode = carpooler.update(input = response)
+                db.session.commit()
+            pester(sender_id,nextNode)
     except Exception as exc:
         messenger.say(sender_id,"Error accessing my database")
         print("Unable to add item to database.")
         print(str(exc))
     else:
-            messenger.say(sender_id,'exiting db function')
+        pass
+#        messenger.say(sender_id,'exiting db function')
 
 #Eventually add more checks, like isEmail, etc.
 def isTypedRight(userInput,requiredType):

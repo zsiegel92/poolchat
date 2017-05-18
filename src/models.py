@@ -1,6 +1,8 @@
 from app import db
 #from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.dialects.postgresql import JSON #Import if we use JSON in field
+from nodeOb import *
+
 
 
 #TODO: Create third model for "Registration". Then, the "engagement" or "participation" table will be a merge of all three tables on userid and carpoolid
@@ -21,14 +23,17 @@ class Carpooler(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     fbId = db.Column(db.String()) #facebook id
     fields = {
-        "email":("String","your email","What is your email address?"),
-        "name":("String","your name","What isyour name?"),
-        "address":("String","the address you'll be coming from","What is the address you'll be coming from?"),
-        "preWindow":("Integer","the earliest you can be ready to go","What is the earliest you can leave your house before the event?"),
-        "on_time":("Integer","your ability to be late (1 or 0)","Do you have to arrive on time? Can you be 30 minutes late? Please answer 'yes' if you are an organizer of this event."),
-        "must_drive":("Integer","your REQUIREMENT to drive (1 for \"have to drive\"; 0 for \"don't have to drive\")","Do you have to drive, or is catching a ride an option? Please answer Yes if you have to drive, or No otherwise."),
-        "num_seats":("Integer","the number of seats in your car (0 if you have no car)","How many seats are there in your car? Please input a number; enter 0 if you cannot drive to the event.")
+        "email":nodeOb("String","your email","What is your email address?"),
+        "name":nodeOb("String","your name","What isyour name?"),
+        "address":nodeOb("String","the address you'll be coming from","What is the address you'll be coming from?"),
+        "preWindow":nodeOb("Integer","the earliest you can be ready to go","What is the earliest you can leave your house before the event?"),
+        "on_time":nodeOb("Integer","your ability to be late (1 or 0)","Do you have to arrive on time? Can you be 30 minutes late? Please answer 'yes' if you are an organizer of this event."),
+        "must_drive":nodeOb("Integer","your REQUIREMENT to drive (1 for \"have to drive\"; 0 for \"don't have to drive\")","Do you have to drive, or is catching a ride an option? Please answer Yes if you have to drive, or No otherwise."),
+        "num_seats":nodeOb("Integer","the number of seats in your car (0 if you have no car)","How many seats are there in your car? Please input a number; enter 0 if you cannot drive to the event.")
     }
+    doneNode = nodeOb("NA","Nothing else","You're all set!")
+
+
     #If state needs to be more complex, store as JSON or as new column.
     fieldstate = db.Column(db.String()) #decision tree state, I guess
     engaged = db.Column(db.Integer) #Is this user fully plugged in?
@@ -36,17 +41,8 @@ class Carpooler(db.Model):
     ##    #NOTE:JSON type supported here:
     ##    result_all = db.Column(JSON)
     for field in fields:
-        exec(field + "= db.Column(db." + fields[field][0] +"())") #example: fbId = db.Column(db.String())
+        exec(field + "= db.Column(db." + fields[field].nType +"())") #example: fbId = db.Column(db.String())
     del field
-
-
-    def update(self,input=None,**kwargs):
-        for arg in kwargs:
-            if hasattr(self,arg):
-                setattr(self,arg,kwargs[arg])
-        if input:
-            setattr(self,self.fieldstate,input)
-        return self.next()
 
     def __init__(self, fbId,**kwargs):
         #        Construction equivalent to (thanks to SQLAlchemy.Model constructor):
@@ -58,15 +54,35 @@ class Carpooler(db.Model):
                 setattr(self,arg,kwargs[arg])
 
 
+
+#   @Return: nodeOb
+#    Can update fields directly, or can update based on current fieldstate with input.
+    def update(self,input=None,**kwargs):
+        for arg in kwargs:
+            if hasattr(self,arg):
+                setattr(self,arg,kwargs[arg])
+        if input:
+            setattr(self,self.fieldstate,input)
+        return self.next()
+
+#   @Return: nodeOb
     def next(self):
         if getattr(self,self.fieldstate,None) is None:
-            return self.fields[self.fieldstate] #return type, description, and question
+            return self.fields[self.fieldstate] #return nodeOb(type, description, and question)
         for field in self.fields:
             if getattr(self,field,None) is None:
                 self.fieldstate=field
-                return self.fields[self.fieldstate] #return description and question
-        return ("NA","Nothing else","You're all set!")
+                return self.fields[self.fieldstate] #return nodeOb(type, description, and question)
+        return doneNode
 
+
+#    @Post: prints description of self
+    def printout(self):
+        for field in self.fields:
+            print(field + ": " + str(getattr(self,field)))
+
+
+#    @Return: String description of carpooler
     def describe(self):
         unknown = '**Empty attributes**:\n'
         known = 'Known attributes:\n'
@@ -78,11 +94,7 @@ class Carpooler(db.Model):
         status = unknown + known
         return status
 
-    def printout(self):
-        for field in self.fields:
-            print(field + ": " + str(getattr(self,field)))
-
-
+#    @Return: String description of carpooler
     def __repr__(self):
         return '<id {}>'.format(self.id)
 
@@ -134,4 +146,5 @@ class Pool(db.Model):
                 setattr(self,arg,kwargs[arg])
         #participants = participants
         #distMatrix = distMatrix
+
 

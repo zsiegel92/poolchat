@@ -66,8 +66,6 @@ def post_webhook():
         for entry in data["entry"]:
             for messaging_event in entry["messaging"]:
                 sender_id = messaging_event["sender"]["id"]
-                toDB(sender_id)
-                
                 if "message" in messaging_event: #message may be of the form
                     if "text" in messaging_event["message"]:
                         messenger.say(sender_id,"Responding to text.")
@@ -84,6 +82,7 @@ def post_webhook():
                         postback_rules(sender_id,postback_text)
     return "ok", 200
 
+#TODO: Don't create dicts at function call! Initialize them earlier.
 def postback_rules(recipient_id,postback_text,referral_text=None):
     rules = {
         "GET_STARTED_PAYLOAD":(lambda: getStarted(recipient_id,referral_text)),
@@ -107,7 +106,8 @@ def text_rules(recipient_id, message_text):
         postback1 = messenger.postBackButton('Do this thing!','thing1')
         postback2 = messenger.postBackButton('Say hello!','Hello2')
         buts = [web_button1,postback1,postback2]
-        messenger.give_choices(recipient_id,'Please pick one of these options',buts)
+        messenger.give_choices(recipient_id,'You can pick one of these options',buts)
+    toDB(recipient_id,response=message_text)
 
 def process_referral(recipient_id,postback_text,ref_text):
     postback_rules(recipient_id,postback_text) #Do nothing with referral for now.
@@ -176,19 +176,21 @@ def toDB(sender_id,response=None,**kwargs):
     try:
         carpooler = Carpooler.query.filter_by(fbId=sender_id).first()
         if carpooler == None:
-            carpooler = Carpooler(fbId=sender_id,**kwargs)
+            carpooler = Carpooler(fbId=sender_id)
             db.session.add(carpooler)
             messenger.say(sender_id,"Added you to my database! =D")
             print("Added you to my database.")
-        else:
-
-            (nextstep,inquiry) = carpooler.update(nextResponse=response,**kwargs)
-            db.session.commit()
-            messenger.say(sender_id,"Updated my database.")
-            print("Updated my database.")
-#            (nextstep,inquiry) = carpooler.next()
-            messenger.say(sender_id,"Now I need to ask about %s" % nextstep() + ".")
+        (nextType,nextStep,inquiry) = carpooler.next()
+        if isTypedRight(response,nextType):
+            messenger.say(sender_id,"OK! Now I know about " + nextStep +". You entered: " + response +".")
+            (type,nextStep,inquiry) = carpooler.update(input=response,**kwargs)
+            messenger.say(sender_id,"Now I need to ask about %s." % nextStep)
             messenger.say(sender_id,inquiry)
+        else:
+            messenger.say(sender_id,"I need you to enter a " + nextType + " so that I can record " + nextStep +"!")
+            messenger.say(sender_id,inquiry)
+        db.session.commit()
+#            (nextStep,inquiry) = carpooler.next()
 
     except Exception as exc:
         messenger.say(sender_id,"Error accessing my database")
@@ -197,6 +199,10 @@ def toDB(sender_id,response=None,**kwargs):
     else:
             messenger.say(sender_id,'exiting db function')
 
+#Eventually add more checks, like isEmail, etc.
+def isTypedRight(userInput,requiredType):
+    typeCheckers = {"String":(lambda stringArg:True),"Integer":(lambda stringArg: stringArg.isdigit())}
+    return typeCheckers[requiredType](userInput)
 
 if __name__ == '__main__':
     app.run()

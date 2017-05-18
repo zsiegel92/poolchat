@@ -9,9 +9,10 @@ from sqlalchemy.dialects.postgresql import JSON #Import if we use JSON in field
 #inputting names as lowercase makes them case-insensitive to SQLAlchemy (including even one uppercase character turns off this feature). So the lowercase class names refer to my classes whose names are uppercase! Confusing!
 #,db.PrimaryKeyConstraint('participant_id', 'pool_id') #Possibly add this to constructor
 participation = db.Table('participation', db.Column('carpooler_id', db.Integer, db.ForeignKey('carpooler.id')), db.Column('pool_id', db.Integer, db.ForeignKey('pool.id')))
+#NOTE: In sqlAlchemy, db.Integer or db.Integer() would both be fine, but in all Flask sqlAlchemy examples, db.Integer is given. Maybe post on SO about whether that holds.
+#Is this a good solution? Holding types, and various conversational morphologies of concepts in a dict? It makes for some obscure commands, but it is parsimonious in many ways. There isn't a lot of repetition in this code, although I have to use getattr VERY frequently.
 
-
-
+#TODO: Don't create dicts at construction ! Initialize them earlier. Does "fields" get imported at module import?
 ##TODO: extend db.Column to have two types of metadata: a label, and a question (eg "What is your facebook id?")
 class Carpooler(db.Model):
     __tablename__ = 'carpooler'
@@ -19,9 +20,9 @@ class Carpooler(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     fbId = db.Column(db.String()) #facebook id
     fields = {
-        "email":("String()","your email","What is your email address?"),
-        "name":("String()","your name","What isyour name?"),
-        "address":("String()","the address you'll be coming from","What is the address you'll be coming from?"),
+        "email":("String","your email","What is your email address?"),
+        "name":("String","your name","What isyour name?"),
+        "address":("String","the address you'll be coming from","What is the address you'll be coming from?"),
         "preWindow":("Integer","the earliest you can be ready to go","What is the earliest you can leave your house before the event?"),
         "on_time":("Integer","your ability to be late (1 or 0)","Do you have to arrive on time? Can you be 30 minutes late? Please answer 'yes' if you are an organizer of this event."),
         "must_drive":("Integer","your REQUIREMENT to drive (1 for \"have to drive\"; 0 for \"don't have to drive\")","Do you have to drive, or is catching a ride an option? Please answer Yes if you have to drive, or No otherwise."),
@@ -34,16 +35,16 @@ class Carpooler(db.Model):
     ##    #NOTE:JSON type supported here:
     ##    result_all = db.Column(JSON)
     for field in fields:
-        exec(field + "= db.Column(db." + fields[field][0] +")") #example: fbId = db.Column(db.String())
+        exec(field + "= db.Column(db." + fields[field][0] +"())") #example: fbId = db.Column(db.String())
     del field
 
 
-    def update(self,nextResponse=None,**kwargs):
+    def update(self,input=None,**kwargs):
         for arg in kwargs:
             if hasattr(self,arg):
                 setattr(self,arg,kwargs[arg])
-        if nextResponse:
-            setattr(self,self.fieldvar,nextResponse)
+        if input:
+            setattr(self,self.fieldstate,input)
         return self.next()
 
     def __init__(self, fbId,**kwargs):
@@ -57,13 +58,13 @@ class Carpooler(db.Model):
                         
 
     def next(self):
-        if getattr(self,self.fieldvar) is None:
-            return self.fields[self.fieldvar][1:] #return description and question
-        for field,value in vars(self).items():
-            if value is None:
-                self.fieldvar=field
-                return self.fields[self.fieldvar][1:] #return description and question
-        return ("Nothing else","You're all set!")
+        if getattr(self,self.fieldstate,None) is None:
+            return self.fields[self.fieldstate] #return type, description, and question
+        for field in self.fields:
+            if getattr(self,field,None) is None:
+                self.fieldstate=field
+                return self.fields[self.fieldstate] #return description and question
+        return ("NA","Nothing else","You're all set!")
 
     def describe(self):
         unknown = '**Empty attributes**:\n'

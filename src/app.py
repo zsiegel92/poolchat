@@ -112,19 +112,24 @@ def text_rules(recipient_id, message_text):
 def process_referral(recipient_id,postback_text,ref_text):
     postback_rules(recipient_id,postback_text) #Do nothing with referral for now.
 
-def getStarted(recipient_id,referral_text=None):
+def getStarted(recipient_id,referral_text=None,message_text=None):
     carpooler = Carpooler.query.filter_by(fbId=recipient_id).first() #Should have been added already
-#    if (carpooler == None):
-#        toDB(sender_id)
-#        messenger.say(recipient_id,'Hello, for the first time!')
-#    else:
-#        messenger.say(recipient_id,"I know you! Let's restart.")
-    if referral_text:
-        pass #Check if referral group is in database, create it if not! Add person to pool automatically.
-    if carpooler.pool.id == None: #see backref in models
-        messenger.say(recipient_id,"Let's get you in a carpooling group!")
-    else:
-        messenger.say(recipient_id,"Let's finish entering your carpool information!")
+    if carpooler is not None:
+        messenger.say(sender_id,"There was an error - I already know you.")
+        return carpooler.next()
+    carpooler = Carpooler(fbId=sender_id)
+    db.session.add(carpooler)
+    messenger.say(sender_id,"Added you to my database! =D")
+    db.session.commit()
+    (nextType,nextStep,inquiry) = carpooler.next()
+    pester(sender_id,nextType,nextStep,inquiry)
+
+def pester(sender_id,nextType,nextStep,inquiry):
+    messenger.say(sender_id,"OK! Now I know about %s." % nextStep)
+    messenger.say(sender_id,"Now I need to ask about %s." % nextStep)
+    messenger.say(sender_id,inquiry)
+
+
 #    pester(sender_id)
 
 #def pester(recipient_id):
@@ -176,16 +181,9 @@ def toDB(sender_id,response=None,**kwargs):
     try:
         carpooler = Carpooler.query.filter_by(fbId=sender_id).first()
         if carpooler == None:
-            carpooler = Carpooler(fbId=sender_id)
-            db.session.add(carpooler)
-            messenger.say(sender_id,"Added you to my database! =D")
-            print("Added you to my database.")
-        (nextType,nextStep,inquiry) = carpooler.next()
+            getStarted(sender_id,message_text=response)
         if isTypedRight(response,nextType):
-            messenger.say(sender_id,"OK! Now I know about " + nextStep +". You entered: " + response +".")
-            (type,nextStep,inquiry) = carpooler.update(input=response,**kwargs)
-            messenger.say(sender_id,"Now I need to ask about %s." % nextStep)
-            messenger.say(sender_id,inquiry)
+            pester()
         else:
             messenger.say(sender_id,"I need you to enter a " + nextType + " so that I can record " + nextStep +"!")
             messenger.say(sender_id,inquiry)

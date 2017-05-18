@@ -11,6 +11,7 @@ from sqlalchemy.dialects.postgresql import JSON #Import if we use JSON in field
 participation = db.Table('participation', db.Column('carpooler_id', db.Integer, db.ForeignKey('carpooler.id')), db.Column('pool_id', db.Integer, db.ForeignKey('pool.id')))
 #NOTE: In sqlAlchemy, db.Integer or db.Integer() would both be fine, but in all Flask sqlAlchemy examples, db.Integer is given. Maybe post on SO about whether that holds.
 #Is this a good solution? Holding types, and various conversational morphologies of concepts in a dict? It makes for some obscure commands, but it is parsimonious in many ways. There isn't a lot of repetition in this code, although I have to use getattr VERY frequently.
+#Instead of tuples, should I send "status update objects"? DUH!! Maybe a 'Node' object!! Needs: node.typeNeeded, node.propertyTitle, node.question
 
 #TODO: Don't create dicts at construction ! Initialize them earlier. Does "fields" get imported at module import?
 ##TODO: extend db.Column to have two types of metadata: a label, and a question (eg "What is your facebook id?")
@@ -55,7 +56,7 @@ class Carpooler(db.Model):
         for arg in kwargs:
             if hasattr(self,arg):
                 setattr(self,arg,kwargs[arg])
-                        
+
 
     def next(self):
         if getattr(self,self.fieldstate,None) is None:

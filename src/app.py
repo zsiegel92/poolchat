@@ -18,8 +18,7 @@ db = SQLAlchemy(app)
 #in Result, we have: from main import app, db,
 #so be careful not to move this aboe defining app and db!
 q = Queue(connection=conn)
-from models import * #previously from models import Carpooler
-
+from models import * #previously from models import Carpooler, Pool
 
 
 
@@ -33,7 +32,7 @@ with app.test_request_context('/'):
 def root():
     try:
 #        messenger.say('1512768535401609','booting now')
-        return "WUTWUTWUT10", 200
+        return 'WUTWUTWUT10', 200
     except Exception as exc:
         return str(exc)
 
@@ -46,7 +45,7 @@ def drop_table():
     except Exception as exc:
         return "Exception on table drop:\n" + str(exc)
     else:
-        return "Dropped and re-created all tables!"
+        return "Dropped and re-created all tables!", 200
 
 
 
@@ -64,29 +63,28 @@ def get_webhook():
 def post_webhook():
     data = request.json
     if data["object"] == "page":
-        for entry in data['entry']:
-            for messaging_event in entry['messaging']:
-                sender_id = messaging_event['sender']['id']
-                messenger.say(sender_id,"making contact")
+        for entry in data["entry"]:
+            for messaging_event in entry["messaging"]:
+                sender_id = messaging_event["sender"]["id"]
                 toDB(sender_id)
-                if 'message' in messaging_event: #message may be of the form
-                    if 'text' in messaging_event['message']:
-                        message_text = messaging_event['message']['text']
+                
+                if "message" in messaging_event: #message may be of the form
+                    if "text" in messaging_event["message"]:
+                        messenger.say(sender_id,"Responding to text.")
+                        message_text = messaging_event["message"]["text"]
                         text_rules(sender_id,message_text)
-                elif 'postback' in messaging_event:
-                    postback_text = messaging_event['postback']['payload']
+                elif "postback" in messaging_event:
+                    postback_text = messaging_event["postback"]["payload"]
                     #referral is in special postbacks see docs
-                    if 'referral' in messaging_event['postback']:
-                        ref_text = messaging_event['postback']['referral']['ref']
+                    if "referral" in messaging_event["postback"]:
+                        ref_text = messaging_event["postback"]["referral"]["ref"]
                         process_referral(sender_id,postback_text,ref_text)
                     else:
+                        messenger.say(sender_id,"Responding to regular postback: " + postback_text)
                         postback_rules(sender_id,postback_text)
     return "ok", 200
 
 def postback_rules(recipient_id,postback_text,referral_text=None):
-    carpooler = Carpooler.query.filter_by(userId=recipient_id).first()
-    newUser = (carpooler == None)
-    
     rules = {
         "GET_STARTED_PAYLOAD":(lambda: getStarted(recipient_id,referral_text)),
         "Hello":(lambda: messenger.say(recipient_id,'World_PB2')),
@@ -115,63 +113,85 @@ def process_referral(recipient_id,postback_text,ref_text):
     postback_rules(recipient_id,postback_text) #Do nothing with referral for now.
 
 def getStarted(recipient_id,referral_text=None):
-    #TODO:
-    if recipient_id not in user_db:
-        toDB(sender_id)
-        messenger.say(recipient_id,'Hello, for the first time!')
-    else:
-        messenger.say(recipient_id,"I know you! Let's restart.")
-
-
-
-def optimize_Group(sender_id):
-    #TODO:
-    #Create a "solution" model in models.py
-    #TODO:
-    #When calling this function:
-#    job = q.enqueue_call(
-#    func=optimize_Group, args=(sender_id,), result_ttl=5000
-#    )
-#    print(job.get_id()) #pass this around as job_id
-#
-    #TODO: When getting solution:
-    #job = Job.fetch(job_id,connection=conn)
-#    if job.is_finished:
-#        return str(job.result), 200 #job.result may use a result model? And it may use a __repr__ method of the model class in models.py
+    carpooler = Carpooler.query.filter_by(fbId=recipient_id).first() #Should have been added already
+#    if (carpooler == None):
+#        toDB(sender_id)
+#        messenger.say(recipient_id,'Hello, for the first time!')
 #    else:
-#        return "Nay!", 202
-#
+#        messenger.say(recipient_id,"I know you! Let's restart.")
+    if referral_text:
+        pass #Check if referral group is in database, create it if not! Add person to pool automatically.
+    if carpooler.pool.id == None: #see backref in models
+        messenger.say(recipient_id,"Let's get you in a carpooling group!")
+    else:
+        messenger.say(recipient_id,"Let's finish entering your carpool information!")
+#    pester(sender_id)
 
-#   TODO: This function should write to the "solutions" table of database:
-#    solution = Solution(parameters_for_solution_entry)
-#    db.session.add(soultion)
-#    db.session.commit()
-#    return solution.id #solution has an id once it is added to the db!!
-    solution = {}
-#    return 1
-#    TODO: send user who called this function (cf param sender_id) a button to "see optimal solution". Possibly along with a Google Maps link?
-    messenger.say(sender_id,"Your group has been optimized! Ask me about it.")
-    return "Solution committed"
+#def pester(recipient_id):
+#    kwargs = {}
+#    carpooler = Carpooler.query.filter_by(fbId=recipient_id).first()
+#    priorities = ['carpoolGroupId','address','email','name','preWindow','need_to_arrive_on_time','num_seats','engaged','state']
+#    priority_feedback = {'carpoolGroupId':'','address':'','email':'','name':'','preWindow':'','need_to_arrive_on_time':'','num_seats':'','engaged':'','state':''}
+#    for priority in priorities:
+#        if getattr(carpooler,priority,None)==None:
+#            messenger.say(recipient_id,'I need to know more about your ' + priority_feedback[priority])
+#            #kwargs[priority]= DEFAULT PRIORITY AND/OR ASK USER RIGHT NOW!
+#            #toDB(recipient_id,**kwargs)
+#            break
+#        else:
+#            messenger.say(recipient_id,'I know everything I need to know about you! Has something changed?')
+
+#def optimize_Group(sender_id):
+#    #TODO:
+#    #Create a "solution" model in models.py
+#    #TODO:
+#    #When calling this function:
+##    job = q.enqueue_call(
+##    func=optimize_Group, args=(sender_id,), result_ttl=5000
+##    )
+##    print(job.get_id()) #pass this around as job_id
+##
+#    #TODO: When getting solution:
+#    #job = Job.fetch(job_id,connection=conn)
+##    if job.is_finished:
+##        return str(job.result), 200 #job.result may use a result model? And it may use a __repr__ method of the model class in models.py
+##    else:
+##        return "Nay!", 202
+##
+#
+##   TODO: This function should write to the "solutions" table of database:
+##    solution = Solution(parameters_for_solution_entry)
+##    db.session.add(soultion)
+##    db.session.commit()
+##    return solution.id #solution has an id once it is added to the db!!
+#    solution = {}
+##    return 1
+##    TODO: send user who called this function (cf param sender_id) a button to "see optimal solution". Possibly along with a Google Maps link?
+#    messenger.say(sender_id,"Your group has been optimized! Ask me about it.")
+#    return "Solution committed"
 
 #Add params argument! Dict? List?
 #def toDB(sender_id,carpoolGroupId=None,address=None,email=None,name=None,preWindow=None,need_to_arrive_on_time=None,num_seats = None,engaged = None,state=None):
-def toDB(sender_id,**kwargs):
+def toDB(sender_id,response=None,**kwargs):
     try:
-        carpooler = Carpooler.query.filter_by(userId=sender_id).first()
+        carpooler = Carpooler.query.filter_by(fbId=sender_id).first()
         if carpooler == None:
-            carpooler = Carpooler(sender_id,**kwargs)
+            carpooler = Carpooler(fbId=sender_id,**kwargs)
             db.session.add(carpooler)
-            messenger.say(sender_id,"Added you to my database.")
+            messenger.say(sender_id,"Added you to my database! =D")
             print("Added you to my database.")
         else:
-            carpooler.update(**kwargs)
+
+            (nextstep,inquiry) = carpooler.update(nextResponse=response,**kwargs)
+            db.session.commit()
             messenger.say(sender_id,"Updated my database.")
             print("Updated my database.")
-        
-        db.session.commit()
-#            db.session.delete(me)
+#            (nextstep,inquiry) = carpooler.next()
+            messenger.say(sender_id,"Now I need to ask about %s" % nextstep() + ".")
+            messenger.say(sender_id,inquiry)
+
     except Exception as exc:
-        messenger.say(sender_id,"Unable to access my database")
+        messenger.say(sender_id,"Error accessing my database")
         print("Unable to add item to database.")
         print(str(exc))
     else:

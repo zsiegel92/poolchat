@@ -8,9 +8,7 @@ from messengerbot import elements
 import os
 import json
 import requests
-
-
-
+import config
 
 class MessengerException(Exception):
     pass
@@ -84,14 +82,23 @@ class MessengerClient(object):
         """
         Subscribe an app to get updates for a page.
         """
+        headers = {
+        'authorization': "Basic WlM6enMxMjM=",
+        'cache-control': "no-cache",
+        'postman-token': "2538b4d1-d981-0dcc-5651-9c6420c8de4f"
+        }
         response = requests.post(
             '%s/subscribed_apps' % self.GRAPH_API_URL,
+            headers=headers,
             params={
                 'access_token': self.access_token
             }
         )
         return response.status_code == 200
 
+#os.environ['APP_SETTINGS'] #returns 'config.DevelopmentConfig'
+access_token = getattr(config,os.environ['APP_SETTINGS'].split('.')[1]).MESSENGER_PLATFORM_ACCESS_TOKEN
+messenger = MessengerClient(access_token=access_token)
 
-from flask import current_app as app
-messenger = MessengerClient(access_token=app.config['MESSENGER_PLATFORM_ACCESS_TOKEN'])
+#from flask import current_app as app
+#messenger = MessengerClient(access_token=app.config['MESSENGER_PLATFORM_ACCESS_TOKEN'])

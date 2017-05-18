@@ -1,0 +1,77 @@
+**New project steps:
+
+mkdir newproject
+cd new project
+git init
+virutalenv env
+
+** copy all files, cd out and in to autoenv **
+
+pip install -r requirements.txt
+heroku create **newapp**
+git remote -v
+
+** copy heroku remote url **
+
+git remote add pro **paste url**
+git remote rm heroku
+git add *
+git commit -m “new repo”
+git push pro master
+
+heroku config:set APP_SETTINGS=config.ProductionConfig --remote pro
+
+**Show databases, and connect to database if desired
+
+psql
+#\l
+# create database *dbname*
+# \q
+
+Edit .env file with *dbname*, cd out and in to autoenv it. Delete migrations folder in src.
+
+python manage.py db init
+python manage.py db migrate
+python manage.py db upgrade
+
+psql
+# \l
+# \c *dbname*
+# \dt
+# \d *table name*
+# \q
+
+heroku config --app **newapp**
+heroku addons:create heroku-postgresql:hobby-dev --app **newapp**
+heroku config --app **newapp**
+
+git add -A
+git commit -m "all migrations in place"
+git push pro master
+
+**First option if project in root, second option if project source (and migrations) in src**
+heroku run python manage.py db upgrade --app **newapp**
+heroku run python src/manage.py db upgrade --directory 'src/migrations' --app **newapp**
+
+
+heroku addons:create redistogo:nano --app **newapp**
+heroku config --app **newapp** | grep REDISTOGO_URL
+
+RUNNING via Python using Flask manager’s server:
+ngrok http 5000
+redis-server
+cd newproject
+python worker.py
+python manage.py runserver
+
+RUNNING via `heroku local`:
+ngrok http 5000
+redis-server
+cd newproject
+heroku local
+
+
+**MAINTENANCE:**
+**updating database models:**
+python manage.py db migrate
+python manage.py db upgrade

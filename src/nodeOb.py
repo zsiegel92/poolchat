@@ -25,13 +25,15 @@ class nodeOb:
         self.nQuestion = nQuestion
         self.Next = Next
         self.choices = choices
+        self.customAfterText=customAfterText
+    
     def isValid(self,userInput):
         return typeCheckers[self.nType](userInput)
     def prompt(self):
         return "Now I need to know more about {1}. Please respond with a(n) {0}.".format(self.nType,self.nTitle)
     def afterSet(self,response):
-        if customAfterText:
-            return customAfterText.format(self.nTitle,self.nQuestion,self.nType)
+        if self.customAfterText:
+            return self.customAfterText.format(self.nTitle,self.nQuestion,self.nType)
         else:
             return "OK, now I know that " + self.nTitle + " is " + response + "."
     def ask(self):

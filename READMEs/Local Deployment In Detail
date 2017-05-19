@@ -89,6 +89,8 @@ heroku config --app poolchatWT | grep REDISTOGO_URL
 
 ** You have now copied/pasted the LOCAL access token into one place, and the REMOTE access token into another place **
 
+**Finally, update Heroku’s envi
+
 **To run the App via Python using Flask manager’s server:
 
 ** In separate shells, do the following four things (and leave them open and running) **

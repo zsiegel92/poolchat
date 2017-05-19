@@ -23,7 +23,7 @@ class StagingConfig(Config):
 class DevelopmentConfig(Config):
     DEVELOPMENT = True
     DEBUG = True
-    MESSENGER_PLATFORM_ACCESS_TOKEN=os.environ['MESSENGER_PLATFORM_ACCESS_TOKEN'] #Zach and Friends
+    MESSENGER_PLATFORM_ACCESS_TOKEN=os.environ.get('MESSENGER_PLATFORM_ACCESS_TOKEN') #Zach and Friends
 
 
 class TestingConfig(Config):

@@ -9,7 +9,7 @@ from flask_sqlalchemy import SQLAlchemy
 from rq import Queue
 from rq.job import Job
 from worker import conn
-
+from nodeOb import *
 
 app = Flask(__name__)
 app.config.from_object(os.environ['APP_SETTINGS'])
@@ -92,7 +92,7 @@ def postback_rules(recipient_id,postback_text,referral_text=None):
     if postback_text in rules:
         rules[postback_text]()
     else:
-        messenger.say(recipient_id,"That button is non-functional!")
+        toDB(recipient_id,response=postback_text)
 
 def text_rules(recipient_id, message_text):
     rules = {
@@ -102,11 +102,12 @@ def text_rules(recipient_id, message_text):
     if message_text in rules:
         messenger.say(recipient_id, rules[message_text])
     else:
-        web_button1 = messenger.webButton('Show website1','https://www.google.com/')
-        postback1 = messenger.postBackButton('Do this thing!','thing1')
-        postback2 = messenger.postBackButton('Say hello!','Hello2')
-        buts = [web_button1,postback1,postback2]
-        messenger.give_choices(recipient_id,'You can pick one of these options',buts)
+        pass
+#        web_button1 = messenger.webButton('Show website1','https://www.google.com/')
+#        postback1 = messenger.postBackButton('Do this thing!','thing1')
+#        postback2 = messenger.postBackButton('Say hello!','Hello2')
+#        buts = [web_button1,postback1,postback2]
+#        messenger.give_choices(recipient_id,'You can pick one of these options',buts)
     toDB(recipient_id,response=message_text)
 
 def process_referral(recipient_id,postback_text,ref_text):
@@ -115,49 +116,22 @@ def process_referral(recipient_id,postback_text,ref_text):
 def getStarted(sender_id,referral_text=None,message_text=None):
     carpooler = Carpooler.query.filter_by(fbId=sender_id).first() #Should have been added already
     if carpooler is not None:
-        messenger.say(sender_id,"There was an error - I already know you.")
+        messenger.say(sender_id,"Something weird happened - I already know you!")
         return carpooler.next() #a nodeOb
     carpooler = Carpooler(fbId=sender_id)
     db.session.add(carpooler)
-    messenger.say(sender_id,"Added you to my database! =D")
     db.session.commit()
-    node = carpooler.next()
+    messenger.say(sender_id,"Added you to my database! =D")
+    node = carpooler.head()
     pester(sender_id,node)
 
+#TODO: Change from messenger.say to messenger.send, where the node stores a general-purpose payload (sans sender_id, though).
 def pester(sender_id,nextNode):
-    messenger.say(sender_id,"OK! Now I need to know about " + nextNode.nTitle + ". Please respond with a " + nextNode.nType +".")
-    messenger.say(sender_id,nextNode.nQuestion)
+#    messenger.say(sender_id,nextNode.prompt())
+#    messenger.say(sender_id,nextNode.ask())
+    messenger.nodeSay(sender_id,nextNode)
 
 
-
-#def optimize_Group(sender_id):
-#    #TODO:
-#    #Create a "solution" model in models.py
-#    #TODO:
-#    #When calling this function:
-##    job = q.enqueue_call(
-##    func=optimize_Group, args=(sender_id,), result_ttl=5000
-##    )
-##    print(job.get_id()) #pass this around as job_id
-##
-#    #TODO: When getting solution:
-#    #job = Job.fetch(job_id,connection=conn)
-##    if job.is_finished:
-##        return str(job.result), 200 #job.result may use a result model? And it may use a __repr__ method of the model class in models.py
-##    else:
-##        return "Nay!", 202
-##
-#
-##   TODO: This function should write to the "solutions" table of database:
-##    solution = Solution(parameters_for_solution_entry)
-##    db.session.add(soultion)
-##    db.session.commit()
-##    return solution.id #solution has an id once it is added to the db!!
-#    solution = {}
-##    return 1
-##    TODO: send user who called this function (cf param sender_id) a button to "see optimal solution". Possibly along with a Google Maps link?
-#    messenger.say(sender_id,"Your group has been optimized! Ask me about it.")
-#    return "Solution committed"
 
 #Add params argument! Dict? List?
 #def toDB(sender_id,carpoolGroupId=None,address=None,email=None,name=None,preWindow=None,need_to_arrive_on_time=None,num_seats = None,engaged = None,state=None):
@@ -167,11 +141,13 @@ def toDB(sender_id,response=None,**kwargs):
         if carpooler == None:
             getStarted(sender_id,message_text=response)
         else:
-            nextNode = carpooler.next()
-            if isTypedRight(response,nextNode.nType):
-                messenger.say(sender_id,"OK, now I know that " + nextNode.nTitle + " is " + response + ".")
+            nextNode = carpooler.head()
+            if nextNode.isValid(response):
+                messenger.say(sender_id,nextNode.afterSet(response))
                 nextNode = carpooler.update(input = response)
                 db.session.commit()
+            else:
+                messenger.say(sender_id,"Invalid input!")
             pester(sender_id,nextNode)
     except Exception as exc:
         messenger.say(sender_id,"Error accessing my database")
@@ -181,10 +157,7 @@ def toDB(sender_id,response=None,**kwargs):
         pass
 #        messenger.say(sender_id,'exiting db function')
 
-#Eventually add more checks, like isEmail, etc.
-def isTypedRight(userInput,requiredType):
-    typeCheckers = {"String":(lambda stringArg:True),"Integer":(lambda stringArg: stringArg.isdigit())}
-    return typeCheckers[requiredType](userInput)
+
 
 if __name__ == '__main__':
     app.run()

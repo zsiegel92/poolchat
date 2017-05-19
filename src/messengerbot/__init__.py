@@ -2,6 +2,7 @@ from messengerbot import messages
 from messengerbot import templates
 from messengerbot import attachments
 from messengerbot import elements
+from nodeOb import *
 #or:
 #from . import messsages
 
@@ -52,6 +53,10 @@ class MessengerClient(object):
             return myResponse
         except MessengerException:
             raise
+    def nodeSay(self,recipient_id,node):
+        recipient = messages.Recipient(recipient_id=recipient_id)
+        myRequest = messages.MessageRequest(recipient=recipient, message=node.payload())
+        self.send(myRequest)
     #see: http://stackoverflow.com/questions/4730435/exception-passing-in-python
     def webButton(self,theTitle='Show this website',theUrl='http://www.google.com'):
         return elements.WebUrlButton(title=theTitle,url=theUrl)
@@ -73,6 +78,7 @@ class MessengerClient(object):
         )
         if response.status_code != 200:
             errorstuff = response.json()
+            print("error in process in __init__.send!")
             errorstuff['myMessage']=json.dumps(message.to_dict())
 #            MessengerError(**response.json()).raise_exception()
             MessengerError(**errorstuff).raise_exception()

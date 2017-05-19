@@ -11,44 +11,42 @@ from nodeOb import *
 #inputting names as lowercase makes them case-insensitive to SQLAlchemy (including even one uppercase character turns off this feature). So the lowercase class names refer to my classes whose names are uppercase! Confusing!
 #,db.PrimaryKeyConstraint('participant_id', 'pool_id') #Possibly add this to constructor
 participation = db.Table('participation', db.Column('carpooler_id', db.Integer, db.ForeignKey('carpooler.id')), db.Column('pool_id', db.Integer, db.ForeignKey('pool.id')))
-#NOTE: In sqlAlchemy, db.Integer or db.Integer() would both be fine, but in all Flask sqlAlchemy examples, db.Integer is given. Maybe post on SO about whether that holds.
-#Is this a good solution? Holding types, and various conversational morphologies of concepts in a dict? It makes for some obscure commands, but it is parsimonious in many ways. There isn't a lot of repetition in this code, although I have to use getattr VERY frequently.
-#Instead of tuples, should I send "status update objects"? DUH!! Maybe a 'Node' object!! Needs: node.typeNeeded, node.propertyTitle, node.question
 
-#TODO: Don't create dicts at construction ! Initialize them earlier. Does "fields" get imported at module import?
-##TODO: extend db.Column to have two types of metadata: a label, and a question (eg "What is your facebook id?")
+
 class Carpooler(db.Model):
     __tablename__ = 'carpooler'
     
     id = db.Column(db.Integer, primary_key=True)
     fbId = db.Column(db.String()) #facebook id
     fields = {
-        "email":nodeOb("String","your email","What is your email address?"),
-        "name":nodeOb("String","your name","What isyour name?"),
-        "address":nodeOb("String","the address you'll be coming from","What is the address you'll be coming from?"),
-        "preWindow":nodeOb("Integer","the earliest you can be ready to go","What is the earliest you can leave your house before the event?"),
-        "on_time":nodeOb("Integer","your ability to be late (1 or 0)","Do you have to arrive on time? Can you be 30 minutes late? Please answer 'yes' if you are an organizer of this event."),
-        "must_drive":nodeOb("Integer","your REQUIREMENT to drive (1 for \"have to drive\"; 0 for \"don't have to drive\")","Do you have to drive, or is catching a ride an option? Please answer Yes if you have to drive, or No otherwise."),
-        "num_seats":nodeOb("Integer","the number of seats in your car (0 if you have no car)","How many seats are there in your car? Please input a number; enter 0 if you cannot drive to the event.")
+        "name":nodeOb("String","your name","What isyour name?","email"),
+        
+        "email":nodeOb("String","your email","What is your email address?","address"),
+
+        "address":nodeOb("String","the address you'll be coming from","What is the address you'll be coming from?","num_seats"),
+        
+        "num_seats":nodeOb("Integer","the number of seats in your car (0 if you have no car)","How many seats are there in your car? Please input a number; enter 0 if you cannot drive to the event.","preWindow",{"I don't have a car":'0',"1 seat (only me)":'1',"2 seats":'2'}),
+        
+        "preWindow":nodeOb("Integer","the earliest you can be ready to go","What is the earliest you can leave your house before the event?","on_time"),
+        
+        "on_time":nodeOb("Integer","your ability to be late (1 or 0)","Do you have to arrive on time? Can you be 30 minutes late? Please answer 1 if you are an organizer of this event or 0 otherwise.","must_drive",{"Can be a bit late":'0',"Must arrive on time":'1'}),
+        
+        "must_drive":nodeOb("Integer","your REQUIREMENT to drive (1 for \"have to drive\"; 0 for \"don't have to drive\")","Do you have to drive, or is catching a ride an option? Please answer Yes if you have to drive, or No otherwise.","name",{"Can drive or ride":'0',"Must drive own car":'1'})
     }
     doneNode = nodeOb("NA","Nothing else","You're all set!")
-
-
-    #If state needs to be more complex, store as JSON or as new column.
     fieldstate = db.Column(db.String()) #decision tree state, I guess
     engaged = db.Column(db.Integer) #Is this user fully plugged in?
     carpools = db.relationship('Pool',secondary=participation,backref=db.backref('carpoolers',lazy='dynamic'))
-    ##    #NOTE:JSON type supported here:
-    ##    result_all = db.Column(JSON)
+
     for field in fields:
         exec(field + "= db.Column(db." + fields[field].nType +"())") #example: fbId = db.Column(db.String())
     del field
 
     def __init__(self, fbId,**kwargs):
         #        Construction equivalent to (thanks to SQLAlchemy.Model constructor):
-        #        super(User, self).__init__(**kwargs)
+        super().__init__()
         self.fbId = fbId #facebook id of user
-        self.fieldstate = "email"
+        self.fieldstate = "name"
         for arg in kwargs:
             if hasattr(self,arg):
                 setattr(self,arg,kwargs[arg])
@@ -62,19 +60,30 @@ class Carpooler(db.Model):
             if hasattr(self,arg):
                 setattr(self,arg,kwargs[arg])
         if input:
-            setattr(self,self.fieldstate,input)
-        return self.next()
+            setattr(self,self.fieldstate,input) #Assign input to the variable whose name is stored in fieldstate
+            self.fieldstate = self.nextField() #Change fieldstate to next field
+        return self.head()
+
+    def head(self):
+        return self.fields[self.fieldstate] #return nodeOb(type, description, and question). If field being queried is blank, stay the course and query for it.
 
 #   @Return: nodeOb
     def next(self):
+        return self.fields[self.fields[self.fieldstate].Next]
+    
+    def nextField(self):
+        return self.head().nextNode()
+    
+#   @Return: nodeOb
+    def pesterNode(self):
         if getattr(self,self.fieldstate,None) is None:
-            return self.fields[self.fieldstate] #return nodeOb(type, description, and question)
-        for field in self.fields:
-            if getattr(self,field,None) is None:
-                self.fieldstate=field
-                return self.fields[self.fieldstate] #return nodeOb(type, description, and question)
-        return doneNode
-
+            print("pestering on same field")
+            return self.head()
+#        for field in self.fields:
+#            if getattr(self,field,None) is None:
+#                self.fieldstate=field
+#                return self.fields[self.fieldstate] #return nodeOb(type, description, and question)
+        return self.next()
 
 #    @Post: prints description of self
     def printout(self):

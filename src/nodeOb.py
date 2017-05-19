@@ -19,12 +19,13 @@ typeCheckers = {"String":(lambda stringArg:True),"Integer":(lambda stringArg: st
 
 class nodeOb:
 
-    def __init__(self,nType=None,nTitle = None,nQuestion=None,Next=None,choices=None,customAfterText=None):
+    def __init__(self,nType=None,nTitle = None,nQuestion=None,Next=None,quickChoices=None,choices=None,customAfterText=None):
         self.nType = nType
         self.nTitle = nTitle
         self.nQuestion = nQuestion
         self.Next = Next
         self.choices = choices
+        self.quickChoices = quickChoices
         self.customAfterText=customAfterText
     
     def isValid(self,userInput):
@@ -43,17 +44,23 @@ class nodeOb:
     
     #TODO: send multiple text messages in one request (prompt AND question).
     #Choices is of the form {text1:postbacktext1,text2:postbacktext2}
+#    Choices is of the form {text1:postbacktext1,text2:postbacktext2}
     def payload(self):
         if self.choices is not None:
             buttons = []
-            for choice in self.choices:
-                buttons.append(elements.PostbackButton(title=choice,payload=self.choices[choice]))
+            for choice,pay in self.choices.items():
+                buttons.append(elements.PostbackButton(title=choice,payload=pay))
             myTemplate = templates.ButtonTemplate(text=self.nQuestion, buttons=buttons)
             myAttachment = attachments.TemplateAttachment(template=myTemplate)
             myMessage = messages.Message(attachment=myAttachment)
-    #        myRequest = messages.MessageRequest(recipient=recipient, message=myMessage)#To be done from messengerbot.
+        elif self.quickChoices is not None:
+            replies = []
+            for choice, pay in self.quickChoices.items():
+                replies.append(quick_replies.QuickReplyItem(content_type='text',title=choice,payload=pay))
+            myReplies = quick_replies.QuickReplies(quick_replies = replies)
+            myMessage = messages.Message(text=self.ask(),quick_replies=myReplies)
         else:
-            myMessage = messages.Message(text=self.prompt())
+            myMessage = messages.Message(text=self.prompt() + "\n" + self.ask())
         return myMessage
 
 #Eventually add more checks, like isEmail, etc.

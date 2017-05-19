@@ -68,9 +68,11 @@ def post_webhook():
                 sender_id = messaging_event["sender"]["id"]
                 if "message" in messaging_event: #message may be of the form
                     if "text" in messaging_event["message"]:
-                        messenger.say(sender_id,"Responding to text.")
                         message_text = messaging_event["message"]["text"]
-                        text_rules(sender_id,message_text)
+                        if "quick_reply" in messaging_event["message"]:
+                            quick_rules(sender_id,messaging_event["message"]["quick_reply"]["payload"])
+                        else:
+                            text_rules(sender_id,message_text)
                 elif "postback" in messaging_event:
                     postback_text = messaging_event["postback"]["payload"]
                     #referral is in special postbacks see docs
@@ -78,7 +80,6 @@ def post_webhook():
                         ref_text = messaging_event["postback"]["referral"]["ref"]
                         process_referral(sender_id,postback_text,ref_text)
                     else:
-                        messenger.say(sender_id,"Responding to regular postback: " + postback_text)
                         postback_rules(sender_id,postback_text)
     return "ok", 200
 
@@ -94,21 +95,20 @@ def postback_rules(recipient_id,postback_text,referral_text=None):
     else:
         toDB(recipient_id,response=postback_text)
 
+def quick_rules(recipient_id,qr_text):
+    text_rules(recipient_id,qr_text)
+
+
 def text_rules(recipient_id, message_text):
     rules = {
         "Hello": "World",
-        "Foo": "Bar"
+        "Foo": "Bar",
+        "Menu":"sendmenu"
     }
     if message_text in rules:
         messenger.say(recipient_id, rules[message_text])
     else:
-        pass
-#        web_button1 = messenger.webButton('Show website1','https://www.google.com/')
-#        postback1 = messenger.postBackButton('Do this thing!','thing1')
-#        postback2 = messenger.postBackButton('Say hello!','Hello2')
-#        buts = [web_button1,postback1,postback2]
-#        messenger.give_choices(recipient_id,'You can pick one of these options',buts)
-    toDB(recipient_id,response=message_text)
+        toDB(recipient_id,response=message_text)
 
 def process_referral(recipient_id,postback_text,ref_text):
     postback_rules(recipient_id,postback_text) #Do nothing with referral for now.

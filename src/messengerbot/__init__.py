@@ -2,7 +2,7 @@ from messengerbot import messages
 from messengerbot import templates
 from messengerbot import attachments
 from messengerbot import elements
-from nodeOb import *
+#from models import Carpooler #WHY DON'T I HAVE TO IMPORT THIS???
 #or:
 #from . import messsages
 
@@ -53,10 +53,15 @@ class MessengerClient(object):
             return myResponse
         except MessengerException:
             raise
-    def nodeSay(self,recipient_id,node):
+    def poolerSay(self,recipient_id,carpooler):
         recipient = messages.Recipient(recipient_id=recipient_id)
-        myRequest = messages.MessageRequest(recipient=recipient, message=node.payload())
+        myRequest = messages.MessageRequest(recipient=recipient, message=carpooler.payload())
         self.send(myRequest)
+        
+#    def nodeSay(self,recipient_id,node):
+#        recipient = messages.Recipient(recipient_id=recipient_id)
+#        myRequest = messages.MessageRequest(recipient=recipient, message=node.payload())
+#        self.send(myRequest)
     #see: http://stackoverflow.com/questions/4730435/exception-passing-in-python
     def webButton(self,theTitle='Show this website',theUrl='http://www.google.com'):
         return elements.WebUrlButton(title=theTitle,url=theUrl)

@@ -99,9 +99,20 @@ class Carpooler(db.Model):
             print("Returning new node.", file=sys.stderr)
             return newNode
 
-    
+
     def returnToMenu(self):
         return (self.menu !='fieldstate')
+
+
+    def isValid(self,response):
+        return self.quickHead().isValid(response)
+    
+    #TODO: copy and mark up fields of node with data before calling afterSet!
+    def afterSet(self,response):
+        return self.quickHead().afterSet(response)
+    
+    def payload(self):
+        return self.head().payload()
 
 #    @Post: prints description of self
     def printout(self):

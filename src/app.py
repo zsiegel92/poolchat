@@ -9,10 +9,6 @@ from flask_sqlalchemy import SQLAlchemy
 from rq import Queue
 from rq.job import Job
 from worker import conn
-from nodeOb import *
-from fieldTrees import * #DON'T ACTUALLY NEED/WANT THIS! Just for debugging.
-
-
 
 app = Flask(__name__)
 app.config.from_object(os.environ['APP_SETTINGS'])
@@ -124,20 +120,22 @@ def getStarted(sender_id,referral_text=None,message_text=None):
     carpooler = Carpooler.query.filter_by(fbId=sender_id).first() #Should have been added already
     if carpooler is not None:
         messenger.say(sender_id,"Something weird happened - I already know you!")
-        pester(sender_id, carpooler.head()) #a nodeOb
+        pester(sender_id, carpooler)
         return
     carpooler = Carpooler(fbId=sender_id)
     db.session.add(carpooler)
     db.session.commit()
     messenger.say(sender_id,"Added you to my database! =D")
-    node = carpooler.head()
-    pester(sender_id,node)
+    pester(sender_id,carpooler)
 
 #TODO: Change from messenger.say to messenger.send, where the node stores a general-purpose payload (sans sender_id, though).
-def pester(sender_id,nextNode):
-#    messenger.say(sender_id,nextNode.prompt())
-#    messenger.say(sender_id,nextNode.ask())
-    messenger.nodeSay(sender_id,nextNode)
+#def pester(sender_id,node):
+##    messenger.say(sender_id,nextNode.prompt())
+##    messenger.say(sender_id,nextNode.ask())
+#    messenger.nodeSay(sender_id,node)
+
+def pester(sender_id,carpooler):
+    messenger.poolerSay(sender_id,carpooler)
 
 
 
@@ -151,18 +149,17 @@ def toDB(sender_id,response=None,**kwargs):
         else:
             print("\n\n")
             print("app.py: Input (" + response + ") applies to carpooler.head().represent():" + carpooler.head().represent())
-            node = carpooler.head()
-            if node.isValid(response):
-                messenger.say(sender_id,node.afterSet(response))
+            if carpooler.isValid(response):
+                messenger.say(sender_id,carpooler.afterSet(response))
                 print("\n\n")
                 print("app.py: fields[newFieldState].represent(): " + fields[carpooler.nextField(response)].represent())
                 print("\n")
                 print("app.py: carpooler.returnToMenu(): " + str(carpooler.returnToMenu()))
-                node = carpooler.update(input = response) #returns node.nex() AND updates carpooler field(s)
+                carpooler.update(input = response) #returns field(s)
                 db.session.commit()
             else:
                 messenger.say(sender_id,"Invalid input!")
-            pester(sender_id,node)
+            pester(sender_id,carpooler)
     except Exception as exc:
         messenger.say(sender_id,"Error accessing my database")
         print("Unable to add item to database.")

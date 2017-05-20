@@ -14,7 +14,7 @@ fields = {
     
     "must_drive":nodeOb("Integer","your REQUIREMENT to drive (1 for \"have to drive\"; 0 for \"don't have to drive\")","Do you have to drive, or is catching a ride an option? Please answer Yes if you have to drive, or No otherwise.",next="menu",quickChoices={"Can drive or ride":'0',"Must drive own car":'1'}),
     
-    "menu":nodeOb("String","whether you'd like to edit your information","Would you like to edit your information?",next='quick_menu',quickChoices={"All good!":'confirming',"Name":'name',"Email":'email',"Address:":'address',"Number of seats":'num_seats',"Drivetime Limit":'preWindow',"Arrival Flexibility":'on_time',"Must drive own car":'must_drive'}),
+    "menu":nodeOb("String","whether you'd like to edit your information","Would you like to edit your information?",next='quick_menu',quickChoices={"All good!":'confirming',"Name":'name',"Email":'email',"Address":'address',"Number of seats":'num_seats',"Drivetime Limit":'preWindow',"Arrival Flexibility":'on_time',"Must drive own car":'must_drive'}),
     
     "confirming":nodeOb("String","everything you've entered.","Is all of the following correct?\n{_all}",next='quick_menu',quickChoices={"All correct!":"CREATE_POOL","Need to go back...":'menu'},verboseNode=True)
 }

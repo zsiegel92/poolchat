@@ -51,8 +51,13 @@ class Carpooler(db.Model):
             setattr(self,self.fieldstate,input) #Assign input to the variable whose name is stored in fieldstate. fieldstate is unchanged.
         return self.next(input)
 
+#    Do this so that I can, eg, edit prompts with rich data from models!
+    def getField(self,field):
+        node = fields[field]
+        return node
+
     def head(self):
-        return fields[self.fieldstate] #return nodeOb(type, description, and question). If field being queried is blank, stay the course and query for it.
+        return self.getField(self.fieldstate) #return nodeOb(type, description, and question). If field being queried is blank, stay the course and query for it.
     
     def nextField(self,input =None):
         print("Next field is: " + str(self.head().nextNode(input)), file=sys.stderr)
@@ -68,7 +73,7 @@ class Carpooler(db.Model):
                 return self.head()
             print("self.nextField(" + input + ") ==" + self.nextField(input), file=sys.stderr)
             newFieldState = self.nextField(input)
-            newNode = fields[newFieldState]
+            newNode = self.getField(newFieldState)
             print("Changing self.fieldstate from " + str(self.fieldstate) + " to " + str(newFieldState), file=sys.stderr)
             print("self.menu: " + str(self.menu))
             self.fieldstate = newFieldState

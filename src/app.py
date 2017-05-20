@@ -108,7 +108,11 @@ def text_rules(recipient_id, message_text):
         "Foo": "Bar",
         "Menu":"sendmenu"
     }
-    if message_text in rules:
+    specialRules = {"CREATE_POOL":"It looks like you want to create a carpool!"}
+    if message_text in specialRules:
+        messenger.say(recipient_id,"You just did something amazing!")
+        messenger.say(recipient_id,specialRules[message_text])
+    elif message_text in rules:
         messenger.say(recipient_id, rules[message_text])
     else:
         toDB(recipient_id,response=message_text)

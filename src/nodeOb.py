@@ -17,12 +17,13 @@ typeCheckers = {"String":(lambda stringArg:True),"Integer":(lambda stringArg: st
 
 class nodeOb:
 
-    def __init__(self,nType=None,nTitle = None,nQuestion=None,next=None,nextChoices=None,quickChoices=None,choices=None,customAfterText=None):
+    def __init__(self,nType=None,nTitle = None,nQuestion=None,next=None,nextChoices=None,quickChoices=None,choices=None,customAfterText=None,verboseNode=False):
         self.nType = nType
         self.nTitle = nTitle
         self.nQuestion = nQuestion
         self.choices = choices
         self.customAfterText=customAfterText
+        self.verboseNode=verboseNode
 
         self.next = next
         self.nextChoices = nextChoices

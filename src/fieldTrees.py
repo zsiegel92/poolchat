@@ -16,5 +16,5 @@ fields = {
     
     "menu":nodeOb("String","whether you'd like to edit your information","Would you like to edit your information?",next='quick_menu',quickChoices={"All good!":'confirming',"Name":'name',"Email":'email',"Address:":'address',"Number of seats":'num_seats',"Drivetime Limit":'preWindow',"Arrival Flexibility":'on_time',"Must drive own car":'must_drive'}),
     
-    "confirming":nodeOb("String","everything you've entered.","Is all of the following correct?\n{}",next='quick_menu',quickChoices={"All correct!":"CREATE_POOL","Need to go back...":'menu'},verboseNode=True)
+    "confirming":nodeOb("String","everything you've entered.","Is all of the following correct?\n{_all}",next='quick_menu',quickChoices={"All correct!":"CREATE_POOL","Need to go back...":'menu'},verboseNode=True)
 }

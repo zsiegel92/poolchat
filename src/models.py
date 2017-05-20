@@ -51,18 +51,36 @@ class Carpooler(db.Model):
             setattr(self,self.fieldstate,input) #Assign input to the variable whose name is stored in fieldstate. fieldstate is unchanged.
         return self.next(input)
 
-#    Do this so that I can, eg, edit prompts with rich data from models!
+#    @RETURN: a nodeOb, not necessarily the current node.
     def getField(self,field):
         node = fields[field]
-        
+        node = node.copy()
+        todict = self.to_dict()
+        todict['_all']='\n'.join(['%s: %s' % (key, value) for (key, value) in todict.items()])
+        node.nTitle = node.nTitle.format(**todict)
+        node.nQuestion = node.nQuestion.format(**todict)
         return node
-
+    
+    def quickField(self,field):
+        return fields[field]
+    
+    #slower version of head for external use. Fields are replaced in prompt, etc.
     def head(self):
-        return self.getField(self.fieldstate) #return nodeOb(type, description, and question). If field being queried is blank, stay the course and query for it.
+        node =self.quickHead()
+        node = node.copy()
+        todict = self.to_dict()
+        todict['_all']='\n'.join(['%s: %s' % (key, value) for (key, value) in todict.items()])
+        node.nTitle = node.nTitle.format(**todict)
+        node.nQuestion = node.nQuestion.format(**todict)
+        return node
+    
+    #quick version of head for internal use
+    def quickHead(self):
+        return fields[self.fieldstate]
     
     def nextField(self,input =None):
-        print("Next field is: " + str(self.head().nextNode(input)), file=sys.stderr)
-        return self.head().nextNode(input)
+        print("Next field is: " + str(self.quickHead().nextNode(input)), file=sys.stderr)
+        return self.quickHead().nextNode(input)
 
 #    @POST: field state is updated
 
@@ -102,6 +120,11 @@ class Carpooler(db.Model):
                 known += field + ': ' + getattr(self,field) + '\n'
         status = unknown + known
         return status
+    #excluded = ["menu","confirming"]
+    def to_dict(self):
+#        print('returning a dict!', file=sys.stderr)
+        return {"Name":self.name,"Email Address":self.email,"address":self.address,"Number of Seats":self.num_seats,"Minutes available for driving":self.preWindow,"Have to arrive on time":self.on_time,"Have to drive self":self.must_drive}
+
 
 #    @Return: String description of carpooler
     def __repr__(self):
@@ -134,6 +157,7 @@ class Pool(db.Model):
 
     def __repr__(self):
         return '<id {}>'.format(self.userId)
+    
 
     def __init__(**kwargs):
         for arg in kwargs:

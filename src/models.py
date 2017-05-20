@@ -54,6 +54,7 @@ class Carpooler(db.Model):
 #    Do this so that I can, eg, edit prompts with rich data from models!
     def getField(self,field):
         node = fields[field]
+        
         return node
 
     def head(self):

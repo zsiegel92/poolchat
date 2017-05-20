@@ -10,6 +10,9 @@ from rq import Queue
 from rq.job import Job
 from worker import conn
 from nodeOb import *
+from fieldTrees import * #DON'T ACTUALLY NEED/WANT THIS! Just for debugging.
+
+
 
 app = Flask(__name__)
 app.config.from_object(os.environ['APP_SETTINGS'])
@@ -22,7 +25,6 @@ from models import * #previously from models import Carpooler, Pool
 
 
 
-
 #from messengerbot import MessengerClient, messages, attachments, templates, elements
 with app.test_request_context('/'):
     from messengerbot import messenger #set up request context so that I can use current_app in messengerbot/__init__.py to get environment variable for access token.
@@ -30,6 +32,7 @@ with app.test_request_context('/'):
 
 @app.route("/", methods=["GET"])
 def root():
+    assert app.debug == False
     try:
 #        messenger.say('1512768535401609','booting now')
         return 'WUTWUTWUT10', 200
@@ -117,7 +120,8 @@ def getStarted(sender_id,referral_text=None,message_text=None):
     carpooler = Carpooler.query.filter_by(fbId=sender_id).first() #Should have been added already
     if carpooler is not None:
         messenger.say(sender_id,"Something weird happened - I already know you!")
-        return carpooler.next() #a nodeOb
+        pester(sender_id, carpooler.head()) #a nodeOb
+        return
     carpooler = Carpooler(fbId=sender_id)
     db.session.add(carpooler)
     db.session.commit()
@@ -141,14 +145,20 @@ def toDB(sender_id,response=None,**kwargs):
         if carpooler == None:
             getStarted(sender_id,message_text=response)
         else:
-            nextNode = carpooler.head()
-            if nextNode.isValid(response):
-                messenger.say(sender_id,nextNode.afterSet(response))
-                nextNode = carpooler.update(input = response)
+            print("\n\n")
+            print("app.py: Input (" + response + ") applies to carpooler.head().represent():" + carpooler.head().represent())
+            node = carpooler.head()
+            if node.isValid(response):
+                messenger.say(sender_id,node.afterSet(response))
+                print("\n\n")
+                print("app.py: fields[newFieldState].represent(): " + fields[carpooler.nextField(response)].represent())
+                print("\n")
+                print("app.py: carpooler.returnToMenu(): " + str(carpooler.returnToMenu()))
+                node = carpooler.update(input = response) #returns node.nex() AND updates carpooler field(s)
                 db.session.commit()
             else:
                 messenger.say(sender_id,"Invalid input!")
-            pester(sender_id,nextNode)
+            pester(sender_id,node)
     except Exception as exc:
         messenger.say(sender_id,"Error accessing my database")
         print("Unable to add item to database.")
@@ -160,4 +170,4 @@ def toDB(sender_id,response=None,**kwargs):
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug = app.debug)

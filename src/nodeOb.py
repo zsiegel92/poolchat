@@ -13,35 +13,61 @@ from messengerbot import quick_replies
 
 #TODO: Each node shouldn't carry a nTitle and nQuestion, but should carry a "payload", which can be things to say, or a postback button. It should also carry a "payload_type", but, generally, payloads should be formatted so that, rather than messenger.say(), messenger.send() can be used.
 
-
-
 typeCheckers = {"String":(lambda stringArg:True),"Integer":(lambda stringArg: stringArg.isdigit())}
 
 class nodeOb:
 
-    def __init__(self,nType=None,nTitle = None,nQuestion=None,Next=None,quickChoices=None,choices=None,customAfterText=None):
+    def __init__(self,nType=None,nTitle = None,nQuestion=None,next=None,nextChoices=None,quickChoices=None,choices=None,customAfterText=None):
         self.nType = nType
         self.nTitle = nTitle
         self.nQuestion = nQuestion
-        self.Next = Next
         self.choices = choices
-        self.quickChoices = quickChoices
         self.customAfterText=customAfterText
+
+        self.next = next
+        self.nextChoices = nextChoices
+        self.quickChoices = quickChoices
+        if next == 'quick_menu':
+#            self.next = 'fieldstate' #Change this to self.root!! Create root field.
+            self.nextChoices = {}
+            for key,value in quickChoices.items():
+#                print(str(key) + str(value))
+                self.nextChoices[str(value)]=str(value)
+        if nextChoices:
+            if not 'default' in nextChoices:
+                self.nextChoices['default']=next
+                    
+        print("Initializing new node with: self.nextChoices: " + str(self.nextChoices))
     
     def isValid(self,userInput):
+        if self.next =='quick_menu':
+            if userInput not in self.nextChoices:
+                return False
+            else:
+                return True
         return typeCheckers[self.nType](userInput)
     def prompt(self):
         return "Now I need to know more about {1}. Please respond with a(n) {0}.".format(self.nType,self.nTitle)
+    
     def afterSet(self,response):
         if self.customAfterText:
             return self.customAfterText.format(self.nTitle,self.nQuestion,self.nType)
+        elif self.next=='quick_menu':
+            return "OK, now I know you want to go to " + self.nextNode(response)
         else:
             return "OK, now I know that " + self.nTitle + " is " + response + "."
+    
+
     def ask(self):
         return "{}".format(self.nQuestion)
-    def nextNode(self):
-        return self.Next
-    
+    def nextNode(self,input=None):
+        if self.nextChoices:
+            if input:
+                if input in self.nextChoices:
+                    return self.nextChoices[input]
+            return self.nextChoices['default']
+        else:
+            return self.next
     #TODO: send multiple text messages in one request (prompt AND question).
     #Choices is of the form {text1:postbacktext1,text2:postbacktext2}
 #    Choices is of the form {text1:postbacktext1,text2:postbacktext2}
@@ -62,7 +88,16 @@ class nodeOb:
         else:
             myMessage = messages.Message(text=self.prompt() + "\n" + self.ask())
         return myMessage
-
+    
+    def copy(self):
+        print("copying node")
+        newNode = nodeOb(nType=self.nType,nTitle = self.nTitle,nQuestion=self.nQuestion,next=self.next,nextChoices=self.nextChoices,quickChoices=self.quickChoices,choices=self.choices,customAfterText=self.customAfterText)
+        return newNode
+    def represent(self):
+        return str(vars(self))
+    
+    def __repr__(self):
+        return self.nType
 #Eventually add more checks, like isEmail, etc.
 
 

@@ -1,13 +1,13 @@
-
-tags = db.Table('tags',
-                db.Column('tag_id', db.Integer, db.ForeignKey('tag.id')),
-                db.Column('page_id', db.Integer, db.ForeignKey('page.id'))
-                )
-
-class Page(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    tags = db.relationship('Tag', secondary=tags,
-                           backref=db.backref('pages', lazy='dynamic'))
-
-class Tag(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+class nexthing:
+    def __init__(a="hey",next = None):
+        if next:
+            if isinstance(next,dict):
+                self.next = next
+            else:
+                self.next = {"default":next}
+        else:
+            self.next = next #None
+        self.a = a
+    def nextfun():
+        if isinstance(self.next,dict):
+            self.dict

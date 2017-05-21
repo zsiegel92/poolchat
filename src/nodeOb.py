@@ -17,14 +17,16 @@ typeCheckers = {"String":(lambda stringArg:True),"Integer":(lambda stringArg: st
 
 class nodeOb:
 
-    def __init__(self,nType=None,nTitle = None,nQuestion=None,next=None,nextChoices=None,quickChoices=None,choices=None,customAfterText=None,verboseNode=False):
+    def __init__(self,nType=None,nTitle = None,nQuestion=None,next=None,nextChoices=None,quickChoices=None,choices=None,customAfterText=None,verboseNode=False,validator = None,processor=None):
         self.nType = nType
         self.nTitle = nTitle
         self.nQuestion = nQuestion
         self.choices = choices
         self.customAfterText=customAfterText
         self.verboseNode=verboseNode
-
+        self.validator = validator
+        self.processor = processor #Custom formatting for database storage
+        
         self.next = next
         self.nextChoices = nextChoices
         self.quickChoices = quickChoices
@@ -40,13 +42,26 @@ class nodeOb:
                     
         print("Initializing new node with: self.nextChoices: " + str(self.nextChoices))
     
+    #TODO: validation functions that are more than type-checkers, as optional arguments
     def isValid(self,userInput):
         if self.next =='quick_menu':
             if userInput not in self.nextChoices:
                 return False
             else:
                 return True
-        return typeCheckers[self.nType](userInput)
+        if not typeCheckers[self.nType](userInput):
+            return False
+        #Optional validator argument
+        if self.validator:
+            return self.validator(userInput)
+        return True
+    
+    def process(self,userInput):
+        if self.processor:
+            return self.processor(userInput)
+        else:
+            return userInput
+            
     def prompt(self):
         return "Now I need to know more about {1}. Please respond with a(n) {0}.".format(self.nType,self.nTitle)
     

@@ -56,7 +56,6 @@ class Carpooler(db.Model):
         node = fields[field]
         node = node.copy()
         todict = self.to_dict()
-        todict['_all']='\n'.join(['%s: %s' % (key, value) for (key, value) in todict.items()])
         node.nTitle = node.nTitle.format(**todict)
         node.nQuestion = node.nQuestion.format(**todict)
         return node
@@ -67,11 +66,17 @@ class Carpooler(db.Model):
     #slower version of head for external use. Fields are replaced in prompt, etc.
     def head(self):
         node =self.quickHead()
+        return self.format(node)
+    
+    def format(self,node):
         node = node.copy()
         todict = self.to_dict()
-        todict['_all']='\n'.join(['%s: %s' % (key, value) for (key, value) in todict.items()])
-        node.nTitle = node.nTitle.format(**todict)
-        node.nQuestion = node.nQuestion.format(**todict)
+        if node.nTitle:
+            node.nTitle = node.nTitle.format(**todict)
+        if node.nQuestion:
+            node.nQuestion = node.nQuestion.format(**todict)
+        if node.customAfterText:
+            node.customAfterText = node.customAfterText.format(**todict)
         return node
     
     #quick version of head for internal use
@@ -106,6 +111,8 @@ class Carpooler(db.Model):
 
     def isValid(self,response):
         return self.quickHead().isValid(response)
+    def process(self,response): #format time for storage, etc.
+        return self.quickHead().process(response)
     
     #TODO: copy and mark up fields of node with data before calling afterSet!
     def afterSet(self,response):
@@ -134,7 +141,10 @@ class Carpooler(db.Model):
     #excluded = ["menu","confirming"]
     def to_dict(self):
 #        print('returning a dict!', file=sys.stderr)
-        return {"Name":self.name,"Email Address":self.email,"address":self.address,"Number of Seats":self.num_seats,"Minutes available for driving":self.preWindow,"Have to arrive on time":self.on_time,"Have to drive self":self.must_drive}
+        todict={"Name":self.name,"Email Address":self.email,"address":self.address,"Number of Seats":self.num_seats,"Minutes available for driving":self.preWindow,"Have to arrive on time":self.on_time,"Have to drive self":self.must_drive}
+        todict['_all']='\n'.join(['%s: %s' % (key, value) for (key, value) in todict.items()])
+        todict['_property']=self.fieldstate
+        return todict
 
 
 #    @Return: String description of carpooler

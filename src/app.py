@@ -28,7 +28,7 @@ with app.test_request_context('/'):
 
 @app.route("/", methods=["GET"])
 def root():
-    assert app.debug == False
+#    assert app.debug == False
     try:
 #        messenger.say('1512768535401609','booting now')
         return 'WUTWUTWUT10', 200
@@ -150,12 +150,13 @@ def toDB(sender_id,response=None,**kwargs):
             print("\n\n")
             print("app.py: Input (" + response + ") applies to carpooler.head().represent():" + carpooler.head().represent())
             if carpooler.isValid(response):
+                response = carpooler.process(response) #format time for storage, etc.
                 messenger.say(sender_id,carpooler.afterSet(response))
                 print("\n\n")
                 print("app.py: fields[newFieldState].represent(): " + fields[carpooler.nextField(response)].represent())
                 print("\n")
                 print("app.py: carpooler.returnToMenu(): " + str(carpooler.returnToMenu()))
-                carpooler.update(input = response) #returns field(s)
+                carpooler.update(input = response)
                 db.session.commit()
             else:
                 messenger.say(sender_id,"Invalid input!")

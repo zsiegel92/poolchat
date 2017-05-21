@@ -116,7 +116,7 @@ class Carpooler(db.Model):
     
     #TODO: copy and mark up fields of node with data before calling afterSet!
     def afterSet(self,response):
-        return self.quickHead().afterSet(response)
+        return self.head().afterSet(response) #Has formatted fields
     
     def payload(self):
         return self.head().payload()

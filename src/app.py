@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import os
-from flask import Flask, request, abort
+from flask import Flask, request, abort,json
 from flask_sqlalchemy import SQLAlchemy
 from rq import Queue
 #from rq.job import Job  #FOR Redis jobs
 from worker import conn
+import requests
 
 app = Flask(__name__)
 app.config.from_object(os.environ['APP_SETTINGS'])
@@ -118,6 +119,7 @@ def process_referral(sender_id,referral_text,postback_text=None):
 	toDB(sender_id)
 
 def getStarted(sender_id,referral_text=None,message_text=None):
+	getInfo(sender_id)
 	carpooler = Carpooler.query.filter_by(fbId=sender_id).first() #Should have been added already
 	if referral_text:
 		messenger.say(sender_id,"You have been referred by: " + referral_text)
@@ -144,6 +146,21 @@ def pester(sender_id,carpooler=None):
 	else:
 		toDB(sender_id)
 
+def getInfo(sender_id):
+	access_token = app.config["MESSENGER_PLATFORM_ACCESS_TOKEN"]
+	url = "https://graph.facebook.com/v2.6/" + sender_id
+	#unused possible args:profile_pic
+	querystring = {"fields":"first_name,last_name,locale,timezone,gender","access_token":access_token}
+
+	headers = {
+	    'cache-control': "no-cache",
+	    'postman-token': "917fd3a5-4af1-0bfa-17f3-d4ee11a7c690"
+	    }
+
+	response = requests.request("GET", url, headers=headers, params=querystring)
+
+	messenger.say(sender_id,response.text)
+	return response.json
 
 
 #Add params argument! Dict? List?

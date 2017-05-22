@@ -1,4 +1,4 @@
-from app import db
+from app import db,json
 #from sqlalchemy.dialects.postgresql import ARRAY
 # from sqlalchemy.dialects.postgresql import JSON #Import if we use JSON in field
 from fieldTrees import fields
@@ -23,9 +23,8 @@ class Carpooler(db.Model):
 	fbId = db.Column(db.String()) #facebook id
 	engaged = db.Column(db.Integer) #Is this user fully plugged in?
 	fieldstate = db.Column(db.String()) #decision tree state
-	# selfRep = db.Column(JSON)
-	# selfFormalRep = db.Column(JSON)
-
+	selfRep = db.Column(db.Text)
+	selfFormalRep = db.Column(db.Text)
 	carpools = db.relationship('Pool',secondary=participation,backref=db.backref('carpoolers',lazy='dynamic'))
 	for field in fields:
 		exec(field + "= db.Column(db." + fields[field].nType +"())") #example: fbId = db.Column(db.String())
@@ -37,8 +36,9 @@ class Carpooler(db.Model):
 		self.fbId = fbId #facebook id of user
 		self.fieldstate = "name"
 		self.menu = "fieldstate"
-		# self.selfRep = {}
-		# self.selfFormalRep={}
+		self.selfRep = "{}"
+		self.selfFormalRep="{}"
+		self.selfAllRep="{}"
 		for arg in kwargs:
 			if hasattr(self,arg):
 				setattr(self,arg,kwargs[arg])
@@ -52,7 +52,16 @@ class Carpooler(db.Model):
 				setattr(self,arg,kwargs[arg])
 		if input:
 			setattr(self,self.fieldstate,input) #Assign input to the variable whose name is stored in fieldstate. fieldstate is unchanged.
-			# self.selfRep[self.fieldstate]=str(input)
+			if fields[self.fieldstate].nodeName:
+				tmp = json.loads(self.selfRep)
+				tmp[self.fieldstate]=str(input)
+				self.selfRep = json.dumps(tmp)
+
+				tmp = json.loads(self.selfFormalRep)
+				tmp[fields[self.fieldstate].nodeName]=str(input)
+				self.selfFormalRep = json.dumps(tmp)
+				print(self.selfFormalRep, file=sys.stderr)
+
 			#formal name key - NOTE: this doesn't exist for every node that is updated here.
 			# try:
 			# 	self.selfFormalRep[fields[self.fieldstate].nodeName]=str(input)
@@ -86,6 +95,10 @@ class Carpooler(db.Model):
 			node.nQuestion = node.nQuestion.format(**todict)
 		if node.customAfterText:
 			node.customAfterText = node.customAfterText.format(**todict)
+		#Note: Formatting rich text into quick buttons is a bad idea! They are limited to 20 characters!
+		if node.quickChoices:
+			for choice in node.quickChoices:
+				node.quickChoices[choice.format(**todict)] = node.quickChoices.pop(choice)
 		return node
 
 	#quick version of head for internal use
@@ -147,22 +160,17 @@ class Carpooler(db.Model):
 				known += field + ': ' + getattr(self,field) + '\n'
 		status = unknown + known
 		return status
-	#excluded = ["menu","confirming"]
+
 	def to_dict(self):
-		print('returning a dict!', file=sys.stderr)
-		todict = {}
-		#Compile all named fields with formal name (nodeName):
-		for field in fields:
-			if fields[field].nodeName:
-				todict[fields[field].nodeName]=getattr(self,field,None)
-		# todict={"Name":self.name,"Email Address":self.email,"address":self.address,"Number of Seats":self.num_seats,"Minutes available for driving":self.preWindow,"Have to arrive on time":self.on_time,"Have to drive self":self.must_drive}
+		#way to costly?
+		print('returning a stored dict!', file=sys.stderr)
+		todict = json.loads(self.selfFormalRep)
 		todict['_all']='\n'.join(['%s: %s' % (key, value) for (key, value) in todict.items()])
-		#Add all fields with dictionary name:
-		for field in fields:
-			if fields[field].nodeName:
-				todict[field]=getattr(self,field,None)
-		todict['_property']=self.fieldstate
+		todict.update(json.loads(self.selfRep))
+		todict['_property']= self.fieldstate
+		print(json.dumps(todict), file=sys.stderr)
 		return todict
+
 
 
 #    @Return: String description of carpooler

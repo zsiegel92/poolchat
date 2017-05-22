@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
+import json
+from urllib import parse  #only in Python 3
 from flask import Flask, request, abort
+import requests
 from flask import Flask  #, jsonify #for handling db solution outputs
 from flask_sqlalchemy import SQLAlchemy
 from rq import Queue
@@ -14,7 +17,7 @@ db = SQLAlchemy(app)
 #in Result, we have: from main import app, db,
 #so be careful not to move this aboe defining app and db!
 q = Queue(connection=conn)
-from models import Carpooler, Pool, participation #previously from models import Carpooler, Pool
+from models import * #previously from models import Carpooler, Pool
 
 
 

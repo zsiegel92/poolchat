@@ -115,7 +115,7 @@ def text_rules(recipient_id, message_text=""):
 
 def process_referral(sender_id,referral_text,postback_text=None):
 	#TODO: config var for app name
-	messenger.say(sender_id,"Referring from m.me/" + app.config['APP_NAME'] + "?ref=" + referral_text) #Do nothing with referral for now.
+	messenger.say(sender_id,"Referring to "+ referral_text + " through: m.me/" + app.config['APP_NAME'] + "?ref=" + referral_text) #Do nothing with referral for now.
 	toDB(sender_id)
 
 def getStarted(sender_id,referral_text=None,message_text=None):

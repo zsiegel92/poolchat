@@ -1,23 +1,19 @@
 # -*- coding: utf-8 -*-
 import os
-import json
-from urllib import parse  #only in Python 3
 from flask import Flask, request, abort
-import requests
-from flask import Flask  #, jsonify #for handling db solution outputs
 from flask_sqlalchemy import SQLAlchemy
 from rq import Queue
-from rq.job import Job
+#from rq.job import Job  #FOR Redis jobs
 from worker import conn
 
 app = Flask(__name__)
 app.config.from_object(os.environ['APP_SETTINGS'])
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True #(or False) #Note: I have this in config.py. If it fails, I will remove that and uncomment this.
-db = SQLAlchemy(app)
+db = SQLAlchemy(app) #SQLAlchemy(app,session_options={'autocommit': True})
 #in Result, we have: from main import app, db,
 #so be careful not to move this aboe defining app and db!
 q = Queue(connection=conn)
-from models import * #previously from models import Carpooler, Pool
+from models import  Carpooler#, Pool, participation
 
 
 
@@ -65,21 +61,24 @@ def post_webhook():
 		for entry in data["entry"]:
 			for messaging_event in entry["messaging"]:
 				sender_id = messaging_event["sender"]["id"]
-				if "message" in messaging_event: #message may be of the form
+				referral_text = None
+				if "referral" in messaging_event:
+					referral_text = messaging_event["referral"]["ref"]
+				if "message" in messaging_event:
 					if "text" in messaging_event["message"]:
 						message_text = messaging_event["message"]["text"]
 						if "quick_reply" in messaging_event["message"]:
 							quick_rules(sender_id,messaging_event["message"]["quick_reply"]["payload"])
 						else:
-							text_rules(sender_id,message_text)
+							text_rules(sender_id,message_text=message_text)
 				elif "postback" in messaging_event:
 					postback_text = messaging_event["postback"]["payload"]
 					#referral is in special postbacks see docs
 					if "referral" in messaging_event["postback"]:
-						ref_text = messaging_event["postback"]["referral"]["ref"]
-						process_referral(sender_id,postback_text,ref_text)
-					else:
-						postback_rules(sender_id,postback_text)
+						referral_text = messaging_event["postback"]["referral"]["ref"]
+						process_referral(sender_id,postback_text,referral_text)
+				elif referral_text:
+					process_referral(sender_id,referral_text=referral_text)
 	return "ok", 200
 
 #TODO: Don't create dicts at function call! Initialize them earlier.
@@ -98,7 +97,7 @@ def quick_rules(recipient_id,qr_text):
 	text_rules(recipient_id,qr_text)
 
 
-def text_rules(recipient_id, message_text):
+def text_rules(recipient_id, message_text=""):
 	rules = {
 		"Hello": "World",
 		"Foo": "Bar",
@@ -113,11 +112,16 @@ def text_rules(recipient_id, message_text):
 	else:
 		toDB(recipient_id,response=message_text)
 
-def process_referral(recipient_id,postback_text,ref_text):
-	postback_rules(recipient_id,postback_text) #Do nothing with referral for now.
+def process_referral(sender_id,referral_text,postback_text=None):
+	#TODO: config var for app name
+	messenger.say(sender_id,"Referring from m.me/" + app.config['APP_NAME'] + "?ref=" + referral_text) #Do nothing with referral for now.
+	toDB(sender_id)
 
 def getStarted(sender_id,referral_text=None,message_text=None):
 	carpooler = Carpooler.query.filter_by(fbId=sender_id).first() #Should have been added already
+	if referral_text:
+		messenger.say(sender_id,"You have been referred by: " + referral_text)
+	#Query Pool.query.filter_by(referral_text=referral_text).first()
 	if carpooler is not None:
 		messenger.say(sender_id,"Something weird happened - I already know you!")
 		pester(sender_id, carpooler)
@@ -134,8 +138,11 @@ def getStarted(sender_id,referral_text=None,message_text=None):
 ##    messenger.say(sender_id,nextNode.ask())
 #    messenger.nodeSay(sender_id,node)
 
-def pester(sender_id,carpooler):
-	messenger.poolerSay(sender_id,carpooler)
+def pester(sender_id,carpooler=None):
+	if carpooler:
+		messenger.poolerSay(sender_id,carpooler)
+	else:
+		toDB(sender_id)
 
 
 
@@ -147,19 +154,14 @@ def toDB(sender_id,response=None,**kwargs):
 		if carpooler == None:
 			getStarted(sender_id,message_text=response)
 		else:
-			print("\n\n")
-			print("app.py: Input (" + response + ") applies to carpooler.head().represent():" + carpooler.head().represent())
-			if carpooler.isValid(response):
-				response = carpooler.process(response) #format time for storage, etc.
-				messenger.say(sender_id,carpooler.afterSet(response))
-				print("\n\n")
-				print("app.py: fields[newFieldState].represent(): " + fields[carpooler.nextField(response)].represent())
-				print("\n")
-				print("app.py: carpooler.returnToMenu(): " + str(carpooler.returnToMenu()))
-				carpooler.update(input = response)
-				db.session.commit()
-			else:
-				messenger.say(sender_id,"Invalid input!")
+			if response:
+				if carpooler.isValid(response):
+					response = carpooler.process(response) #format time for storage, etc.
+					messenger.say(sender_id,carpooler.afterSet(response))
+					carpooler.update(input = response)
+					db.session.commit()
+				else:
+					messenger.say(sender_id,"I need a valid response!")
 			pester(sender_id,carpooler)
 	except Exception as exc:
 		messenger.say(sender_id,"Error accessing my database")

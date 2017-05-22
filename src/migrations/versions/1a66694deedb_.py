@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 2632481d9007
-Revises: e37a3715ed20
-Create Date: 2017-05-16 02:41:13.243578
+Revision ID: 1a66694deedb
+Revises: 
+Create Date: 2017-05-22 06:24:03.515162
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '2632481d9007'
-down_revision = 'e37a3715ed20'
+revision = '1a66694deedb'
+down_revision = None
 branch_labels = None
 depends_on = None
 
@@ -21,14 +21,17 @@ def upgrade():
     op.create_table('carpooler',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('fbId', sa.String(), nullable=True),
-    sa.Column('email', sa.String(), nullable=True),
-    sa.Column('name', sa.String(), nullable=True),
-    sa.Column('address', sa.String(), nullable=True),
-    sa.Column('preWindow', sa.Integer(), nullable=True),
-    sa.Column('need_to_arrive_on_time', sa.Integer(), nullable=True),
-    sa.Column('num_seats', sa.Integer(), nullable=True),
     sa.Column('engaged', sa.Integer(), nullable=True),
-    sa.Column('state', sa.Integer(), nullable=True),
+    sa.Column('fieldstate', sa.String(), nullable=True),
+    sa.Column('name', sa.String(), nullable=True),
+    sa.Column('email', sa.String(), nullable=True),
+    sa.Column('address', sa.String(), nullable=True),
+    sa.Column('num_seats', sa.Integer(), nullable=True),
+    sa.Column('preWindow', sa.Integer(), nullable=True),
+    sa.Column('on_time', sa.Integer(), nullable=True),
+    sa.Column('must_drive', sa.Integer(), nullable=True),
+    sa.Column('menu', sa.String(), nullable=True),
+    sa.Column('confirming', sa.String(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('pool',
@@ -36,6 +39,7 @@ def upgrade():
     sa.Column('poolName', sa.String(), nullable=True),
     sa.Column('eventDate', sa.Date(), nullable=True),
     sa.Column('eventTime', sa.Time(), nullable=True),
+    sa.Column('latenessWindow', sa.Integer(), nullable=True),
     sa.Column('eventAddress', sa.String(), nullable=True),
     sa.Column('eventContact', sa.String(), nullable=True),
     sa.Column('eventEmail', sa.String(), nullable=True),

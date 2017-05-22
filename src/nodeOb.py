@@ -3,6 +3,7 @@ from messengerbot import templates
 from messengerbot import attachments
 from messengerbot import elements
 from messengerbot import quick_replies
+import sys #Just for printed error messages!
 
 #from sqlalchemy import (all the abstract type checking functions I need, like email checking, etc. Maybe even put a Google Maps-querying address-checker in the node object).
 
@@ -12,13 +13,14 @@ from messengerbot import quick_replies
 
 #TODO: Each node shouldn't carry a nTitle and nQuestion, but should carry a "payload", which can be things to say, or a postback button. It should also carry a "payload_type", but, generally, payloads should be formatted so that, rather than messenger.say(), messenger.send() can be used.
 
-typeCheckers ={"String": (lambda stringArg: True),"Integer": (lambda stringArg: stringArg.isdigit())}
+typeCheckers ={"String": (lambda stringArg: isinstance(stringArg,str)),"Integer": (lambda stringArg: stringArg.isdigit())}
 
 class nodeOb:
 
-    def __init__(self,nType=None,nTitle = None,nQuestion=None,next=None,nextChoices=None,quickChoices=None,choices=None,customAfterText=None,verboseNode=False,validator = None,processor=None):
+    def __init__(self,nType=None,nTitle = None,nQuestion=None,nodeName=None,next=None,nextChoices=None,quickChoices=None,choices=None,customAfterText=None,verboseNode=False,validator = None,processor=None):
         self.nType = nType
         self.nTitle = nTitle
+        self.nodeName = nodeName
         self.nQuestion = nQuestion
         self.choices = choices
         self.customAfterText=customAfterText
@@ -66,11 +68,14 @@ class nodeOb:
 
     def afterSet(self,response):
         if self.customAfterText:
-            return self.customAfterText.format(self.nTitle,self.nQuestion,self.nType)
+            return self.customAfterText.format(title=self.nTitle,question=self.nQuestion,type=self.nType)
         elif self.next=='quick_menu':
+            #TODO: nextNode(response) returns a field name. Instead, return a field title.
             return "OK, now I know you want to go to " + self.nextNode(response)
-        else:
+        elif response:
             return "OK, now I know that " + self.nTitle + " is " + response + "."
+        else:
+            return "Ready to keep moving. (nodeOb.afterSet, no response)"
 
 
     def ask(self):

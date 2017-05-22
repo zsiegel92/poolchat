@@ -126,3 +126,9 @@ python manage.py runserver
 python manage.py db migrate
 python manage.py db upgrade
 heroku run python src/manage.py db upgrade --directory 'src/migrations' --app poolchatWT
+
+**MAINTENANCE: Sometimes have to delete and re-initialize database migrations**
+python manage.py db init
+
+**MAINTENANCE: Had to delete ENTIRE psql database to proceed. No idea why. Deleted template databases (first had to alter to edit-able), then discovered I had to re-create them to re-create my database. No idea if this is what gave me eventual success. Probably not.**
+DROP DATABASE [IF EXISTS] poolchatWT;

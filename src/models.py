@@ -1,6 +1,6 @@
 from app import db
 #from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy.dialects.postgresql import JSON #Import if we use JSON in field
+# from sqlalchemy.dialects.postgresql import JSON #Import if we use JSON in field
 from fieldTrees import fields
 #from decision_trees import poolertree as fields
 import sys
@@ -23,6 +23,8 @@ class Carpooler(db.Model):
 	fbId = db.Column(db.String()) #facebook id
 	engaged = db.Column(db.Integer) #Is this user fully plugged in?
 	fieldstate = db.Column(db.String()) #decision tree state
+	# selfRep = db.Column(JSON)
+	# selfFormalRep = db.Column(JSON)
 
 	carpools = db.relationship('Pool',secondary=participation,backref=db.backref('carpoolers',lazy='dynamic'))
 	for field in fields:
@@ -35,6 +37,8 @@ class Carpooler(db.Model):
 		self.fbId = fbId #facebook id of user
 		self.fieldstate = "name"
 		self.menu = "fieldstate"
+		# self.selfRep = {}
+		# self.selfFormalRep={}
 		for arg in kwargs:
 			if hasattr(self,arg):
 				setattr(self,arg,kwargs[arg])
@@ -48,6 +52,12 @@ class Carpooler(db.Model):
 				setattr(self,arg,kwargs[arg])
 		if input:
 			setattr(self,self.fieldstate,input) #Assign input to the variable whose name is stored in fieldstate. fieldstate is unchanged.
+			# self.selfRep[self.fieldstate]=str(input)
+			#formal name key - NOTE: this doesn't exist for every node that is updated here.
+			# try:
+			# 	self.selfFormalRep[fields[self.fieldstate].nodeName]=str(input)
+			# except:
+			# 	pass
 		return self.next(input)
 
 #    @RETURN: a nodeOb, not necessarily the current node.
@@ -139,9 +149,18 @@ class Carpooler(db.Model):
 		return status
 	#excluded = ["menu","confirming"]
 	def to_dict(self):
-#        print('returning a dict!', file=sys.stderr)
-		todict={"Name":self.name,"Email Address":self.email,"address":self.address,"Number of Seats":self.num_seats,"Minutes available for driving":self.preWindow,"Have to arrive on time":self.on_time,"Have to drive self":self.must_drive}
+		print('returning a dict!', file=sys.stderr)
+		todict = {}
+		#Compile all named fields with formal name (nodeName):
+		for field in fields:
+			if fields[field].nodeName:
+				todict[fields[field].nodeName]=getattr(self,field,None)
+		# todict={"Name":self.name,"Email Address":self.email,"address":self.address,"Number of Seats":self.num_seats,"Minutes available for driving":self.preWindow,"Have to arrive on time":self.on_time,"Have to drive self":self.must_drive}
 		todict['_all']='\n'.join(['%s: %s' % (key, value) for (key, value) in todict.items()])
+		#Add all fields with dictionary name:
+		for field in fields:
+			if fields[field].nodeName:
+				todict[field]=getattr(self,field,None)
 		todict['_property']=self.fieldstate
 		return todict
 
@@ -165,9 +184,9 @@ class Pool(db.Model):
 	eventEmail = db.Column(db.String())
 	eventHostOrg = db.Column(db.String()) #Is this user fully plugged in?
 	signature = db.Column(db.String()) #decision tree state, I guess
-	solution = db.column(JSON) #Should I store this in a separate db?
+	# solution = db.column(JSON) #Should I store this in a separate db?
 	fireTime = db.column(db.Integer) #Number of minutes before event that a solution is automatically generated (maybe need plugin or package - cron?)
-	eventCoordinators = db.column(JSON) #List of sender_id's for hosts, to enable editing of event, triggering solutions, etc.
+	# eventCoordinators = db.column(JSON) #List of sender_id's for hosts, to enable editing of event, triggering solutions, etc.
 	#distMatrix = db.column(JSON) #Can I store this as a 2d array?
 
 	def update(self,**kwargs):

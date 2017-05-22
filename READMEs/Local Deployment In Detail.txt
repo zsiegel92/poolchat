@@ -6,7 +6,7 @@ mkdir poolchat
 cd poolchat
 git clone https://github.com/zsiegel92/poolchat.git
 git init
-virutalenv env
+virutalenv --python=python3.6 env
 
 ** cd out and in to autoenv **
 

@@ -4,7 +4,6 @@ from messengerbot import attachments
 from messengerbot import elements
 from messengerbot import quick_replies
 
-
 #from sqlalchemy import (all the abstract type checking functions I need, like email checking, etc. Maybe even put a Google Maps-querying address-checker in the node object).
 
 #TODO: store next state in a node.
@@ -13,7 +12,7 @@ from messengerbot import quick_replies
 
 #TODO: Each node shouldn't carry a nTitle and nQuestion, but should carry a "payload", which can be things to say, or a postback button. It should also carry a "payload_type", but, generally, payloads should be formatted so that, rather than messenger.say(), messenger.send() can be used.
 
-typeCheckers = {"String":(lambda stringArg:True),"Integer":(lambda stringArg: stringArg.isdigit())}
+typeCheckers ={"String": (lambda stringArg: True),"Integer": (lambda stringArg: stringArg.isdigit())}
 
 class nodeOb:
 
@@ -26,7 +25,7 @@ class nodeOb:
         self.verboseNode=verboseNode
         self.validator = validator
         self.processor = processor #Custom formatting for database storage
-        
+
         self.next = next
         self.nextChoices = nextChoices
         self.quickChoices = quickChoices
@@ -39,9 +38,9 @@ class nodeOb:
         if nextChoices:
             if not 'default' in nextChoices:
                 self.nextChoices['default']=next
-                    
+
         print("Initializing new node with: self.nextChoices: " + str(self.nextChoices))
-    
+
     #TODO: validation functions that are more than type-checkers, as optional arguments
     def isValid(self,userInput):
         if self.next =='quick_menu':
@@ -55,16 +54,16 @@ class nodeOb:
         if self.validator:
             return self.validator(userInput)
         return True
-    
+
     def process(self,userInput):
         if self.processor:
             return self.processor(userInput)
         else:
             return userInput
-            
+
     def prompt(self):
         return "Now I need to know more about {1}. Please respond with a(n) {0}.".format(self.nType,self.nTitle)
-    
+
     def afterSet(self,response):
         if self.customAfterText:
             return self.customAfterText.format(self.nTitle,self.nQuestion,self.nType)
@@ -72,7 +71,7 @@ class nodeOb:
             return "OK, now I know you want to go to " + self.nextNode(response)
         else:
             return "OK, now I know that " + self.nTitle + " is " + response + "."
-    
+
 
     def ask(self):
         return "{}".format(self.nQuestion)
@@ -104,20 +103,17 @@ class nodeOb:
         else:
             myMessage = messages.Message(text=self.prompt() + "\n" + self.ask())
         return myMessage
-    
+
     def copy(self):
         print("copying node")
         newNode = nodeOb(nType=self.nType,nTitle = self.nTitle,nQuestion=self.nQuestion,next=self.next,nextChoices=self.nextChoices,quickChoices=self.quickChoices,choices=self.choices,customAfterText=self.customAfterText)
         return newNode
     def represent(self):
         return str(vars(self))
-    
+
     def __repr__(self):
         return self.nType
 #Eventually add more checks, like isEmail, etc.
 
 
 #TODO: import nodeOb in messengerbot/__init__.py and implement a sendNode(sender_id,node) function that does messengerbot.send(sender_id,node.payload)
-
-
-

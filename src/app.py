@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
-import json
-from urllib import parse #only in Python 3
 from flask import Flask, request, abort
-import requests
-from flask import Flask#, jsonify #for handling db solution outputs
+from flask import Flask  #, jsonify #for handling db solution outputs
 from flask_sqlalchemy import SQLAlchemy
 from rq import Queue
 from rq.job import Job
@@ -17,116 +14,116 @@ db = SQLAlchemy(app)
 #in Result, we have: from main import app, db,
 #so be careful not to move this aboe defining app and db!
 q = Queue(connection=conn)
-from models import * #previously from models import Carpooler, Pool
+from models import Carpooler, Pool, participation #previously from models import Carpooler, Pool
 
 
 
 #from messengerbot import MessengerClient, messages, attachments, templates, elements
 with app.test_request_context('/'):
-    from messengerbot import messenger #set up request context so that I can use current_app in messengerbot/__init__.py to get environment variable for access token.
-    messenger.subscribe_app()
+	from messengerbot import messenger  #set up request context so that I can use current_app in messengerbot/__init__.py to get environment variable for access token.
+	messenger.subscribe_app()
 
 @app.route("/", methods=["GET"])
 def root():
 #    assert app.debug == False
-    try:
+	try:
 #        messenger.say('1512768535401609','booting now')
-        return 'WUTWUTWUT10', 200
-    except Exception as exc:
-        return str(exc)
+		return 'WUTWUTWUT10', 200
+	except Exception as exc:
+		return str(exc)
 
 #TODO: Flip through users in db, message them their table has been dropped :)
 @app.route('/dropTabs', methods=["GET"])
 def drop_table():
-    try:
-        db.drop_all()
-        db.create_all()
-    except Exception as exc:
-        return "Exception on table drop:\n" + str(exc)
-    else:
-        return "Dropped and re-created all tables!", 200
+	try:
+		db.drop_all()
+		db.create_all()
+	except Exception as exc:
+		return "Exception on table drop:\n" + str(exc)
+	else:
+		return "Dropped and re-created all tables!", 200
 
 
 
 # webhook for facebook to initialize the bot
 @app.route('/webhook', methods=['GET'])
 def get_webhook():
-    if not 'hub.verify_token' in request.args or not 'hub.challenge' in request.args:
-        abort(400)
-    return request.args.get('hub.challenge')
+	if not 'hub.verify_token' in request.args or not 'hub.challenge' in request.args:
+		abort(400)
+	return request.args.get('hub.challenge')
 
 
 
 
 @app.route('/webhook', methods=['POST'])
 def post_webhook():
-    data = request.json
-    if data["object"] == "page":
-        for entry in data["entry"]:
-            for messaging_event in entry["messaging"]:
-                sender_id = messaging_event["sender"]["id"]
-                if "message" in messaging_event: #message may be of the form
-                    if "text" in messaging_event["message"]:
-                        message_text = messaging_event["message"]["text"]
-                        if "quick_reply" in messaging_event["message"]:
-                            quick_rules(sender_id,messaging_event["message"]["quick_reply"]["payload"])
-                        else:
-                            text_rules(sender_id,message_text)
-                elif "postback" in messaging_event:
-                    postback_text = messaging_event["postback"]["payload"]
-                    #referral is in special postbacks see docs
-                    if "referral" in messaging_event["postback"]:
-                        ref_text = messaging_event["postback"]["referral"]["ref"]
-                        process_referral(sender_id,postback_text,ref_text)
-                    else:
-                        postback_rules(sender_id,postback_text)
-    return "ok", 200
+	data = request.json
+	if data["object"] == "page":
+		for entry in data["entry"]:
+			for messaging_event in entry["messaging"]:
+				sender_id = messaging_event["sender"]["id"]
+				if "message" in messaging_event: #message may be of the form
+					if "text" in messaging_event["message"]:
+						message_text = messaging_event["message"]["text"]
+						if "quick_reply" in messaging_event["message"]:
+							quick_rules(sender_id,messaging_event["message"]["quick_reply"]["payload"])
+						else:
+							text_rules(sender_id,message_text)
+				elif "postback" in messaging_event:
+					postback_text = messaging_event["postback"]["payload"]
+					#referral is in special postbacks see docs
+					if "referral" in messaging_event["postback"]:
+						ref_text = messaging_event["postback"]["referral"]["ref"]
+						process_referral(sender_id,postback_text,ref_text)
+					else:
+						postback_rules(sender_id,postback_text)
+	return "ok", 200
 
 #TODO: Don't create dicts at function call! Initialize them earlier.
 def postback_rules(recipient_id,postback_text,referral_text=None):
-    rules = {
-        "GET_STARTED_PAYLOAD":(lambda: getStarted(recipient_id,referral_text)),
-        "Hello":(lambda: messenger.say(recipient_id,'World_PB2')),
-        "thing1":(lambda: messenger.say(recipient_id,'thing2_PB2'))
-    }
-    if postback_text in rules:
-        rules[postback_text]()
-    else:
-        toDB(recipient_id,response=postback_text)
+	rules = {
+		"GET_STARTED_PAYLOAD":(lambda: getStarted(recipient_id,referral_text)),
+		"Hello":(lambda: messenger.say(recipient_id,'World_PB2')),
+		"thing1":(lambda: messenger.say(recipient_id,'thing2_PB2'))
+	}
+	if postback_text in rules:
+		rules[postback_text]()
+	else:
+		toDB(recipient_id,response=postback_text)
 
 def quick_rules(recipient_id,qr_text):
-    text_rules(recipient_id,qr_text)
+	text_rules(recipient_id,qr_text)
 
 
 def text_rules(recipient_id, message_text):
-    rules = {
-        "Hello": "World",
-        "Foo": "Bar",
-        "Menu":"sendmenu"
-    }
-    specialRules = {"CREATE_POOL":"It looks like you want to create a carpool!"}
-    if message_text in specialRules:
-        messenger.say(recipient_id,"You just did something amazing!")
-        messenger.say(recipient_id,specialRules[message_text])
-    elif message_text in rules:
-        messenger.say(recipient_id, rules[message_text])
-    else:
-        toDB(recipient_id,response=message_text)
+	rules = {
+		"Hello": "World",
+		"Foo": "Bar",
+		"Menu":"sendmenu"
+	}
+	specialRules = {"CREATE_POOL":"It looks like you want to create a carpool!"}
+	if message_text in specialRules:
+		messenger.say(recipient_id,"You just did something amazing!")
+		messenger.say(recipient_id,specialRules[message_text])
+	elif message_text in rules:
+		messenger.say(recipient_id, rules[message_text])
+	else:
+		toDB(recipient_id,response=message_text)
 
 def process_referral(recipient_id,postback_text,ref_text):
-    postback_rules(recipient_id,postback_text) #Do nothing with referral for now.
+	postback_rules(recipient_id,postback_text) #Do nothing with referral for now.
 
 def getStarted(sender_id,referral_text=None,message_text=None):
-    carpooler = Carpooler.query.filter_by(fbId=sender_id).first() #Should have been added already
-    if carpooler is not None:
-        messenger.say(sender_id,"Something weird happened - I already know you!")
-        pester(sender_id, carpooler)
-        return
-    carpooler = Carpooler(fbId=sender_id)
-    db.session.add(carpooler)
-    db.session.commit()
-    messenger.say(sender_id,"Added you to my database! =D")
-    pester(sender_id,carpooler)
+	carpooler = Carpooler.query.filter_by(fbId=sender_id).first() #Should have been added already
+	if carpooler is not None:
+		messenger.say(sender_id,"Something weird happened - I already know you!")
+		pester(sender_id, carpooler)
+		return
+	carpooler = Carpooler(fbId=sender_id)
+	db.session.add(carpooler)
+	db.session.commit()
+	messenger.say(sender_id,"Added you to my database! =D")
+	pester(sender_id,carpooler)
 
 #TODO: Change from messenger.say to messenger.send, where the node stores a general-purpose payload (sans sender_id, though).
 #def pester(sender_id,node):
@@ -135,41 +132,41 @@ def getStarted(sender_id,referral_text=None,message_text=None):
 #    messenger.nodeSay(sender_id,node)
 
 def pester(sender_id,carpooler):
-    messenger.poolerSay(sender_id,carpooler)
+	messenger.poolerSay(sender_id,carpooler)
 
 
 
 #Add params argument! Dict? List?
 #def toDB(sender_id,carpoolGroupId=None,address=None,email=None,name=None,preWindow=None,need_to_arrive_on_time=None,num_seats = None,engaged = None,state=None):
 def toDB(sender_id,response=None,**kwargs):
-    try:
-        carpooler = Carpooler.query.filter_by(fbId=sender_id).first()
-        if carpooler == None:
-            getStarted(sender_id,message_text=response)
-        else:
-            print("\n\n")
-            print("app.py: Input (" + response + ") applies to carpooler.head().represent():" + carpooler.head().represent())
-            if carpooler.isValid(response):
-                response = carpooler.process(response) #format time for storage, etc.
-                messenger.say(sender_id,carpooler.afterSet(response))
-                print("\n\n")
-                print("app.py: fields[newFieldState].represent(): " + fields[carpooler.nextField(response)].represent())
-                print("\n")
-                print("app.py: carpooler.returnToMenu(): " + str(carpooler.returnToMenu()))
-                carpooler.update(input = response)
-                db.session.commit()
-            else:
-                messenger.say(sender_id,"Invalid input!")
-            pester(sender_id,carpooler)
-    except Exception as exc:
-        messenger.say(sender_id,"Error accessing my database")
-        print("Unable to add item to database.")
-        print(str(exc))
-    else:
-        pass
+	try:
+		carpooler = Carpooler.query.filter_by(fbId=sender_id).first()
+		if carpooler == None:
+			getStarted(sender_id,message_text=response)
+		else:
+			print("\n\n")
+			print("app.py: Input (" + response + ") applies to carpooler.head().represent():" + carpooler.head().represent())
+			if carpooler.isValid(response):
+				response = carpooler.process(response) #format time for storage, etc.
+				messenger.say(sender_id,carpooler.afterSet(response))
+				print("\n\n")
+				print("app.py: fields[newFieldState].represent(): " + fields[carpooler.nextField(response)].represent())
+				print("\n")
+				print("app.py: carpooler.returnToMenu(): " + str(carpooler.returnToMenu()))
+				carpooler.update(input = response)
+				db.session.commit()
+			else:
+				messenger.say(sender_id,"Invalid input!")
+			pester(sender_id,carpooler)
+	except Exception as exc:
+		messenger.say(sender_id,"Error accessing my database")
+		print("Unable to add item to database.")
+		print(str(exc))
+	else:
+		pass
 #        messenger.say(sender_id,'exiting db function')
 
 
 
 if __name__ == '__main__':
-    app.run(debug = app.debug)
+	app.run(debug = app.debug)

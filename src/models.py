@@ -43,15 +43,80 @@ class Carpooler(db.Model):
 			if hasattr(self,arg):
 				setattr(self,arg,kwargs[arg])
 
-#   @Return: nodeOb
-#    Can update fields directly, or can update based on current fieldstate with input.
+	# @Return: nodeOb
+	# Can update fields directly, or can update based on current fieldstate with input.
+	# based on some field of fields[self.fieldstate] (aka self.quickhead()), such as "is_field", we should either do this, or do something else! Like, maybe, it could be "multi_field". Seems like an "intake_format" nodeOb field is necessary!
 	def update(self,input=None,**kwargs):
 		for arg in kwargs:
 			if hasattr(self,arg):
 				setattr(self,arg,kwargs[arg])
 		if input:
-			setattr(self,self.fieldstate,input) #Assign input to the variable whose name is stored in fieldstate. fieldstate is unchanged.
-			if fields[self.fieldstate].nodeName:
+			#Assign input to the variable whose name is stored in fieldstate. fieldstate is unchanged.
+			setattr(self,self.fieldstate,input)
+			self.updateSelfRepresentations(input)
+		return self.next(input)
+	# @RETURN: next nodeOb
+	# @POST: field state is updated
+	# @POST: self.head() will return what this returns
+	def next(self,input=None):
+		if self.menu == 'fieldstate':
+			self.fieldstate = self.nextField(input)
+			return self.head()
+		else:
+			self.fieldstate = self.menu
+			self.menu = 'menu'
+			return self.head()
+
+	def returnToMenu(self):
+		return (self.menu !='fieldstate')
+	def isValid(self,response):
+		return self.quickHead().isValid(response)
+	def process(self,response): #format time for storage, etc.
+		return self.quickHead().process(response)
+	# TODO: copy and mark up fields of node with data before calling afterSet!
+	def afterUpdate(self,response):
+		return self.head().afterSet(response) #Has formatted fields
+
+	# @RETURN: a nodeOb, not necessarily the current node.
+	def quickField(self,field):
+		return fields[field]
+#    @RETURN: a nodeOb formatted with user data.
+	def getField(self,field):
+		node = fields[field]
+		return self.format(node)
+
+	# @RETURN: a nodeOb for the current field
+	def quickHead(self):
+		return fields[self.fieldstate]
+	# @RETURN: a nodeOb for the current field, formatted with user data.
+	def head(self):
+		node = self.quickHead()
+		return self.format(node)
+	# Returns the (String) name of the next field
+	def nextField(self, input=None):
+		print("Next field is: " + str(self.quickHead().nextNode(input)), file=sys.stderr)
+		return self.quickHead().nextNode(input)
+
+
+	def payload(self):
+		return self.head().payload()
+	def format(self, node):
+		if node.verboseNode:
+			node = node.copy()
+			todict = self.to_dict()
+			if node.nTitle:
+				node.nTitle = node.nTitle.format(**todict)
+			if node.nQuestion:
+				node.nQuestion = node.nQuestion.format(**todict)
+			if node.customAfterText:
+				node.customAfterText = node.customAfterText.format(**todict)
+		return node
+
+	# @POST: If the current node self.quickHead() has a nodeName, the self-representation fields are updated. These can be used to format templates stored in nodeOb's with user data, such as a string field containing greeting = "Hi, {name}", which can be formatted as greeting.format(**json.loads(self.selfRep))
+	# Note that only outwards-facing fields should have a nodeName! Otherwise they will land in here, which is a problem because self.to_dict creates an "_all" field containing all fields as text, which should not contain private fields such as "menu" or "fieldstate"
+	def updateSelfRepresentations(self,input=None):
+		if input:
+			if self.quickHead().nodeName:
 				tmp = json.loads(self.selfRep)
 				tmp[self.fieldstate]=str(input)
 				self.selfRep = json.dumps(tmp)
@@ -59,87 +124,22 @@ class Carpooler(db.Model):
 				tmp = json.loads(self.selfFormalRep)
 				tmp[fields[self.fieldstate].nodeName]=str(input)
 				self.selfFormalRep = json.dumps(tmp)
-				print(self.selfFormalRep, file=sys.stderr)
 
-			#formal name key - NOTE: this doesn't exist for every node that is updated here.
-			# try:
-			# 	self.selfFormalRep[fields[self.fieldstate].nodeName]=str(input)
-			# except:
-			# 	pass
-		return self.next(input)
-
-
-	def quickField(self,field):
-		return fields[field]
-#    @RETURN: a nodeOb, not necessarily the current node.
-	def getField(self,field):
-		node = fields[field]
-		return self.format(node)
+	def to_dict(self):
+		todict = json.loads(self.selfFormalRep)
+		todict['_all']='\n'.join(['%s: %s' % (key, value) for (key, value) in todict.items()])
+		todict.update(json.loads(self.selfRep))
+		todict['_property']= self.fieldstate
+		print(json.dumps(todict), file=sys.stderr)
+		return todict
 
 
-	#quick version of head for internal use
-	def quickHead(self):
-		return fields[self.fieldstate]
-	#slower version of head for external use. Fields are replaced in prompt, etc.
-	def head(self):
-		node = self.quickHead()
-		return self.format(node)
-
-	def nextField(self, input=None):
-		print("Next field is: " + str(self.quickHead().nextNode(input)), file=sys.stderr)
-		return self.quickHead().nextNode(input)
-
-#    @POST: field state is updated
-	def next(self,input=None):
-		if self.returnToMenu():
-			self.fieldstate = self.menu
-			self.menu = 'menu'
-			return self.head()
-		self.fieldstate = self.nextField(input)
-		return self.head()
-
-	def returnToMenu(self):
-		return (self.menu !='fieldstate')
-
-
-	def isValid(self,response):
-		return self.quickHead().isValid(response)
-	def process(self,response): #format time for storage, etc.
-		return self.quickHead().process(response)
-
-	#TODO: copy and mark up fields of node with data before calling afterSet!
-	def afterUpdate(self,response):
-		return self.head().afterSet(response) #Has formatted fields
-
-	def payload(self):
-		return self.head().payload()
-
-	def format(self, node):
-		if not node.verboseNode:
-			return node
-		node = node.copy()
-		todict = self.to_dict()
-		if node.nTitle:
-			node.nTitle = node.nTitle.format(**todict)
-		if node.nQuestion:
-			node.nQuestion = node.nQuestion.format(**todict)
-		if node.customAfterText:
-			node.customAfterText = node.customAfterText.format(**todict)
-		#Note: Formatting rich text into quick buttons is a bad idea! They are limited to 20 characters!
-		#Note: Formatting quick buttons ALSO re-orders them, which is not ideal.
-		# if node.quickChoices:
-		# 	for choice in node.quickChoices:
-		# 		node.quickChoices[choice.format(**todict)] = node.quickChoices.pop(choice)
-		return node
-
-
-#    @Post: prints description of self
+	# @POST: prints description of self
 	def printout(self):
 		for field in fields:
 			print(field + ": " + str(getattr(self,field)))
 
-
-#    @Return: String description of carpooler
+	# @RETURN: String description of carpooler
 	def describe(self):
 		unknown = '**Empty attributes**:\n'
 		known = 'Known attributes:\n'
@@ -151,22 +151,9 @@ class Carpooler(db.Model):
 		status = unknown + known
 		return status
 
-	def to_dict(self):
-		#way to costly?
-		print('returning a stored dict!', file=sys.stderr)
-		todict = json.loads(self.selfFormalRep)
-		todict['_all']='\n'.join(['%s: %s' % (key, value) for (key, value) in todict.items()])
-		todict.update(json.loads(self.selfRep))
-		todict['_property']= self.fieldstate
-		print(json.dumps(todict), file=sys.stderr)
-		return todict
-
-
-
-#    @Return: String description of carpooler
+	# @Return: String description of carpooler
 	def __repr__(self):
 		return '<id {}>'.format(self.id)
-
 
 
 class Pool(db.Model):

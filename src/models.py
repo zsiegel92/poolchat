@@ -46,7 +46,6 @@ class Carpooler(db.Model):
 #   @Return: nodeOb
 #    Can update fields directly, or can update based on current fieldstate with input.
 	def update(self,input=None,**kwargs):
-		print("Beginning update(input) - self.fieldstate: " + self.fieldstate + ", self.menu: " + self.menu + ", self." + self.fieldstate + ": " + str(getattr(self,self.fieldstate,None)) + ", input: " + input, file=sys.stderr)
 		for arg in kwargs:
 			if hasattr(self,arg):
 				setattr(self,arg,kwargs[arg])
@@ -69,22 +68,51 @@ class Carpooler(db.Model):
 			# 	pass
 		return self.next(input)
 
-#    @RETURN: a nodeOb, not necessarily the current node.
-	def getField(self,field):
-		node = fields[field]
-		node = node.copy()
-		todict = self.to_dict()
-		node.nTitle = node.nTitle.format(**todict)
-		node.nQuestion = node.nQuestion.format(**todict)
-		return node
 
 	def quickField(self,field):
 		return fields[field]
+#    @RETURN: a nodeOb, not necessarily the current node.
+	def getField(self,field):
+		node = fields[field]
+		return self.format(node)
 
+
+	#quick version of head for internal use
+	def quickHead(self):
+		return fields[self.fieldstate]
 	#slower version of head for external use. Fields are replaced in prompt, etc.
 	def head(self):
 		node = self.quickHead()
 		return self.format(node)
+
+	def nextField(self, input=None):
+		print("Next field is: " + str(self.quickHead().nextNode(input)), file=sys.stderr)
+		return self.quickHead().nextNode(input)
+
+#    @POST: field state is updated
+	def next(self,input=None):
+		if self.returnToMenu():
+			self.fieldstate = self.menu
+			self.menu = 'menu'
+			return self.head()
+		self.fieldstate = self.nextField(input)
+		return self.head()
+
+	def returnToMenu(self):
+		return (self.menu !='fieldstate')
+
+
+	def isValid(self,response):
+		return self.quickHead().isValid(response)
+	def process(self,response): #format time for storage, etc.
+		return self.quickHead().process(response)
+
+	#TODO: copy and mark up fields of node with data before calling afterSet!
+	def afterUpdate(self,response):
+		return self.head().afterSet(response) #Has formatted fields
+
+	def payload(self):
+		return self.head().payload()
 
 	def format(self, node):
 		if not node.verboseNode:
@@ -104,47 +132,6 @@ class Carpooler(db.Model):
 		# 		node.quickChoices[choice.format(**todict)] = node.quickChoices.pop(choice)
 		return node
 
-	#quick version of head for internal use
-	def quickHead(self):
-		return fields[self.fieldstate]
-
-	def nextField(self, input=None):
-		print("Next field is: " + str(self.quickHead().nextNode(input)), file=sys.stderr)
-		return self.quickHead().nextNode(input)
-
-#    @POST: field state is updated
-
-	def next(self,input=None):
-			print("Beginning next(input) - self.fieldstate: " + self.fieldstate + ", self.menu: " + self.menu + ", self." + self.fieldstate + ": " + getattr(self,self.fieldstate,None) + ", input: " + input, file=sys.stderr)
-			if self.returnToMenu():
-				self.fieldstate = self.menu
-				self.menu = 'menu'
-				return self.head()
-			print("self.nextField(" + input + ") ==" + self.nextField(input), file=sys.stderr)
-			newFieldState = self.nextField(input)
-			newNode = self.getField(newFieldState)
-			print("Changing self.fieldstate from " + str(self.fieldstate) + " to " + str(newFieldState), file=sys.stderr)
-			print("self.menu: " + str(self.menu))
-			self.fieldstate = newFieldState
-			print("Returning new node.", file=sys.stderr)
-			return newNode
-
-
-	def returnToMenu(self):
-		return (self.menu !='fieldstate')
-
-
-	def isValid(self,response):
-		return self.quickHead().isValid(response)
-	def process(self,response): #format time for storage, etc.
-		return self.quickHead().process(response)
-
-	#TODO: copy and mark up fields of node with data before calling afterSet!
-	def afterSet(self,response):
-		return self.head().afterSet(response) #Has formatted fields
-
-	def payload(self):
-		return self.head().payload()
 
 #    @Post: prints description of self
 	def printout(self):

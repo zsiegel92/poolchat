@@ -5,6 +5,9 @@ from nodeOb import nodeOb
 
 #nodeOb# __init__(self,nType=None,nTitle = None,nQuestion=None,next=None,nextChoices=None,quickChoices=None,choices=None,customAfterText=None,verboseNode=False,validator = None,processor=None):
 
+#    "start":nodeOb(nType="String",nTitle="whether this is your information"),
+
+
 fields = {
 	"name":nodeOb(nType="String",nTitle="your name",nQuestion="What is your name?",next="email",nodeName="Name"),
 

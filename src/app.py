@@ -174,7 +174,7 @@ def toDB(sender_id,response=None,**kwargs):
 			if response:
 				if carpooler.isValid(response):
 					response = carpooler.process(response) #format time for storage, etc.
-					messenger.say(sender_id,carpooler.afterSet(response))
+					messenger.say(sender_id,carpooler.afterUpdate(response))
 					carpooler.update(input = response)
 					db.session.commit()
 				else:

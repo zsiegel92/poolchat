@@ -21,7 +21,7 @@ from models import  Carpooler#, Pool, participation
 #from messengerbot import MessengerClient, messages, attachments, templates, elements
 with app.test_request_context('/'):
 	from messengerbot import messenger  #set up request context so that I can use current_app in messengerbot/__init__.py to get environment variable for access token.
-	messenger.subscribe_app()
+	# messenger.subscribe_app() #Causing issues...
 
 @app.route("/", methods=["GET"])
 def root():

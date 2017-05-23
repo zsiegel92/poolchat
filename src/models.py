@@ -87,6 +87,8 @@ class Carpooler(db.Model):
 		return self.format(node)
 
 	def format(self, node):
+		if not node.verboseNode:
+			return node
 		node = node.copy()
 		todict = self.to_dict()
 		if node.nTitle:

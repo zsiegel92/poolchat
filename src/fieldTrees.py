@@ -8,7 +8,7 @@ from nodeOb import nodeOb
 fields = {
 	"name":nodeOb(nType="String",nTitle="your name",nQuestion="What is your name?",next="email",nodeName="Name"),
 
-	"email":nodeOb(nType="String",nTitle="your email",nQuestion="What is your email address, {name}?",next="address",nodeName="Email"),
+	"email":nodeOb(nType="String",nTitle="your email",nQuestion="What is your email address, {name}?",next="address",nodeName="Email",verboseNode=True),
 
 	"address":nodeOb(nType="String",nTitle="the address you'll be coming from",nQuestion="What is the address you'll be coming from?",next="num_seats",nodeName="Address"),
 

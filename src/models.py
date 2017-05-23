@@ -96,9 +96,10 @@ class Carpooler(db.Model):
 		if node.customAfterText:
 			node.customAfterText = node.customAfterText.format(**todict)
 		#Note: Formatting rich text into quick buttons is a bad idea! They are limited to 20 characters!
-		if node.quickChoices:
-			for choice in node.quickChoices:
-				node.quickChoices[choice.format(**todict)] = node.quickChoices.pop(choice)
+		#Note: Formatting quick buttons ALSO re-orders them, which is not ideal.
+		# if node.quickChoices:
+		# 	for choice in node.quickChoices:
+		# 		node.quickChoices[choice.format(**todict)] = node.quickChoices.pop(choice)
 		return node
 
 	#quick version of head for internal use

@@ -88,7 +88,7 @@ def getInfo(sender_id):
 	# headers=headers,
 	response = requests.request("GET", url, params=querystring)
 
-	messenger.say(sender_id,response.text)
+	# messenger.say(sender_id,response.text)
 	return response.json()
 
 

@@ -26,8 +26,10 @@ class Carpooler(db.Model):
 	selfRep = db.Column(db.Text)
 	selfFormalRep = db.Column(db.Text)
 	carpools = db.relationship('Pool',secondary=participation,backref=db.backref('carpoolers',lazy='dynamic'))
+
 	for field in fields:
-		exec(field + "= db.Column(db." + fields[field].nType +"())") #example: fbId = db.Column(db.String())
+		if fields[field].obField == 'Carpooler':
+			exec(field + "= db.Column(db." + fields[field].nType +"())") #example: fbId = db.Column(db.String())
 	del field
 
 
@@ -38,29 +40,35 @@ class Carpooler(db.Model):
 		self.menu = "fieldstate"
 		self.selfRep = "{}"
 		self.selfFormalRep="{}"
-		self.selfAllRep="{}"
 		for arg in kwargs:
 			if hasattr(self,arg):
 				setattr(self,arg,kwargs[arg])
+
+
 
 	# @Return: nodeOb
 	# Can update fields directly, or can update based on current fieldstate with input.
 	# based on some field of fields[self.fieldstate] (aka self.quickhead()), such as "is_field", we should either do this, or do something else! Like, maybe, it could be "multi_field". Seems like an "intake_format" nodeOb field is necessary!
 	def update(self,input=None,**kwargs):
+		print('in update',file=sys.stderr)
 		for arg in kwargs:
-			if hasattr(self,arg):
-				setattr(self,arg,kwargs[arg])
+			self.set(fieldstate=arg,value=kwargs[arg])
 		if input:
-			#Assign input to the variable whose name is stored in fieldstate. fieldstate is unchanged.
-			setattr(self,self.fieldstate,input)
-			self.updateSelfRepresentations(input)
-		return self.next(input)
+			if self.onField():
+				self.set(value=input)#default field is self.fieldstate
+		return self.next(input= input)
+
 	# @RETURN: next nodeOb
 	# @POST: field state is updated
 	# @POST: self.head() will return what this returns
 	def next(self,input=None):
+		print('in next',file=sys.stderr)
 		if self.menu == 'fieldstate':
 			self.fieldstate = self.nextField(input)
+			return self.head()
+		elif self.menu =='menu':
+			self.fieldstate = self.menu
+			self.menu = 'menu'
 			return self.head()
 		else:
 			self.fieldstate = self.menu
@@ -68,39 +76,62 @@ class Carpooler(db.Model):
 			return self.head()
 
 	def returnToMenu(self):
+		print('in returnToMenu',file=sys.stderr)
 		return (self.menu !='fieldstate')
 	def isValid(self,response):
+		print('in isValid',file=sys.stderr)
 		return self.quickHead().isValid(response)
 	def process(self,response): #format time for storage, etc.
+		print('in process',file=sys.stderr)
 		return self.quickHead().process(response)
 	# TODO: copy and mark up fields of node with data before calling afterSet!
 	def afterUpdate(self,response):
+		print('in afterUpdate',file=sys.stderr)
 		return self.head().afterSet(response) #Has formatted fields
 
 	# @RETURN: a nodeOb, not necessarily the current node.
 	def quickField(self,field):
-		return fields[field]
+		print('in quickField',file=sys.stderr)
+		print('field: '+str(field),file=sys.stderr)
+		try:
+			return fields[field]
+		except Exception as inst:
+			print(inst,file=sys.stderr)
+			print('trying to get a field that is not in fields',file=sys.stderr)
 #    @RETURN: a nodeOb formatted with user data.
 	def getField(self,field):
-		node = fields[field]
-		return self.format(node)
+		print('in getField',file=sys.stderr)
+		try:
+			node = fields[field]
+			return self.format(node)
+		except Exception as inst:
+			print(inst,file=sys.stderr)
+			print('trying to get a field that is not in fields',file=sys.stderr)
 
 	# @RETURN: a nodeOb for the current field
 	def quickHead(self):
-		return fields[self.fieldstate]
+		print('in quickHead',file=sys.stderr)
+		return self.quickField(self.fieldstate)
 	# @RETURN: a nodeOb for the current field, formatted with user data.
 	def head(self):
+		print('in head',file=sys.stderr)
 		node = self.quickHead()
 		return self.format(node)
 	# Returns the (String) name of the next field
 	def nextField(self, input=None):
+		print('in nextField',file=sys.stderr)
 		print("Next field is: " + str(self.quickHead().nextNode(input)), file=sys.stderr)
 		return self.quickHead().nextNode(input)
 
+	def onField(self):
+		print('in onField',file=sys.stderr)
+		return self.quickHead().obField=='Carpooler'
 
 	def payload(self):
+		print('in payload',file=sys.stderr)
 		return self.head().payload()
 	def format(self, node):
+		print('in format',file=sys.stderr)
 		if node.verboseNode:
 			node = node.copy()
 			todict = self.to_dict()
@@ -112,20 +143,57 @@ class Carpooler(db.Model):
 				node.customAfterText = node.customAfterText.format(**todict)
 		return node
 
+	def externalUpdate(self,nextFieldState=None,**kwargs):
+		print('in externalUpdate',file=sys.stderr)
+		#check hasattr?
+		for arg in kwargs:
+			print('externally updating carpooler.'+arg+' to ' + kwargs[arg], file=sys.stderr)
+			self.set(fieldstate=arg,value=kwargs[arg])
+			print('externally updated carpooler.'+arg+' to ' + getattr(self,arg,'error'), file=sys.stderr)
+		# Set this last
+		if nextFieldState:
+			print('externally updating carpooler.fieldstate to ' + str(nextFieldState), file=sys.stderr)
+			self.set(fieldstate='fieldstate',value=nextFieldState)
+			print('successfully externally updated carpooler.fieldstate to ' + str(getattr(self,'fieldstate','error')), file=sys.stderr)
+
+
+	# Call afterset from here?
+	#Assign input to the variable whose name is stored in fieldstate. fieldstate is unchanged.
+	def set(self,value,fieldstate=None):
+		print('in set',file=sys.stderr)
+		print('in self.set', file=sys.stderr)
+		if not fieldstate:
+			fieldstate = self.fieldstate
+		print('hasattr(self,'+ fieldstate + '): ' + str(hasattr(self,fieldstate)),file=sys.stderr)
+		print('getattr(self,fieldstate,None): ' + str(getattr(self,fieldstate,None)),file=sys.stderr)
+		if hasattr(self,fieldstate):
+			print('setting carpooler.'+fieldstate+' to ' + value, file=sys.stderr)
+			setattr(self,fieldstate,value)
+			print('successfully set carpooler.'+fieldstate+' to ' + getattr(self,fieldstate,'error'), file=sys.stderr)
+			self.updateSelfRepresentations(fieldstate=fieldstate,input=value)
+			print('successfully updated representations',file=sys.stderr)
 	# @POST: If the current node self.quickHead() has a nodeName, the self-representation fields are updated. These can be used to format templates stored in nodeOb's with user data, such as a string field containing greeting = "Hi, {name}", which can be formatted as greeting.format(**json.loads(self.selfRep))
 	# Note that only outwards-facing fields should have a nodeName! Otherwise they will land in here, which is a problem because self.to_dict creates an "_all" field containing all fields as text, which should not contain private fields such as "menu" or "fieldstate"
-	def updateSelfRepresentations(self,input=None):
+	# @PRE: MAKE SURE 'fieldstate in fields'! There is a check here, but it's mostly bad practice otherwise
+	def updateSelfRepresentations(self,input=None,fieldstate=None):
+		print('in updateSelfRepresentations',file=sys.stderr)
+		if not fieldstate:
+			fieldstate = self.fieldstate
 		if input:
-			if self.quickHead().nodeName:
-				tmp = json.loads(self.selfRep)
-				tmp[self.fieldstate]=str(input)
-				self.selfRep = json.dumps(tmp)
+			if fieldstate in fields:
+				if getattr(self.quickField(fieldstate),'nodeName',None):
+					# print('getattr(self.quickField(fieldstate),'nodeName',None):' + str(getattr(self.quickField(fieldstate),'nodeName',None)),file=sys.stderr)
+					print("getattr(self.quickField(fieldstate),'nodeName',None):" + str(getattr(self.quickField(fieldstate),'nodeName',None)),file=sys.stderr)
+					tmp = json.loads(self.selfRep)
+					tmp[fieldstate]=str(input)
+					self.selfRep = json.dumps(tmp)
 
-				tmp = json.loads(self.selfFormalRep)
-				tmp[fields[self.fieldstate].nodeName]=str(input)
-				self.selfFormalRep = json.dumps(tmp)
-
+					tmp = json.loads(self.selfFormalRep)
+					tmp[self.quickField(fieldstate).nodeName]=str(input)
+					self.selfFormalRep = json.dumps(tmp)
+					print('got this far',file=sys.stderr)
 	def to_dict(self):
+		print('in to_dict',file=sys.stderr)
 		todict = json.loads(self.selfFormalRep)
 		todict['_all']='\n'.join(['%s: %s' % (key, value) for (key, value) in todict.items()])
 		todict.update(json.loads(self.selfRep))
@@ -137,7 +205,7 @@ class Carpooler(db.Model):
 	# @POST: prints description of self
 	def printout(self):
 		for field in fields:
-			print(field + ": " + str(getattr(self,field)))
+			print(field + ": " + str(getattr(self,field)),file=sys.stderr)
 
 	# @RETURN: String description of carpooler
 	def describe(self):
@@ -154,6 +222,7 @@ class Carpooler(db.Model):
 	# @Return: String description of carpooler
 	def __repr__(self):
 		return '<id {}>'.format(self.id)
+
 
 
 class Pool(db.Model):

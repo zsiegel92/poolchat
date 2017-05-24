@@ -108,6 +108,7 @@ class MessengerClient(object):
 		return response.status_code == 200
 
 #os.environ['APP_SETTINGS'] #returns 'config.DevelopmentConfig'
+#Note: this may only be possible because this module is imported `with app.test_request_context`
 access_token = getattr(config,os.environ['APP_SETTINGS'].split('.')[1]).MESSENGER_PLATFORM_ACCESS_TOKEN
 messenger = MessengerClient(access_token=access_token)
 

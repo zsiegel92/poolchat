@@ -17,7 +17,7 @@ typeCheckers ={"String": (lambda stringArg: isinstance(stringArg,str)),"Integer"
 
 class nodeOb:
 
-	def __init__(self,nType=None,nTitle = None,nQuestion=None,nodeName=None,next=None,nextChoices=None,quickChoices=None,choices=None,customAfterText=None,verboseNode=False,validator = None,processor=None):
+	def __init__(self,nType=None,nTitle = None,nQuestion=None,nodeName=None,next=None,nextChoices=None,quickChoices=None,choices=None,customAfterText=None,verboseNode=False,validator = None,processor=None,obField=None):
 		self.nType = nType
 		self.nTitle = nTitle
 		self.nodeName = nodeName
@@ -26,6 +26,7 @@ class nodeOb:
 		self.verboseNode=verboseNode
 		self.validator = validator
 		self.processor = processor #Custom formatting for database storage
+		self.obField = obField #eg 'Carpooler'
 
 		self.next = next
 		self.nextChoices = nextChoices

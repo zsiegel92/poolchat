@@ -1,0 +1,13 @@
+TO CREATE and enter ENVIRONMENT:
+
+conda env create --prefix /Users/Zach/poolchat/conEnv
+activate
+deactivate
+conda env list
+conda env remove --name conEnv
+
+TO INSTALL A PACKAGE:
+
+conda install --prefix /Users/Zach/poolchat/conEnv numpy
+conda env export > environment.yml
+conda list -e --prefix /Users/Zach/poolchat/conEnv > conda-requirements.txt

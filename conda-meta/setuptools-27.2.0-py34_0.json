@@ -1,0 +1,35 @@
+{
+  "arch": "x86_64",
+  "auth": null,
+  "build": "py34_0",
+  "build_number": 0,
+  "channel": "https://repo.continuum.io/pkgs/free/osx-64",
+  "date": "2016-09-15",
+  "depends": [
+    "python 3.4*"
+  ],
+  "files": [
+    "bin/easy_install",
+    "bin/easy_install-3.4",
+    "lib/python3.4/site-packages/setuptools-27.2.0-py3.4.egg",
+    "lib/python3.4/site-packages/setuptools.pth"
+  ],
+  "fn": "setuptools-27.2.0-py34_0.tar.bz2",
+  "license": "MIT",
+  "link": {
+    "source": "/Users/Zach/anaconda/pkgs/setuptools-27.2.0-py34_0",
+    "type": 1
+  },
+  "md5": "1ccc75c41bff457b674f0ffbe4d014df",
+  "name": "setuptools",
+  "noarch": null,
+  "platform": "darwin",
+  "preferred_env": null,
+  "priority": 1,
+  "schannel": "defaults",
+  "size": 540526,
+  "subdir": "osx-64",
+  "url": "https://repo.continuum.io/pkgs/free/osx-64/setuptools-27.2.0-py34_0.tar.bz2",
+  "version": "27.2.0",
+  "with_features_depends": {}
+}

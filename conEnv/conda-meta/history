@@ -1,0 +1,22 @@
+==> 2017-05-28 02:01:36 <==
+# cmd: /Users/Zach/anaconda/bin/conda-env create --prefix /Users/Zach/poolchat/conEnv
++defaults::openssl-1.0.2l-0
++defaults::pip-9.0.1-py36_1
++defaults::python-3.6.1-2
++defaults::readline-6.2-2
++defaults::setuptools-27.2.0-py36_0
++defaults::sqlite-3.13.0-0
++defaults::tk-8.5.18-0
++defaults::wheel-0.29.0-py36_0
++defaults::xz-5.2.2-1
++defaults::zlib-1.2.8-3
+==> 2017-05-28 02:03:39 <==
+# cmd: /Users/Zach/poolchat/conEnv/bin/conda install --prefix /Users/Zach/poolchat/conEnv numpy
++defaults::mkl-2017.0.1-0
++defaults::numpy-1.12.1-py36_0
+# install specs: numpy
+==> 2017-05-28 02:11:29 <==
+# cmd: /Users/Zach/poolchat/conEnv/bin/conda install --prefix /Users/Zach/poolchat/conEnv python-dateutil
++defaults::python-dateutil-2.6.0-py36_0
++defaults::six-1.10.0-py36_0
+# install specs: python-dateutil

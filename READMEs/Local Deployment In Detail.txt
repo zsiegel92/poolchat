@@ -20,11 +20,19 @@ git remote -v
 ** copy remote url in case different from how it’s written below **
 
 
+** FOR HEROKU REPO **
 git remote add pro https://git.heroku.com/poolchatWT.git
 git remote rm heroku
 git add *
 git commit -m “new repo”
 git push pro master
+
+** FOR GITHUB REPO: set up github integration and automatic deploy in dashboard. **
+git remote add hub <github URL>
+git remote rm heroku
+git add -A
+git commit -m “new repo”
+git push hub master
 
 **Set environment variable to point to config variables in config.py (note this variable is stored in .env for local assignment)
 

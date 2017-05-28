@@ -1,0 +1,15 @@
+==> 2017-05-28 02:07:11 <==
+# cmd: /Users/Zach/poolchat/conEnv/bin/conda install --prefix /Users/Zach/poolchat dateutil
++defaults::dateutil-2.4.1-py34_0
++defaults::openssl-1.0.2l-0
++defaults::pip-9.0.1-py34_1
++defaults::python-3.4.5-0
++defaults::readline-6.2-2
++defaults::setuptools-27.2.0-py34_0
++defaults::six-1.10.0-py34_0
++defaults::sqlite-3.13.0-0
++defaults::tk-8.5.18-0
++defaults::wheel-0.29.0-py34_0
++defaults::xz-5.2.2-1
++defaults::zlib-1.2.8-3
+# install specs: dateutil

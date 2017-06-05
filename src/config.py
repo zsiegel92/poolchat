@@ -1,6 +1,9 @@
 import os
 basedir = os.path.abspath(os.path.dirname(__file__))
 
+#Note: The following was removed from app.py, after app.confi.from_object(...)
+#app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 
 class Config(object):
 	DEBUG = False
@@ -36,6 +39,7 @@ class DevelopmentConfig(Config):
 	DEVELOPMENT = True
 	DEBUG = True
 	MESSENGER_PLATFORM_ACCESS_TOKEN=os.environ.get('MESSENGER_PLATFORM_ACCESS_TOKEN') #Zach and Friends
+	SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
 class TestingConfig(Config):

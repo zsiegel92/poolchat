@@ -1,9 +1,7 @@
 # Stuff by Zach:
-conda-meta/
-include/
-Weird Conda Junk/
 .env
 .git/
+conEnv/
 
 
 # Byte-compiled / optimized / DLL files

@@ -1,5 +1,6 @@
 # Stuff by Zach:
 .env
+src/Scratch/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

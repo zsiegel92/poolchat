@@ -1,8 +1,7 @@
 # Stuff by Zach:
+conEnv/
 .env
 .git/
-conEnv/
-
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

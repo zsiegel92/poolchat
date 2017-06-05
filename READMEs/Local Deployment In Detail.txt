@@ -1,20 +1,22 @@
 Make a new project in a new directory!
 
-**Start a new project:
+**Start a new project, create conda environment, :
 
 mkdir poolchat
 cd poolchat
 git clone https://github.com/zsiegel92/poolchat.git
 git init
-virutalenv --python=python3.6 env
+#virutalenv --python=python3.6 env
+conda env create
 
 ** cd out and in to autoenv **
-
-** This will create a Heroku app called “poolchatWT” with a remote called “pro”:
-
 pip install -r requirements.txt
-heroku create poolchatWT
 
+
+** This will create a Heroku app called “poolchatWT” with a remote called “pro” and a conda package buildpack:
+
+heroku create poolchatWT
+heroku config:add BUILDPACK_URL=https://github.com/kennethreitz/conda-buildpack.git
 git remote -v
 
 ** copy remote url in case different from how it’s written below **

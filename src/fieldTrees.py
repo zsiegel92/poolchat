@@ -1,12 +1,13 @@
 from nodeOb import nodeOb
 #Custom validator functions here; add them as kwargs as 'validator'
 #Custom processor functions here; add them as kwargs as 'processor'
-#Possibly import html templates to use in node constructor for payload!!! Whoa. Jinja? Angular? How do those run?
-
-#nodeOb# __init__(self,nType=None,nTitle = None,nQuestion=None,next=None,nextChoices=None,quickChoices=None,choices=None,customAfterText=None,verboseNode=False,validator = None,processor=None):
+#Possibly import html templates to use in node constructor for webview payload!!! Jinja? Angular? How do those run?
 
 #    "start":nodeOb(nType="String",nTitle="whether this is your information"),
 
+# in psql:
+# /c poolchat;
+# select engaged, fieldstate, name, email, address, num_seats, on_time, must_drive, menu, confirming, "preWindow", "fbId" from carpooler;
 
 fields = {
 	"name":nodeOb(nType="String",nTitle="your name",nQuestion="What is your name?",next="email",nodeName="Name",obField='Carpooler'),
@@ -23,7 +24,7 @@ fields = {
 
 	"must_drive":nodeOb(nType="Integer",nTitle="your REQUIREMENT to drive (1 for \"have to drive\"; 0 for \"don't have to drive\")",nQuestion="Do you have to drive, or is catching a ride an option? Please answer Yes if you have to drive, or No otherwise.",next="menu",quickChoices={"Can drive or ride":'0',"Must drive own car":'1'},nodeName="Have to Drive Self",obField='Carpooler'),
 
-	"menu":nodeOb(nType="String",nTitle="whether you'd like to edit your information",nQuestion="Would you like to change the following?\n{_all}",next='quick_menu',quickChoices={"All good!":'confirming',"Name":'name',"Email":'email',"Address":'address',"Number of seats":'num_seats',"Drivetime Limit":'preWindow',"Arrival Flexibility":'on_time',"Must drive own car":'must_drive'},verboseNode=True,obField='Carpooler'),
+	"menu":nodeOb(nType="String",nTitle="whether you'd like to edit your information",nQuestion="Would you like to change the following?\n{_all}",next='quick_menu',quickChoices={"All good!":'mode',"Name":'name',"Email":'email',"Address":'address',"Number of seats":'num_seats',"Drivetime Limit":'preWindow',"Arrival Flexibility":'on_time',"Must drive own car":'must_drive'},verboseNode=True,obField='Carpooler'),
 
-	"confirming":nodeOb(nType="String",nTitle="everything you've entered.",nQuestion="Is all of the following correct?\n{_all}",next='quick_menu',quickChoices={"All correct!":"CREATE_POOL","Need to go back...":'menu'},verboseNode=True,obField='Carpooler')
+	"mode":nodeOb(nType="String",nTitle="everything you've entered.",nQuestion="Is all of the following correct?\n{_all}",next='quick_menu',quickChoices={"All correct!":"CREATE_POOL","Need to go back...":'menu'},verboseNode=True,obField='Carpooler')
 }

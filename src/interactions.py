@@ -57,7 +57,6 @@ def getStarted(sender_id,referral_text=None,message_text=None):
 		print('carpooler.name: ' + str(carpooler.name))
 	if info['timezone'] != -7:
 		messenger.say(sender_id,"You are probably in the wrong timezone for this!")
-	carpooler.printout()
 	db.session.add(carpooler)
 	db.session.commit()
 	messenger.say(sender_id,"Added you to my database, madude! =D")

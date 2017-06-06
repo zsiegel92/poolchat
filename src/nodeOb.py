@@ -47,6 +47,11 @@ class nodeOb:
 			self.nextChoices = {}
 			for key,value in quickChoices.items():
 				self.nextChoices[str(value)]=str(value)
+		elif next =='mode_menu':
+			self.nextChoices = {}
+			for key, value in quickChoices.items():
+				self.nextChoices[str(value)]=str(value)
+
 		if nextChoices:
 			if not 'default' in nextChoices:
 				self.nextChoices['default']=next

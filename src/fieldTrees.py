@@ -1,4 +1,7 @@
 from nodeOb import nodeOb
+
+modesFirst = {'fields':'name','poolfields':'eventAddress'}
+
 #Custom validator functions here; add them as kwargs as 'validator'
 #Custom processor functions here; add them as kwargs as 'processor'
 #Possibly import html templates to use in node constructor for webview payload!!! Jinja? Angular? How do those run?
@@ -26,5 +29,12 @@ fields = {
 
 	"menu":nodeOb(nType="String",nTitle="whether you'd like to edit your information",nQuestion="Would you like to change the following?\n{_all}",next='quick_menu',quickChoices={"All good!":'mode',"Name":'name',"Email":'email',"Address":'address',"Number of seats":'num_seats',"Drivetime Limit":'preWindow',"Arrival Flexibility":'on_time',"Must drive own car":'must_drive'},verboseNode=True,obField='Carpooler'),
 
-	"mode":nodeOb(nType="String",nTitle="everything you've entered.",nQuestion="Is all of the following correct?\n{_all}",next='quick_menu',quickChoices={"All correct!":"CREATE_POOL","Need to go back...":'menu'},verboseNode=True,obField='Carpooler')
+	# "mode":nodeOb(nType="String",nTitle="everything you've entered.",nQuestion="Is all of the following correct?\n{_all}",next='quick_menu',quickChoices={"All correct!":"CREATE_POOL","Need to go back...":'menu'},verboseNode=True,obField='Carpooler')
+    "mode":nodeOb(nType="String",nTitle="everything you've entered.",nQuestion="Is all of the following correct?\n{_all}",next='quick_menu',quickChoices={"All correct!":"poolfields","Need to go back...":'menu'},verboseNode=True,obField='Carpooler')
 }
+
+#NOTE: need an 'altchoices' node type, for when different choices lead to different next nodes. Or maybe just add functionality for when there is "quickchoices" and "nextchoices" listed!
+poolfields = { "create_or_join":nodeOb(nType="String",nTitle="whether you want to create or join a pool",nQuestion="Would you like to create a new carpool, or join one?",next="address",quickChoices={"Create":'creative',"Join":'joiner'},nodeName="Have to Drive Self",obField='Carpooler'),
+
+    "eventAddress":nodeOb(nType="String",nTitle="the address you'll be going to",nQuestion="What is the address you'll be going to?",next="eventAddress",nodeName="Event Address",obField='Pool'),
+    "eventTime":nodeOb(nType="String",nTitle="the time of your event",nQuestion="What is the time your event starts?",next="eventTime",nodeName="Event Time",obField='Pool')}

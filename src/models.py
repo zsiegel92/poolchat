@@ -1,7 +1,7 @@
 from app import db,json
 #from sqlalchemy.dialects.postgresql import ARRAY
 # from sqlalchemy.dialects.postgresql import JSON #Import if we use JSON in field
-from fieldTrees import fields
+from fieldTrees import fields,poolfields,modesFirst
 #from decision_trees import poolertree as fields
 import sys
 
@@ -25,6 +25,7 @@ class Carpooler(db.Model):
 	fieldstate = db.Column(db.String()) #decision tree state
 	selfRep = db.Column(db.Text)
 	selfFormalRep = db.Column(db.Text)
+	pool = db.ForeignKey('pool.id')
 
 	mode = db.Column(db.Text)
 
@@ -48,24 +49,7 @@ class Carpooler(db.Model):
 			if hasattr(self,arg):
 				setattr(self,arg,kwargs[arg])
 
-	# @RETURN: next nodeOb
-	# @POST: field state is updated
-	# @POST: self.head() will return what this returns
-	def next(self,input=None):
-		print('in next',file=sys.stderr)
-		if self.fieldstate == 'mode':
-			#Do something crazy?
-			pass
-		if self.menu == 'fieldstate':
-			self.fieldstate = self.nextField(input)
 
-		elif self.menu =='menu':
-			self.fieldstate = 'menu'
-			self.menu = 'fieldstate'
-		#went somewhere from the menu.
-		else:
-			self.fieldstate = self.menu
-			self.menu = 'menu'
 
 
 	# @Return: nodeOb
@@ -76,45 +60,73 @@ class Carpooler(db.Model):
 		for arg in kwargs:
 			self.set(fieldstate=arg,value=kwargs[arg])
 		if input:
-			if self.changingModes():
-				self.setMode(input)
-			#change to elif once setMode is complete!
+			if self.fieldstate =='mode':
+				print("In models.update,fieldstate='mode'.",file=sys.stderr)
+				if input in modesFirst:
+					print("In models.update changing modes,input in modesFirst. modesFirst[input] = " + modesFirst[input],file=sys.stderr)
+					self.mode = input
+					self.fieldstate=modesFirst[input]
+					return
+				else:
+					print("In models.update changing modes,input NOT in modesFirst.",file=sys.stderr)
+					self.next(input=input)
+					return
+
 			if self.onField():
 				self.set(value=input)#default field is self.fieldstate
+				self.next(input= input)
 			elif self.onPool():
-				self.setForCurrentPool(input)
-			self.next(input= input)
+				self.setForCurrentPool(value=input)
+				self.next(input= input)
 			return
-
-	def changingModes(self):
-		print('in self.changingModes', file=sys.stderr)
-		return self.fieldstate == 'mode'
-
-	def setMode(self,input):
-		print('in self.setMode', file=sys.stderr)
-		if input in ['fields','Pool']:
-			# self.mode = input
-			pass
-		else:
-			pass
-
-	def onField(self):
-		print('in onField',file=sys.stderr)
-		return self.quickHead().obField=='Carpooler'
-
-	def onPool(self):
-		print('in onPool',file=sys.stderr)
-		return self.quickHead().obField=='Pool'
 
 	def getCurrentPool(self):
 		print('in getCurrentPool',file=sys.stderr)
+		if self.pool ==None:
+			pool = Pool(fbId = self.fbId)
+			# self.pool = pool.id #if self.pool is int
+			self.pool=pool
+		return self.pool
 		#Find and return the current pool, based on carpooler fields...
-		return True
 
-	def setForCurrentPool(self,input):
+	def setForCurrentPool(self,value,fieldstate=None):
 		print('in self.setForCurrentPool', file=sys.stderr)
 		pool=self.getCurrentPool()
-		#pool.update(input=input) #uncomment after refactoring pool model
+		if not fieldstate:
+			fieldstate = self.fieldstate
+		if hasattr(pool,fieldstate):
+			print('setting pool.'+fieldstate+' to ' + value, file=sys.stderr)
+			setattr(pool,fieldstate,value)
+
+	# @RETURN: next nodeOb
+	# @POST: field state is updated
+	# @POST: self.head() will return what this returns
+	def next(self,input=None):
+		print('in next',file=sys.stderr)
+		if self.menu == 'fieldstate':
+			self.fieldstate = self.nextField(input)
+		elif self.menu =='menu':
+			self.fieldstate = 'menu'
+			self.menu = 'fieldstate'
+		#went somewhere from the menu.
+		else:
+			self.fieldstate = self.menu
+			self.menu = 'menu'
+
+	# @RETURN: a nodeOb, not necessarily the current node.
+	def quickField(self,field):
+		print('in quickField: mode = ' + self.mode + ', getting field: ' + field + ', self.fieldstate = ' + self.fieldstate + ', self.menu =' + self.menu,file=sys.stderr)
+		namespace = __import__(__name__) #get current namespace
+		tree = getattr(namespace,self.mode,None)
+		try:
+			return tree[field]
+		except Exception as inst:
+			print()
+			print(inst,file=sys.stderr)
+			print(
+				'trying to get a node that is not in tree',
+				file=sys.stderr
+				)
 
 	# Call afterset from here?
 	#Assign input to the variable whose name is stored in fieldstate. fieldstate is unchanged.
@@ -128,20 +140,14 @@ class Carpooler(db.Model):
 			self.updateSelfRepresentations(fieldstate=fieldstate,input=value)
 
 
-	# @RETURN: a nodeOb, not necessarily the current node.
-	def quickField(self,field):
-		print('in quickField: mode = ' + self.mode + ', getting field: ' + field + ', self.fieldstate = ' + self.fieldstate + ', self.menu =' + self.menu,file=sys.stderr)
-		namespace = __import__(__name__) #get current namespace
-		tree = getattr(namespace,self.mode,None)
+	def onField(self):
+		print('in onField',file=sys.stderr)
+		return self.quickHead().obField=='Carpooler'
 
-		try:
-			return fields[field]
-		except Exception as inst:
-			print(inst,file=sys.stderr)
-			print(
-				'trying to get a field that is not in fields',
-				file=sys.stderr
-				)
+	def onPool(self):
+		print('in onPool',file=sys.stderr)
+		return self.quickHead().obField=='Pool'
+
 
 	# Unused
 	def returnToMenu(self):
@@ -259,9 +265,10 @@ class Pool(db.Model):
 	__tablename__ = 'pool'
 
 	id = db.Column(db.Integer, primary_key=True) #id of group carpooling
+
 	poolName = db.Column(db.String())
 	eventDate = db.Column(db.Date())
-	eventTime = db.Column(db.Time) #Time of event encoded as int?
+	eventTime = db.Column(db.String())#db.Column(db.Time) #Time of event encoded as int?
 	latenessWindow = db.Column(db.Integer)
 	eventAddress = db.Column(db.String())
 	eventContact = db.Column(db.String())#1 or 0
@@ -272,6 +279,7 @@ class Pool(db.Model):
 	fireTime = db.column(db.Integer) #Number of minutes before event that a solution is automatically generated (maybe need plugin or package - cron?)
 	# eventCoordinators = db.column(JSON) #List of sender_id's for hosts, to enable editing of event, triggering solutions, etc.
 	#distMatrix = db.column(JSON) #Can I store this as a 2d array?
+	members = db.column(db.Text) #JSON dump
 
 	def update(self,**kwargs):
 		for arg in kwargs:
@@ -282,10 +290,17 @@ class Pool(db.Model):
 		return '<id {}>'.format(self.userId)
 
 
-	def __init__(self,**kwargs):
+	def __init__(self,fbId = None,**kwargs):
+		self.members = ""
 		for arg in kwargs:
 			if hasattr(self,arg):
 				setattr(self,arg,kwargs[arg])
+		if fbId:
+			carpooler = Carpooler.query.filter_by(fbId=fbId).first() #
+			tmp = json.loads(self.members)
+			tmp[fbId]=carpooler.name
+			self.members=json.dumps(tmp)
+
 		#participants = participants
 		#distMatrix = distMatrix
 

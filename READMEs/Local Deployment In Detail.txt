@@ -16,7 +16,9 @@ pip install -r requirements.txt
 ** This will create a Heroku app called “poolchatWT” with a remote called “pro” and a conda package buildpack:
 
 heroku create poolchatWT
-heroku config:add BUILDPACK_URL=https://github.com/kennethreitz/conda-buildpack.git
+#heroku config:add BUILDPACK_URL=https://github.com/kennethreitz/conda-buildpack.git #Deprecated
+heroku buildpacks:set https://github.com/kennethreitz/conda-buildpack.git 
+
 git remote -v
 
 ** copy remote url in case different from how it’s written below **

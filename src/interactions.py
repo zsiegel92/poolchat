@@ -1,21 +1,33 @@
 from app import messenger, db,app
 import requests
-from models import  Carpooler#, Pool, participation
+from models import  Carpooler,Pool, Trip
+
 
 #TODO: Don't create dicts at function call! Initialize them earlier.
 def postback_rules(recipient_id,postback_text,referral_text=None):
+	messenger.say(recipient_id,postback_text)
+
+	key_and_args = postback_text.split('/')
+	key = key_and_args[0]
+	keyPayload = key_and_args[-1]
+
 	rules = {
+		"RESPONSE":(lambda OF,RESP: toDB(recipient_id,RESP)),
 		"GET_STARTED_PAYLOAD":(lambda: getStarted(recipient_id,referral_text)),
+		"CREATE_NEW_POOL":(lambda: newPool(recipient_id)),
+		"FIND_POOL":(lambda: joinPool(recipient_id)),
+		"JOIN_POOL":(lambda poolid: joinPool(recipient_id,poolid)),
 		"Hello":(lambda: messenger.say(recipient_id,'World_PB2')),
 		"thing1":(lambda: messenger.say(recipient_id,'thing2_PB2'))
 	}
-	if postback_text in rules:
-		rules[postback_text]()
+
+	if key in rules:
+		rules[key](*key_and_args[1:])
 	else:
-		toDB(recipient_id,response=postback_text)
+		toDB(recipient_id,response=keyPayload)
 
 def quick_rules(recipient_id,qr_text):
-	text_rules(recipient_id,qr_text)
+	postback_rules(recipient_id,qr_text)
 
 
 def text_rules(recipient_id, message_text=""):
@@ -32,6 +44,39 @@ def text_rules(recipient_id, message_text=""):
 		messenger.say(recipient_id, rules[message_text])
 	else:
 		toDB(recipient_id,response=message_text)
+def newPool(recipient_id):
+	messenger.say(recipient_id,'in newPool')
+
+	carpooler=Carpooler.query.filter_by(fbId=recipient_id).first()
+	trip = Trip()
+	trip.pool=Pool()
+	carpooler.pools.insert(0,trip)
+	messenger.say(recipient_id,'added trip to carpooler.pools')
+
+
+	carpooler.fieldstate ='mode'
+	carpooler.update(input='poolfields')
+	messenger.say(recipient_id,"You just created a carpool!")
+	pester(recipient_id,carpooler)
+
+
+def joinPool(recipient_id,poolId):
+	carpooler = Carpooler.query.filter_by(fbId=recipient_id).first()
+	pool = Pool.query.filter_by(id=poolId).first()
+	trip = Trip()
+	trip.member=pool
+	carpooler.pools.insert(0,trip)
+
+	messenger.say(recipient_id,"You just created a carpool! Your pool ID is " + str(poolId))
+	pester(recipient_id,carpooler)
+
+
+def findPool(recipient_id):
+	messenger.say(recipient_id,"Are any of these the pool you'd like to join? (Build out interactions.findPool function)")
+	pester(recipient_id)
+
+def switchCurrentPool(recipient_id,more):
+	pass
 
 def process_referral(sender_id,referral_text,postback_text=None):
 	#TODO: config var for app name

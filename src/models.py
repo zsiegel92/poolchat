@@ -1,7 +1,7 @@
 from app import db,json
 #from sqlalchemy.dialects.postgresql import ARRAY
 # from sqlalchemy.dialects.postgresql import JSON #Import if we use JSON in field
-from fieldTrees import fields,poolfields,modesFirst
+from fieldTrees import fields,poolfields,findPool,tripfields,modesFirst
 #from decision_trees import poolertree as fields
 import sys
 
@@ -10,8 +10,8 @@ import sys
 #FOR NOW: It's as though every carpooler can have multiple pools, but all those pools have the exact same characteristics for the carpooler xD
 
 #NOTE: inputting names as lowercase makes them case-insensitive to SQLAlchemy (including even one uppercase character turns off this feature). So the lowercase class names refer to my classes whose names are uppercase! Confusing!
-#,db.PrimaryKeyConstraint('participant_id', 'pool_id') #Possibly add this to constructor
-participation = db.Table('participation', db.Column('carpooler_id', db.Integer, db.ForeignKey('carpooler.id')), db.Column('pool_id', db.Integer, db.ForeignKey('pool.id')))
+
+
 
 print('Hello from MODELS.PY!', file=sys.stderr)
 
@@ -20,16 +20,23 @@ class Carpooler(db.Model):
 
 #    NOT SURE if sqlalchemy column definitions HAVE TO occur outside __init__.
 	id = db.Column(db.Integer, primary_key=True)
+
+	# Note: pools[0] is the current pool!
+	# Note: EVERY member OWNS their pools!
+	pools = db.relationship("Trip",back_populates = 'member')
+	# owned_pools = db.relationship("pool",back_populates = 'owners')
+
+
 	fbId = db.Column(db.String()) #facebook id
-	engaged = db.Column(db.Integer) #Is this user fully plugged in?
-	fieldstate = db.Column(db.String()) #decision tree state
+
+
 	selfRep = db.Column(db.Text)
 	selfFormalRep = db.Column(db.Text)
-	pool = db.ForeignKey('pool.id')
 
+	fieldstate = db.Column(db.String()) #decision tree state
 	mode = db.Column(db.Text)
 
-	carpools = db.relationship('Pool',secondary=participation,backref=db.backref('carpoolers',lazy='dynamic'))
+
 
 	for field in fields:
 		if fields[field].obField == 'Carpooler':
@@ -72,21 +79,34 @@ class Carpooler(db.Model):
 					self.next(input=input)
 					return
 
-			if self.onField():
+			if self.quickHead().obField=='Carpooler':
 				self.set(value=input)#default field is self.fieldstate
 				self.next(input= input)
-			elif self.onPool():
+			elif self.quickHead().obField=='Pool':
 				self.setForCurrentPool(value=input)
 				self.next(input= input)
+			elif self.quickHead().obField=='Trip':
+				#Do Trip stuff
+				#Look up "SQLAlchemy "
+				self.next(input=input)
+			elif self.quickHead().obField=='findPool':
+				self.next(input=input)
+			elif self.quickHead().obField=='tripfields':
+				self.next(input=input)
+			else:
+				self.next(input=input)
 			return
 
 	def getCurrentPool(self):
 		print('in getCurrentPool',file=sys.stderr)
-		if self.pool ==None:
-			pool = Pool(fbId = self.fbId)
+		#checks if self.pools is empty
+		if not self.pools:
+			#DON'T DO THIS HERE! Instead, trigger Interactions.newPool or return message saying "no such pool"
+			pool = Pool(carpooler=self)
 			# self.pool = pool.id #if self.pool is int
-			self.pool=pool
-		return self.pool
+			self.pools.insert(0,pool)
+		#pools stores ASSOCIATIONS
+		return self.pools[0].pool
 		#Find and return the current pool, based on carpooler fields...
 
 	def setForCurrentPool(self,value,fieldstate=None):
@@ -140,13 +160,6 @@ class Carpooler(db.Model):
 			self.updateSelfRepresentations(fieldstate=fieldstate,input=value)
 
 
-	def onField(self):
-		print('in onField',file=sys.stderr)
-		return self.quickHead().obField=='Carpooler'
-
-	def onPool(self):
-		print('in onPool',file=sys.stderr)
-		return self.quickHead().obField=='Pool'
 
 
 	# Unused
@@ -158,12 +171,16 @@ class Carpooler(db.Model):
 
 	def process(self,response): #format time for storage, etc.
 		print('in process',file=sys.stderr)
+		if (self.quickHead().findPool):
+			pool = Pool.query.filter_by(response).first()
+			return pool.poolName
 		return self.quickHead().process(response)
 
 
 	def isValid(self,response):
 		print('in isValid',file=sys.stderr)
 		return self.quickHead().isValid(response)
+
 
 	# TODO: copy and mark up fields of node with data before calling afterSet!
 	def afterUpdate(self,response):
@@ -188,8 +205,8 @@ class Carpooler(db.Model):
 	# @RETURN: a nodeOb for the current field, formatted with user data.
 	def head(self):
 		print('in head',file=sys.stderr)
-		node = self.quickHead()
-		return self.format(node)
+		return self.format(self.quickHead())
+
 	# Returns the (String) name of the next field
 	def nextField(self, input=None):
 		print('in nextField',file=sys.stderr)
@@ -266,6 +283,9 @@ class Pool(db.Model):
 
 	id = db.Column(db.Integer, primary_key=True) #id of group carpooling
 
+	# owners = db.relationship("carpooler",back_populates="owned_pools")
+	members = db.relationship("Trip",back_populates="pool") #JSON dump
+
 	poolName = db.Column(db.String())
 	eventDate = db.Column(db.Date())
 	eventTime = db.Column(db.String())#db.Column(db.Time) #Time of event encoded as int?
@@ -279,7 +299,7 @@ class Pool(db.Model):
 	fireTime = db.column(db.Integer) #Number of minutes before event that a solution is automatically generated (maybe need plugin or package - cron?)
 	# eventCoordinators = db.column(JSON) #List of sender_id's for hosts, to enable editing of event, triggering solutions, etc.
 	#distMatrix = db.column(JSON) #Can I store this as a 2d array?
-	members = db.column(db.Text) #JSON dump
+
 
 	def update(self,**kwargs):
 		for arg in kwargs:
@@ -290,18 +310,32 @@ class Pool(db.Model):
 		return '<id {}>'.format(self.userId)
 
 
-	def __init__(self,fbId = None,**kwargs):
-		self.members = ""
+	def __init__(self,carpooler = None,**kwargs):
 		for arg in kwargs:
 			if hasattr(self,arg):
 				setattr(self,arg,kwargs[arg])
-		if fbId:
-			carpooler = Carpooler.query.filter_by(fbId=fbId).first() #
-			tmp = json.loads(self.members)
-			tmp[fbId]=carpooler.name
-			self.members=json.dumps(tmp)
+		if carpooler:
+			self.owner = carpooler
+			self.members = carpooler
+
 
 		#participants = participants
 		#distMatrix = distMatrix
+
+
+class Trip(db.Model):
+	__tablename__ = 'trips'
+
+	carpooler_id = db.Column(db.Integer, db.ForeignKey('carpooler.id'), primary_key=True)
+	pool_id = db.Column(db.Integer, db.ForeignKey('pool.id'), primary_key=True)
+
+	member = db.relationship("Carpooler", back_populates="pools")
+	pool = db.relationship("Pool", back_populates="members")
+
+	address = db.Column(db.String())
+	num_seats = db.Column(db.Integer)
+	preWindow = db.Column(db.Integer)
+	on_time = db.Column(db.Integer)
+	must_drive = db.Column(db.Integer)
 
 

@@ -16,8 +16,12 @@ pip install -r requirements.txt
 ** This will create a Heroku app called “poolchatWT” with a remote called “pro” and a conda package buildpack:
 
 heroku create poolchatWT
-#heroku config:add BUILDPACK_URL=https://github.com/kennethreitz/conda-buildpack.git #Deprecated
-heroku buildpacks:set https://github.com/kennethreitz/conda-buildpack.git 
+#heroku config:add BUILDPACK_URL=https://github.com/arose13/conda-buildpack.git
+#Deprecated
+heroku buildpacks:set https://github.com/arose13/conda-buildpack.git
+
+#view buildpack
+heroku buildpacks
 
 git remote -v
 
@@ -72,8 +76,10 @@ psql
 ** Add Postgres to Heroku **
 
 heroku config --app poolchatWT
+heroku addons:destroy heroku-postgresql
 heroku addons:create heroku-postgresql:hobby-dev --app poolchatWT
 heroku config --app poolchatWT
+
 
 git add -A
 git commit -m "all migrations in place"

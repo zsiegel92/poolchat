@@ -3,7 +3,7 @@ from messengerbot import templates
 from messengerbot import attachments
 from messengerbot import elements
 from messengerbot import quick_replies
-# import sys #Just for printed error messages!
+import sys #Just for printed error messages!
 
 #from sqlalchemy import (all the abstract type checking functions I need, like email checking, etc. Maybe even put a Google Maps-querying address-checker in the node object).
 
@@ -15,9 +15,11 @@ from messengerbot import quick_replies
 
 typeCheckers ={"String": (lambda stringArg: isinstance(stringArg,str)),"Integer": (lambda stringArg: stringArg.isdigit())}
 
+node_args = ['nType','nTitle','nQuestion','next','nextChoices','quickChoices','choices','customAfterText','nodeName','verboseNode','validator','processor','obField','findPool','disable_prefix']
+
 class nodeOb:
 
-	def __init__(self,nType=None,nTitle = None,nQuestion=None,nodeName=None,next=None,nextChoices=None,quickChoices=None,choices=None,customAfterText=None,verboseNode=False,validator = None,processor=None,obField=None):
+	def __init__(self,nType=None,nTitle = None,nQuestion=None,nodeName=None,next=None,nextChoices=None,quickChoices=None,choices=None,customAfterText=None,verboseNode=False,validator = None,processor=None,obField=None,findPool=False,disable_prefix=False):
 		self.nType = nType
 		self.nTitle = nTitle
 		self.nodeName = nodeName
@@ -27,6 +29,7 @@ class nodeOb:
 		self.validator = validator
 		self.processor = processor #Custom formatting for database storage
 		self.obField = obField #eg 'Carpooler'
+		self.findPool = findPool
 
 		self.next = next
 		self.nextChoices = nextChoices
@@ -34,10 +37,18 @@ class nodeOb:
 		self.choices = choices
 		self.quickChoices = quickChoices
 
+		self.disable_prefix=disable_prefix
+		if not (self.disable_prefix):
+			prefix = "RESPONSE/"+ str(obField) +"/"
+		else:
+			prefix = ""
+
+
+
 		if quickChoices:
 			self.quick_choice_buttons = []
 			for choice, pay in quickChoices.items():
-				self.quick_choice_buttons.append(quick_replies.QuickReplyItem(content_type='text',title=choice,payload=pay))
+				self.quick_choice_buttons.append(quick_replies.QuickReplyItem(content_type='text',title=choice,payload=prefix+ pay))
 		if choices:
 			self.choice_buttons = []
 			for choice,pay in choices.items():
@@ -47,6 +58,7 @@ class nodeOb:
 			self.nextChoices = {}
 			for key,value in quickChoices.items():
 				self.nextChoices[str(value)]=str(value)
+
 		elif next =='mode_menu':
 			self.nextChoices = {}
 			for key, value in quickChoices.items():
@@ -55,7 +67,6 @@ class nodeOb:
 		if nextChoices:
 			if not 'default' in nextChoices:
 				self.nextChoices['default']=next
-
 
 	#TODO: validation functions that are more than type-checkers, as optional arguments
 	def isValid(self,userInput):
@@ -118,9 +129,16 @@ class nodeOb:
 		return myMessage
 
 	def copy(self):
+		copied_args ={}
+		for arg in node_args:
+			copied_args[arg]=getattr(self,arg,None)
+
 		print("copying node")
-		newNode = nodeOb(nType=self.nType,nTitle = self.nTitle,nQuestion=self.nQuestion,next=self.next,nextChoices=self.nextChoices,quickChoices=self.quickChoices,choices=self.choices,customAfterText=self.customAfterText)
+		newNode = nodeOb(**copied_args)
+
+		print("finished copying node")
 		return newNode
+
 	def represent(self):
 		return str(vars(self))
 

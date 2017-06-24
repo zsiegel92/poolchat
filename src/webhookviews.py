@@ -1,26 +1,6 @@
-from interactions import quick_rules,text_rules,process_referral,postback_rules #Note: have to import webhookviews at bottom of app
-from app import app,db,request,abort
-@app.route("/", methods=["GET"])
-def root():
-#    assert app.debug == False
-	try:
-#        messenger.say('1512768535401609','booting now')
-		return 'WUTWUTWUT10', 200
-	except Exception as exc:
-		return str(exc)
-
-#TODO: Flip through users in db, message them their table has been dropped :)
-@app.route('/dropTabs', methods=["GET"])
-def drop_table():
-	try:
-		db.drop_all()
-		db.create_all()
-	except Exception as exc:
-		return "Exception on table drop:\n" + str(exc)
-	else:
-		return "Dropped and re-created all tables!", 200
-
-
+#Note: have to import webhookviews at bottom of app.py
+from interactions import quick_rules,text_rules,process_referral,postback_rules
+from app import app,request,abort
 
 # webhook for facebook to initialize the bot
 @app.route('/webhook', methods=['GET'])

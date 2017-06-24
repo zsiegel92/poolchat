@@ -25,7 +25,7 @@ class Carpooler(db.Model):
 	# Note: EVERY member OWNS their pools!
 	pools = db.relationship("Trip",back_populates = 'member')
 	# owned_pools = db.relationship("pool",back_populates = 'owners')
-
+	current_pool_id = db.Column(db.Integer, db.ForeignKey('pool.id'))
 
 	fbId = db.Column(db.String()) #facebook id
 
@@ -63,51 +63,55 @@ class Carpooler(db.Model):
 	# Can update fields directly, or can update based on current fieldstate with input.
 	# based on some field of fields[self.fieldstate] (aka self.quickhead()), such as "is_field", we should either do this, or do something else! Like, maybe, it could be "multi_field". Seems like an "intake_format" nodeOb field is necessary!
 	def update(self,input=None,**kwargs):
-		print('in update',file=sys.stderr)
+		print('in Carpooler.update - self.fieldstate = ' + str(self.fieldstate) + ', self.mode = ' + str(self.mode) + ', self.menu = ' + str(self.menu),file=sys.stderr)
 		for arg in kwargs:
 			self.set(fieldstate=arg,value=kwargs[arg])
 		if input:
 			if self.fieldstate =='mode':
-				print("In models.update,fieldstate='mode'.",file=sys.stderr)
 				if input in modesFirst:
-					print("In models.update changing modes,input in modesFirst. modesFirst[input] = " + modesFirst[input],file=sys.stderr)
 					self.mode = input
+					self.menu = 'fieldstate'
 					self.fieldstate=modesFirst[input]
 					return
 				else:
-					print("In models.update changing modes,input NOT in modesFirst.",file=sys.stderr)
 					self.next(input=input)
 					return
 
-			if self.quickHead().obField=='Carpooler':
+			# DO STUFF BASED ON Carpooler.mode!!
+			if self.mode =='fields':
 				self.set(value=input)#default field is self.fieldstate
 				self.next(input= input)
-			elif self.quickHead().obField=='Pool':
+			elif self.mode == 'poolfields':
 				self.setForCurrentPool(value=input)
 				self.next(input= input)
-			elif self.quickHead().obField=='Trip':
-				#Do Trip stuff
-				#Look up "SQLAlchemy "
+			elif self.mode == 'tripfields':
+				self.setForCurrentTrip(value=input)
 				self.next(input=input)
-			elif self.quickHead().obField=='findPool':
-				self.next(input=input)
-			elif self.quickHead().obField=='tripfields':
-				self.next(input=input)
+			elif self.mode.split('/')[0] == 'EXTERNAL':
+				return
 			else:
-				self.next(input=input)
+				print("Error in update! self.mode = " + str(self.mode) + ", self.fieldstate = " + str(self.fieldstate) + ", self.menu = " + str(self.menu),file=sys.stderr)
 			return
 
 	def getCurrentPool(self):
-		print('in getCurrentPool',file=sys.stderr)
+		print("in getCurrentPool. self.current_pool_id = " +str(self.current_pool_id),file=sys.stderr)
 		#checks if self.pools is empty
 		if not self.pools:
-			#DON'T DO THIS HERE! Instead, trigger Interactions.newPool or return message saying "no such pool"
 			pool = Pool(carpooler=self)
-			# self.pool = pool.id #if self.pool is int
-			self.pools.insert(0,pool)
-		#pools stores ASSOCIATIONS
-		return self.pools[0].pool
-		#Find and return the current pool, based on carpooler fields...
+			trip = Trip()
+			trip.pool=pool
+			self.pools.append(trip)
+			self.current_pool_id=pool.id
+			return pool
+		else:
+			#pools stores ASSOCIATIONS
+			for trip in self.pools:
+				if trip.pool.id == self.current_pool_id:
+					return trip.pool
+			#SHOULD NOT GET HERE
+			print("Something went wrong in Carpooler.getCurrentPool",file=sys.stderr)
+			return Pool()
+
 
 	def setForCurrentPool(self,value,fieldstate=None):
 		print('in self.setForCurrentPool', file=sys.stderr)
@@ -115,8 +119,30 @@ class Carpooler(db.Model):
 		if not fieldstate:
 			fieldstate = self.fieldstate
 		if hasattr(pool,fieldstate):
-			print('setting pool.'+fieldstate+' to ' + value, file=sys.stderr)
 			setattr(pool,fieldstate,value)
+			pool.updateSelfRepresentations(fieldstate,value)
+
+	def getCurrentTrip(self):
+		print('in getCurrentTrip',file=sys.stderr)
+		#checks if self.pools is empty
+		return Trip.query.filter_by(carpooler_id=self.id,pool_id=self.getCurrentPool().id).first()
+
+
+	def setForCurrentTrip(self,value,fieldstate=None):
+		print('in self.setForCurrentTrip', file=sys.stderr)
+		trip=self.getCurrentTrip()
+		if not trip:
+			print("TRIP NOT FOUND",file=sys.stderr)
+			return
+		if not fieldstate:
+			fieldstate = self.fieldstate
+		if hasattr(trip,fieldstate):
+			setattr(trip,fieldstate,value)
+			trip.updateSelfRepresentations(fieldstate,value)
+
+
+
+
 
 	# @RETURN: next nodeOb
 	# @POST: field state is updated
@@ -129,6 +155,7 @@ class Carpooler(db.Model):
 			self.fieldstate = 'menu'
 			self.menu = 'fieldstate'
 		#went somewhere from the menu.
+		#self.menu = (some field)
 		else:
 			self.fieldstate = self.menu
 			self.menu = 'menu'
@@ -141,12 +168,8 @@ class Carpooler(db.Model):
 		try:
 			return tree[field]
 		except Exception as inst:
-			print()
 			print(inst,file=sys.stderr)
-			print(
-				'trying to get a node that is not in tree',
-				file=sys.stderr
-				)
+
 
 	# Call afterset from here?
 	#Assign input to the variable whose name is stored in fieldstate. fieldstate is unchanged.
@@ -171,6 +194,7 @@ class Carpooler(db.Model):
 
 	def process(self,response): #format time for storage, etc.
 		print('in process',file=sys.stderr)
+		# CHANGE THIS SHIT
 		if (self.quickHead().findPool):
 			pool = Pool.query.filter_by(response).first()
 			return pool.poolName
@@ -204,36 +228,47 @@ class Carpooler(db.Model):
 		return self.quickField(self.fieldstate)
 	# @RETURN: a nodeOb for the current field, formatted with user data.
 	def head(self):
-		print('in head',file=sys.stderr)
+		print('in Carpooler.head',file=sys.stderr)
 		return self.format(self.quickHead())
 
 	# Returns the (String) name of the next field
 	def nextField(self, input=None):
-		print('in nextField',file=sys.stderr)
-		print("Next field is: " + str(self.quickHead().nextNode(input)), file=sys.stderr)
+		print('in Carpooler.nextField',file=sys.stderr)
 		return self.quickHead().nextNode(input)
 
 
 	#called by messengerbot.poolerSay() (in __init__.py)
 	def payload(self):
-		print('in payload. self.fieldstate = ' + self.fieldstate,file=sys.stderr)
+		print('in Carpooler.payload',file=sys.stderr)
 		return self.head().payload()
 
 	def format(self, node):
-		print('in format',file=sys.stderr)
+		print("in Carpooler.format",file=sys.stderr)
+		if not node:
+			return node
+
 		if node.verboseNode:
+			if (node.obField=='Carpooler'):
+				todict = self.to_dict()
+			elif (node.obField=='Trip'):
+				todict=self.getCurrentTrip().to_dict()
+			elif (node.obField == 'Pool'):
+				# return self.getCurrentPool().to_dict()
+				todict=self.getCurrentPool().to_dict()
+			else:
+				return node
 			node = node.copy()
-			todict = self.to_dict()
 			if node.nTitle:
 				node.nTitle = node.nTitle.format(**todict)
 			if node.nQuestion:
 				node.nQuestion = node.nQuestion.format(**todict)
 			if node.customAfterText:
 				node.customAfterText = node.customAfterText.format(**todict)
+		print("Exiting format.",file=sys.stderr)
 		return node
 
 	def externalUpdate(self,nextFieldState=None,**kwargs):
-		print('in externalUpdate',file=sys.stderr)
+		print('in Carpooler.externalUpdate',file=sys.stderr)
 		#check hasattr?
 		for arg in kwargs:
 			self.set(fieldstate=arg,value=kwargs[arg])
@@ -247,7 +282,7 @@ class Carpooler(db.Model):
 	# Note that only outwards-facing fields should have a nodeName! Otherwise they will land in here, which is a problem because self.to_dict creates an "_all" field containing all fields as text, which should not contain private fields such as "menu" or "fieldstate"
 	# @PRE: MAKE SURE 'fieldstate in fields'! There is a check here, but it's mostly bad practice otherwise
 	def updateSelfRepresentations(self,input=None,fieldstate=None):
-		print('in updateSelfRepresentations',file=sys.stderr)
+		print('in Carpooler.updateSelfRepresentations',file=sys.stderr)
 		if not fieldstate:
 			fieldstate = self.fieldstate
 		if input:
@@ -263,12 +298,11 @@ class Carpooler(db.Model):
 
 
 	def to_dict(self):
-		print('in to_dict',file=sys.stderr)
+		print('in Carpooler.to_dict',file=sys.stderr)
 		todict = json.loads(self.selfFormalRep)
 		todict['_all']='\n'.join(['%s: %s' % (key, value) for (key, value) in todict.items()])
 		todict.update(json.loads(self.selfRep))
 		todict['_property']= self.fieldstate
-		print(json.dumps(todict), file=sys.stderr)
 		return todict
 
 
@@ -300,6 +334,41 @@ class Pool(db.Model):
 	# eventCoordinators = db.column(JSON) #List of sender_id's for hosts, to enable editing of event, triggering solutions, etc.
 	#distMatrix = db.column(JSON) #Can I store this as a 2d array?
 
+	selfRep = db.Column(db.Text)
+	selfFormalRep = db.Column(db.Text)
+
+	def __init__(self):
+		super().__init__()
+		self.selfRep = "{}"
+		self.selfFormalRep="{}"
+
+
+	def updateSelfRepresentations(self,fieldstate,input):
+		print('in Pool.updateSelfRepresentations',file=sys.stderr)
+		treename = 'poolfields'
+		namespace = __import__(__name__) #get current namespace
+		tree = getattr(namespace,treename,None)
+
+		if fieldstate in tree: #Should be
+			if getattr(tree[fieldstate],'nodeName',None):
+				tmp = json.loads(self.selfRep)
+				tmp[fieldstate]=str(input)
+				tmp['pool_id']=self.id
+				self.selfRep = json.dumps(tmp)
+
+				tmp = json.loads(self.selfFormalRep)
+				tmp['Pool ID']=self.id
+				tmp[tree[fieldstate].nodeName]=str(input)
+				self.selfFormalRep = json.dumps(tmp)
+
+
+	def to_dict(self):
+		print('in Trip.to_dict',file=sys.stderr)
+		todict = json.loads(self.selfFormalRep)
+
+		todict['_all']='\n'.join(['%s: %s' % (key, value) for (key, value) in todict.items()])
+		todict.update(json.loads(self.selfRep))
+		return todict
 
 	def update(self,**kwargs):
 		for arg in kwargs:
@@ -309,14 +378,6 @@ class Pool(db.Model):
 	def __repr__(self):
 		return '<id {}>'.format(self.userId)
 
-
-	def __init__(self,carpooler = None,**kwargs):
-		for arg in kwargs:
-			if hasattr(self,arg):
-				setattr(self,arg,kwargs[arg])
-		if carpooler:
-			self.owner = carpooler
-			self.members = carpooler
 
 
 		#participants = participants
@@ -337,5 +398,97 @@ class Trip(db.Model):
 	preWindow = db.Column(db.Integer)
 	on_time = db.Column(db.Integer)
 	must_drive = db.Column(db.Integer)
+
+	selfRep = db.Column(db.Text)
+	selfFormalRep = db.Column(db.Text)
+	poolRepLoaded = db.Column(db.Integer)
+	carpoolerRepLoaded = db.Column(db.Integer)
+
+	def __init__(self):
+		super().__init__()
+		self.selfRep = "{}"
+		self.selfFormalRep="{}"
+		self.poolRepLoaded=0
+		self.carpoolerRepLoaded=0
+
+	def loadCarpoolerRep(self):
+		if (self.member):
+			member_prefix = "member_"
+			formal_member_prefix = "Traveler's "
+			carpoolerFields = json.loads(self.member.selfRep)
+			tripFields = json.loads(self.selfRep)
+			for key, value in carpoolerFields.items():
+				tripFields[member_prefix+key]=value
+			self.selfRep = json.dumps(tripFields)
+
+			carpoolerFormalFields = json.loads(self.member.selfFormalRep)
+			tripFormalFields = json.loads(self.selfFormalRep)
+			for key, value in carpoolerFormalFields.items():
+				tripFormalFields[formal_member_prefix+key]=value
+			self.selfFormalRep = json.dumps(tripFormalFields)
+
+			self.carpoolerRepLoaded =1
+		else:
+			return
+
+	def loadPoolRep(self):
+		if (self.pool):
+			pool_prefix = "pool_"
+			formal_pool_prefix = "Carpool's "
+			poolFields = json.loads(self.pool.selfRep)
+			tripFields = json.loads(self.selfRep)
+			for key, value in poolFields.items():
+				tripFields[pool_prefix+key]=value
+			self.selfRep = json.dumps(tripFields)
+
+			poolFormalFields = json.loads(self.pool.selfFormalRep)
+			tripFormalFields = json.loads(self.selfFormalRep)
+			for key, value in poolFormalFields.items():
+				tripFormalFields[formal_pool_prefix+key]=value
+			self.selfFormalRep = json.dumps(tripFormalFields)
+
+			self.poolRepLoaded =1
+		else:
+			return
+
+	def updateSelfRepresentations(self,fieldstate,input):
+		print('in Trip.updateSelfRepresentations',file=sys.stderr)
+		treename = 'tripfields'
+		namespace = __import__(__name__) #get current namespace
+		tree = getattr(namespace,treename,None)
+
+		if (self.poolRepLoaded ==0):
+			self.loadPoolRep()
+		if (self.carpoolerRepLoaded ==0):
+			self.loadCarpoolerRep()
+
+		if fieldstate in tree: #Should be
+			if getattr(tree[fieldstate],'nodeName',None):
+				tmp = json.loads(self.selfRep)
+				tmp[fieldstate]=str(input)
+				self.selfRep = json.dumps(tmp)
+
+				tmp = json.loads(self.selfFormalRep)
+				if (getattr(self,'member.name',None) and getattr(self,'pool.poolName',None)):
+					tmp['Member']=self.member.name
+					tmp['Pool']=self.pool.poolName
+				tmp[tree[fieldstate].nodeName]=str(input)
+				self.selfFormalRep = json.dumps(tmp)
+
+
+	def to_dict(self):
+		print('in Trip.to_dict',file=sys.stderr)
+
+		if (self.poolRepLoaded ==0):
+			self.loadPoolRep()
+		if (self.carpoolerRepLoaded ==0):
+			self.loadCarpoolerRep()
+
+		todict = json.loads(self.selfFormalRep)
+		todict['_all']='\n'.join(['%s: %s' % (key, value) for (key, value) in todict.items()])
+		todict.update(json.loads(self.selfRep))
+		return todict
+
+
 
 

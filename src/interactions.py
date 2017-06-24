@@ -2,11 +2,12 @@ from app import messenger, db,app
 import requests
 from models import  Carpooler,Pool, Trip
 
+#FOR TESTING ONLY,IMPORT SYS
+import sys
 
 #TODO: Don't create dicts at function call! Initialize them earlier.
 def postback_rules(recipient_id,postback_text,referral_text=None):
-	messenger.say(recipient_id,postback_text)
-
+	print("in interactions.postback_rules - postback_text = " + str(postback_text),file =sys.stderr)
 	key_and_args = postback_text.split('/')
 	key = key_and_args[0]
 	keyPayload = key_and_args[-1]
@@ -15,7 +16,7 @@ def postback_rules(recipient_id,postback_text,referral_text=None):
 		"RESPONSE":(lambda OF,RESP: toDB(recipient_id,RESP)),
 		"GET_STARTED_PAYLOAD":(lambda: getStarted(recipient_id,referral_text)),
 		"CREATE_NEW_POOL":(lambda: newPool(recipient_id)),
-		"FIND_POOL":(lambda: joinPool(recipient_id)),
+		"FIND_POOL":(lambda: 5),
 		"JOIN_POOL":(lambda poolid: joinPool(recipient_id,poolid)),
 		"Hello":(lambda: messenger.say(recipient_id,'World_PB2')),
 		"thing1":(lambda: messenger.say(recipient_id,'thing2_PB2'))
@@ -31,6 +32,7 @@ def quick_rules(recipient_id,qr_text):
 
 
 def text_rules(recipient_id, message_text=""):
+	print("in interactions.text_rules - message_text = " + str(message_text),file =sys.stderr)
 	rules = {
 		"Hello": "World",
 		"Foo": "Bar",
@@ -45,18 +47,40 @@ def text_rules(recipient_id, message_text=""):
 	else:
 		toDB(recipient_id,response=message_text)
 def newPool(recipient_id):
-	messenger.say(recipient_id,'in newPool')
-
+	print("in interactions.newPool",file=sys.stderr)
 	carpooler=Carpooler.query.filter_by(fbId=recipient_id).first()
-	trip = Trip()
+
+	trip=Trip()
 	trip.pool=Pool()
-	carpooler.pools.insert(0,trip)
-	messenger.say(recipient_id,'added trip to carpooler.pools')
+	carpooler.pools.append(trip)
+	#Have to populate carpooler.pools and trip.pool (at least) before adding/committing due to non-null constraint!
+
+	# db.session.add(trip) #MAY NEED THIS, MAYBE NOT!
+	db.session.commit()
+
+	#Have to commit before this is populated! This is why this function should be external to models.py, maybe.
+	carpooler.current_pool_id = trip.pool.id
 
 
 	carpooler.fieldstate ='mode'
 	carpooler.update(input='poolfields')
-	messenger.say(recipient_id,"You just created a carpool!")
+
+
+	db.session.commit()
+
+	cartrips = []
+	for cartrip in carpooler.pools:
+		cartrips.append(cartrip.pool.id)
+	if len(cartrips) > 1:
+		tripstring = "Your carpools have IDs: "
+		for ii in range(0,len(cartrips)-1):
+			tripstring = tripstring + str(cartrips[ii]) + ", "
+		tripstring = tripstring + " and " + str(cartrips[-1]) + "."
+	else:
+		tripstring = "Your only carpool has ID: " + str(cartrips[0]) + "."
+
+	messenger.say(recipient_id,"You just created a carpool! Your NEW carpool's 'Pool ID' is " + str(trip.pool.id) + ". Don't forget about your other trips! " + tripstring)
+
 	pester(recipient_id,carpooler)
 
 
@@ -79,7 +103,7 @@ def switchCurrentPool(recipient_id,more):
 	pass
 
 def process_referral(sender_id,referral_text,postback_text=None):
-	#TODO: config var for app name
+	#Triggered by visit to m.me/GroupThere?ref=myparam
 	messenger.say(sender_id,"Referring to "+ referral_text + " through: m.me/" + app.config['APP_NAME'] + "?ref=" + referral_text) #Do nothing with referral for now.
 	toDB(sender_id)
 

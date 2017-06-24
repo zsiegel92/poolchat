@@ -3,7 +3,6 @@ from messengerbot import templates
 from messengerbot import attachments
 from messengerbot import elements
 from messengerbot import quick_replies
-import sys #Just for printed error messages!
 
 #from sqlalchemy import (all the abstract type checking functions I need, like email checking, etc. Maybe even put a Google Maps-querying address-checker in the node object).
 

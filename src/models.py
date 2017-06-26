@@ -5,6 +5,7 @@ from fieldTrees import fields,poolfields,findPool,tripfields,modesFirst
 #from decision_trees import poolertree as fields
 import sys
 
+
 #TODO: Create third model for "Registration". Then, the "engagement" or "participation" table will be a merge of all three tables on userid and carpoolid
 #TODO: Some properties of this relation can't be stored in the user! Such as: time window, address, number of seats, need to arrive, must drive
 #FOR NOW: It's as though every carpooler can have multiple pools, but all those pools have the exact same characteristics for the carpooler xD
@@ -37,11 +38,10 @@ class Carpooler(db.Model):
 	mode = db.Column(db.Text)
 
 
-
-	for field in fields:
-		if fields[field].obField == 'Carpooler':
-			exec(field + "= db.Column(db." + fields[field].nType +"())") #example: fbId = db.Column(db.String())
-	del field
+	name = db.Column(db.String())
+	email = db.Column(db.String())
+	menu = db.Column(db.String())
+	mode = db.Column(db.String())
 
 
 	def __init__(self, fbId,**kwargs):
@@ -68,16 +68,9 @@ class Carpooler(db.Model):
 			self.set(fieldstate=arg,value=kwargs[arg])
 		if input:
 			if self.fieldstate =='mode':
-				if input in modesFirst:
-					self.mode = input
-					self.menu = 'fieldstate'
-					self.fieldstate=modesFirst[input]
-					return
-				else:
-					self.next(input=input)
-					return
-
-			# DO STUFF BASED ON Carpooler.mode!!
+				self.switch_modes(input)
+				return
+			#DO STUFF BASED ON Carpooler.mode!!
 			if self.mode =='fields':
 				self.set(value=input)#default field is self.fieldstate
 				self.next(input= input)
@@ -87,18 +80,45 @@ class Carpooler(db.Model):
 			elif self.mode == 'tripfields':
 				self.setForCurrentTrip(value=input)
 				self.next(input=input)
-			elif self.mode.split('/')[0] == 'EXTERNAL':
-				return
+			elif self.mode == 'findPool':
+				self.next(input=input)
 			else:
 				print("Error in update! self.mode = " + str(self.mode) + ", self.fieldstate = " + str(self.fieldstate) + ", self.menu = " + str(self.menu),file=sys.stderr)
 			return
+	def switch_modes(self,input):
+		print("in Carpooler.switch_modes. input = " + str(input),file=sys.stderr)
+		if input in modesFirst:
+			self.mode = input
+			self.menu = 'fieldstate'
+			self.fieldstate=modesFirst[input]
+		else:
+			print("ERROR in Carpooler.switch_modes",file=sys.stderr)
+			self.next(input)
+
+	def describe_trips(self):
+		print("in Carpooler.describe_trips",file=sys.stderr)
+		# cartrips = []
+		# for cartrip in self.pools:
+		# 	cartrips.append(cartrip.pool.id)
+		cartrips=[cartrip.pool.id for cartrip in self.pools]
+
+		if len(cartrips) > 1:
+			tripstring = "Your carpools have IDs: "
+			for ii in range(0,len(cartrips)-1):
+				tripstring = tripstring + str(cartrips[ii]) + ", "
+			tripstring = tripstring + " and " + str(cartrips[-1]) + "."
+		elif len(cartrips)==1:
+			tripstring = "Your only carpool has ID: " + str(cartrips[0]) + "."
+		else:
+			tripstring = "You have no carpools."
+		return tripstring
 
 	def getCurrentPool(self):
 		print("in getCurrentPool. self.current_pool_id = " +str(self.current_pool_id),file=sys.stderr)
 		#checks if self.pools is empty
 		if not self.pools:
-			pool = Pool(carpooler=self)
 			trip = Trip()
+			pool = Pool()
 			trip.pool=pool
 			self.pools.append(trip)
 			self.current_pool_id=pool.id
@@ -166,8 +186,11 @@ class Carpooler(db.Model):
 		namespace = __import__(__name__) #get current namespace
 		tree = getattr(namespace,self.mode,None)
 		try:
+			print("tree= " + str(self.mode) + ", field = " + str(field),file=sys.stderr)
+			print("tree[field].next = " + str(tree[field].next),file=sys.stderr)
 			return tree[field]
 		except Exception as inst:
+			print("Error in Carpooler.quickField",file=sys.stderr)
 			print(inst,file=sys.stderr)
 
 
@@ -195,15 +218,18 @@ class Carpooler(db.Model):
 	def process(self,response): #format time for storage, etc.
 		print('in process',file=sys.stderr)
 		# CHANGE THIS SHIT
-		if (self.quickHead().findPool):
-			pool = Pool.query.filter_by(response).first()
-			return pool.poolName
 		return self.quickHead().process(response)
 
+	def prefix(self,response): #format time for storage, etc.
+		print('in Carpooler.prefix',file=sys.stderr)
+		# CHANGE THIS SHIT
+		node = self.quickHead()
+		return node.prefixer(response)
 
-	def isValid(self,response):
-		print('in isValid',file=sys.stderr)
-		return self.quickHead().isValid(response)
+
+	def isValid(self,response,obField=None):
+		print('in Carpooler.isValid',file=sys.stderr)
+		return self.quickHead().isValid(response,obField)
 
 
 	# TODO: copy and mark up fields of node with data before calling afterSet!
@@ -224,7 +250,7 @@ class Carpooler(db.Model):
 
 	# @RETURN: a nodeOb for the current field
 	def quickHead(self):
-		print('in quickHead',file=sys.stderr)
+		print('in Carpooler.quickHead',file=sys.stderr)
 		return self.quickField(self.fieldstate)
 	# @RETURN: a nodeOb for the current field, formatted with user data.
 	def head(self):
@@ -245,6 +271,7 @@ class Carpooler(db.Model):
 	def format(self, node):
 		print("in Carpooler.format",file=sys.stderr)
 		if not node:
+			print("ERROR",file = sys.stderr)
 			return node
 
 		if node.verboseNode:
@@ -255,8 +282,11 @@ class Carpooler(db.Model):
 			elif (node.obField == 'Pool'):
 				# return self.getCurrentPool().to_dict()
 				todict=self.getCurrentPool().to_dict()
+			elif (node.obField == 'findPool'):
+				# return self.getCurrentPool().to_dict()
+				todict=self.to_dict()
 			else:
-				return node
+				todict=self.getCurrentTrip().to_dict()
 			node = node.copy()
 			if node.nTitle:
 				node.nTitle = node.nTitle.format(**todict)
@@ -264,7 +294,6 @@ class Carpooler(db.Model):
 				node.nQuestion = node.nQuestion.format(**todict)
 			if node.customAfterText:
 				node.customAfterText = node.customAfterText.format(**todict)
-		print("Exiting format.",file=sys.stderr)
 		return node
 
 	def externalUpdate(self,nextFieldState=None,**kwargs):
@@ -303,6 +332,7 @@ class Carpooler(db.Model):
 		todict['_all']='\n'.join(['%s: %s' % (key, value) for (key, value) in todict.items()])
 		todict.update(json.loads(self.selfRep))
 		todict['_property']= self.fieldstate
+		todict['tripstring']=self.describe_trips()
 		return todict
 
 
@@ -487,6 +517,7 @@ class Trip(db.Model):
 		todict = json.loads(self.selfFormalRep)
 		todict['_all']='\n'.join(['%s: %s' % (key, value) for (key, value) in todict.items()])
 		todict.update(json.loads(self.selfRep))
+		todict['tripstring']=self.member.describe_trips()
 		return todict
 
 

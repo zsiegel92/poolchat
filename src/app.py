@@ -28,8 +28,10 @@ with app.test_request_context('/'):
 
 #NOTE: Have to import webhookviews at the END because of circular import.
 #webhookviews imports from interactions which imports from app.
-from webhookviews import root, drop_table, get_webhook,post_webhook
-from pageviews import
+# from webhookviews import get_webhook,post_webhook
+# from pageviews import root, drop_table, drop_and_ping,testing,ping_getStarted,ping_text,drop_ping_text,drop_populate
+import webhookviews
+import pageviews
 
 #Webhook views can be placed here
 

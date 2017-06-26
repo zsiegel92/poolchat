@@ -1,31 +1,41 @@
 from app import messenger, db,app
 import requests
 from models import  Carpooler,Pool, Trip
-
 #FOR TESTING ONLY,IMPORT SYS
 import sys
 
 #TODO: Don't create dicts at function call! Initialize them earlier.
-def postback_rules(recipient_id,postback_text,referral_text=None):
-	print("in interactions.postback_rules - postback_text = " + str(postback_text),file =sys.stderr)
+def postback_rules(recipient_id,postback_text,referral_text=None,carpooler=None,allowNoPrefix=True):
+	print("in interactions.postback_rules. postback_text = " + str(postback_text),file =sys.stderr)
+
+	for i in range(0,8):
+		print("HARK: in interactions.postback_rules",file =sys.stderr)
+
 	key_and_args = postback_text.split('/')
 	key = key_and_args[0]
 	keyPayload = key_and_args[-1]
-
 	rules = {
-		"RESPONSE":(lambda OF,RESP: toDB(recipient_id,RESP)),
+		"RESPONSE":(lambda obField,*RESP: fillField(recipient_id, "/".join(RESP),obField,carpooler)),
+		"PREFIXED":(lambda *args: postback_rules(recipient_id,"/".join(args),carpooler=carpooler,allowNoPrefix=False)),
 		"GET_STARTED_PAYLOAD":(lambda: getStarted(recipient_id,referral_text)),
-		"CREATE_NEW_POOL":(lambda: newPool(recipient_id)),
-		"FIND_POOL":(lambda: 5),
-		"JOIN_POOL":(lambda poolid: joinPool(recipient_id,poolid)),
+		"CREATE_NEW_POOL":(lambda: newPool(recipient_id,carpooler)),
+		"FIND_ADDRESS":(lambda inputted_address: findAddress(recipient_id,inputted_address,carpooler)),
+		"FIND_POOL":(lambda inputted_pool_id: findPool(recipient_id,inputted_pool_id,carpooler)),
+		"SWITCH_MODE":(lambda mode: switchMode(recipient_id,mode,carpooler)),
+		"GOTO_NODE":(lambda nodeName: go_to_node(recipient_id,nodeName,carpooler)),
 		"Hello":(lambda: messenger.say(recipient_id,'World_PB2')),
 		"thing1":(lambda: messenger.say(recipient_id,'thing2_PB2'))
 	}
 
 	if key in rules:
+		print("key_and_args[1:] = " + str(key_and_args[1:]),file=sys.stderr)
 		rules[key](*key_and_args[1:])
+		pester(recipient_id,carpooler)
 	else:
-		toDB(recipient_id,response=keyPayload)
+		if allowNoPrefix:
+			noPrefixResponse(recipient_id,response=keyPayload)
+		else:
+			print("ERROR IN interactions.postback_rules",file=sys.stderr)
 
 def quick_rules(recipient_id,qr_text):
 	postback_rules(recipient_id,qr_text)
@@ -40,15 +50,33 @@ def text_rules(recipient_id, message_text=""):
 	}
 	specialRules = {"CREATE_POOL":"It looks like you want to create a carpool!"}
 	if message_text in specialRules:
-		messenger.say(recipient_id,"You just did something amazing!")
+		messenger.say(recipient_id,"You just did something amazing (but I'm not doing anything about it yet)!")
 		messenger.say(recipient_id,specialRules[message_text])
 	elif message_text in rules:
 		messenger.say(recipient_id, rules[message_text])
 	else:
-		toDB(recipient_id,response=message_text)
-def newPool(recipient_id):
+		noPrefixResponse(recipient_id,response=message_text)
+
+def go_to_node(recipient_id,nodeName,carpooler=None):
+	print("in interactions.doMenu", file=sys.stderr)
+	if not carpooler:
+		carpooler = Carpooler.query.filter_by(fbId=recipient_id).first()
+	carpooler.fieldstate = nodeName
+	db.session.commit()
+
+# @Pre: carpooler with fbId = recipient_id exists!
+def switchMode(recipient_id,mode,carpooler=None):
+	print("in interactions.switchMode", file=sys.stderr)
+	if not carpooler:
+		carpooler = Carpooler.query.filter_by(fbId=recipient_id).first()
+	carpooler.switch_modes(mode)
+	db.session.commit()
+
+# @Pre: carpooler with fbId = recipient_id exists!
+def newPool(recipient_id,carpooler=None):
 	print("in interactions.newPool",file=sys.stderr)
-	carpooler=Carpooler.query.filter_by(fbId=recipient_id).first()
+	if not carpooler:
+		carpooler=Carpooler.query.filter_by(fbId=recipient_id).first()
 
 	trip=Trip()
 	trip.pool=Pool()
@@ -61,53 +89,82 @@ def newPool(recipient_id):
 	#Have to commit before this is populated! This is why this function should be external to models.py, maybe.
 	carpooler.current_pool_id = trip.pool.id
 
-
-	carpooler.fieldstate ='mode'
-	carpooler.update(input='poolfields')
-
+	carpooler.switch_modes('poolfields')
 
 	db.session.commit()
 
-	cartrips = []
-	for cartrip in carpooler.pools:
-		cartrips.append(cartrip.pool.id)
-	if len(cartrips) > 1:
-		tripstring = "Your carpools have IDs: "
-		for ii in range(0,len(cartrips)-1):
-			tripstring = tripstring + str(cartrips[ii]) + ", "
-		tripstring = tripstring + " and " + str(cartrips[-1]) + "."
-	else:
-		tripstring = "Your only carpool has ID: " + str(cartrips[0]) + "."
+	tripstring = carpooler.describe_trips()
 
 	messenger.say(recipient_id,"You just created a carpool! Your NEW carpool's 'Pool ID' is " + str(trip.pool.id) + ". Don't forget about your other trips! " + tripstring)
 
-	pester(recipient_id,carpooler)
+def findAddress(sender_id,inputted_address,carpooler=None):
+	print("in interactions.findAddress",file=sys.stderr)
+	messenger.say(sender_id,"Here is a picture of that address! If this isn't right, you can change it later.")
+
+	GMAPS_GEOCODE_API_TOKEN = app.config['GMAPS_GEOCODE_API_TOKEN']
+
+	geocode_url = "https://maps.googleapis.com/maps/api/geocode/json"
+	querystring = {"address":inputted_address,"key":GMAPS_GEOCODE_API_TOKEN}
+	response = requests.request("GET", geocode_url, params=querystring)
+	response=response.json()
+
+	formatted_address =response['results'][0]['formatted_address']
+	lat = response['results'][0]['geometry']['location']['lat']
+	lon = response['results'][0]['geometry']['location']['lng']
 
 
-def joinPool(recipient_id,poolId):
-	carpooler = Carpooler.query.filter_by(fbId=recipient_id).first()
-	pool = Pool.query.filter_by(id=poolId).first()
-	trip = Trip()
-	trip.member=pool
-	carpooler.pools.insert(0,trip)
+	GMAPS_STATIC_API_TOKEN = app.config['GMAPS_STATIC_API_TOKEN']
+	static_maps_base_url = "https://maps.googleapis.com/maps/api/staticmap"
+	querystring = {"center":str(lat)+","+str(lon),"zoom":"14","size":"400x400","key":GMAPS_STATIC_API_TOKEN}
+	response = requests.request("GET", static_maps_base_url, params=querystring,stream=True)
+	full_url= response.url
+	del response
+	# img = response.content
+	messenger.send_image(sender_id,full_url)
 
-	messenger.say(recipient_id,"You just created a carpool! Your pool ID is " + str(poolId))
-	pester(recipient_id,carpooler)
+	fillField(sender_id,formatted_address,carpooler=carpooler)
+	db.session.commit()
+
+# @Pre: carpooler with fbId = recipient_id exists!
+def findPool(recipient_id,pool_id,carpooler=None):
+	print("in interactions.findPool", file=sys.stderr)
+	if not carpooler:
+		carpooler = Carpooler.query.filter_by(fbId=recipient_id).first()
+
+	pool = Pool.query.filter_by(id=pool_id).first()
+	if pool:
+		trip = Trip.query.filter_by(carpooler_id=carpooler.id,pool_id=pool.id).first()
+		if not trip:
+			trip = Trip()
+			trip.pool=pool
+			carpooler.pools.append(trip)
+			messenger.say(recipient_id,"You just joined the carpool with ID " + str(pool.id)+ "!")
+		else:
+			messenger.say(recipient_id,"You are already part of this carpool! We will go back and edit your information.")
+
+		carpooler.current_pool_id= pool.id
+		carpooler.switch_modes('poolfields')
+	else:
+		messenger.say(recipient_id,"There is no such carpool :(")
+
+	db.session.commit()
 
 
-def findPool(recipient_id):
-	messenger.say(recipient_id,"Are any of these the pool you'd like to join? (Build out interactions.findPool function)")
-	pester(recipient_id)
+
+
+
 
 def switchCurrentPool(recipient_id,more):
+	print("in interactions.switchCurrentPool", file=sys.stderr)
 	pass
 
 def process_referral(sender_id,referral_text,postback_text=None):
 	#Triggered by visit to m.me/GroupThere?ref=myparam
 	messenger.say(sender_id,"Referring to "+ referral_text + " through: m.me/" + app.config['APP_NAME'] + "?ref=" + referral_text) #Do nothing with referral for now.
-	toDB(sender_id)
+	pester(sender_id)
 
 def getStarted(sender_id,referral_text=None,message_text=None):
+	print("in interactions.getStarted", file=sys.stderr)
 	carpooler = Carpooler.query.filter_by(fbId=sender_id).first() #Should have been added already
 
 	if referral_text:
@@ -138,12 +195,17 @@ def getStarted(sender_id,referral_text=None,message_text=None):
 #    messenger.nodeSay(sender_id,node)
 
 def pester(sender_id,carpooler=None):
-	if carpooler:
-		messenger.poolerSay(sender_id,carpooler)
+	print("in interactions.pester", file=sys.stderr)
+	if not carpooler:
+		carpooler = Carpooler.query.filter_by(fbId=sender_id).first()
+	if not carpooler:
+		getStarted(sender_id)
 	else:
-		toDB(sender_id)
+		messenger.poolerSay(sender_id,carpooler)
+
 
 def getInfo(sender_id):
+	print("in interactions.getInfo", file=sys.stderr)
 	access_token = app.config["MESSENGER_PLATFORM_ACCESS_TOKEN"]
 	url = "https://graph.facebook.com/v2.6/" + sender_id
 	#unused possible args:profile_pic
@@ -160,27 +222,41 @@ def getInfo(sender_id):
 	return response.json()
 
 
+def fillField(sender_id,response,obField=None,carpooler=None):
+	print("in interactions.fillField", file=sys.stderr)
+	if not carpooler:
+		carpooler = Carpooler.query.filter_by(fbId=sender_id).first()
+	if carpooler:
+		if carpooler.isValid(response,obField):
+			response = carpooler.process(response) #format time for storage, etc.
+			messenger.say(sender_id,"Processed response is: " + str(response))
+			messenger.say(sender_id, carpooler.afterUpdate(response))
+			carpooler.update(input = response)
+			db.session.commit()
+		else:
+			print("carpooler.isValid('"+response+"') = " + str(carpooler.isValid(response)),file=sys.stderr)
+			messenger.say(sender_id,"I need a valid response!")
+	else:
+		getStarted(sender_id,message_text=response)
+
+
+#        messenger.say(sender_id,'exiting db function')
 #Add params argument! Dict? List?
 #def toDB(sender_id,carpoolGroupId=None,address=None,email=None,name=None,preWindow=None,need_to_arrive_on_time=None,num_seats = None,engaged = None,state=None):
-def toDB(sender_id,response=None,**kwargs):
+def noPrefixResponse(sender_id,response,**kwargs):
+	print("in interactions.noPrefixResponse, response = " + str(response),file=sys.stderr)
 	try:
 		carpooler = Carpooler.query.filter_by(fbId=sender_id).first()
-		if carpooler == None:
-			getStarted(sender_id,message_text=response)
+
+		if carpooler:
+			print("got this far1",file=sys.stderr)
+			response = carpooler.prefix(response) #format time for storage, etc.
+			print("got this far2",file=sys.stderr)
+			messenger.say(sender_id,"Prefixed response is: " + str(response))
+			postback_rules(sender_id,'PREFIXED/' + response,carpooler=carpooler)
 		else:
-			if response:
-				if carpooler.isValid(response):
-					response = carpooler.process(response) #format time for storage, etc.
-					messenger.say(sender_id, carpooler.afterUpdate(response))
-					carpooler.update(input = response)
-					db.session.commit()
-				else:
-					messenger.say(sender_id,"I need a valid response!")
-			pester(sender_id,carpooler)
+			getStarted(sender_id,message_text=response)
 	except Exception as exc:
 		messenger.say(sender_id,"Error accessing my database")
-		print("Unable to add item to database.")
-		print(str(exc))
-	else:
-		pass
-#        messenger.say(sender_id,'exiting db function')
+		print("Error in noPrefixResponse",file=sys.stderr)
+		print(str(exc),file=sys.stderr)

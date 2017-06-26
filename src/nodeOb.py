@@ -4,6 +4,8 @@ from messengerbot import attachments
 from messengerbot import elements
 from messengerbot import quick_replies
 
+import sys
+
 #from sqlalchemy import (all the abstract type checking functions I need, like email checking, etc. Maybe even put a Google Maps-querying address-checker in the node object).
 
 #TODO: store next state in a node.
@@ -14,78 +16,95 @@ from messengerbot import quick_replies
 
 typeCheckers ={"String": (lambda stringArg: isinstance(stringArg,str)),"Integer": (lambda stringArg: stringArg.isdigit())}
 
-node_args = ['nType','nTitle','nQuestion','next','nextChoices','quickChoices','choices','customAfterText','nodeName','verboseNode','validator','processor','obField','findPool','disable_prefix']
+node_args = ['nType','nTitle','nQuestion','next','nextChoices','quickChoices','choices','customAfterText','nodeName','verboseNode','validator','postProcessor','obField','pre_toggle','fieldname','prefix']
 
 class nodeOb:
 
-	def __init__(self,nType=None,nTitle = None,nQuestion=None,nodeName=None,next=None,nextChoices=None,quickChoices=None,choices=None,customAfterText=None,verboseNode=False,validator = None,processor=None,obField=None,findPool=False,disable_prefix=False):
+	def __init__(self,nType=None,nTitle = None,nQuestion=None,next=None,nextChoices=None,quickChoices=None,choices=None,customAfterText=None,nodeName=None,verboseNode=False,validator = None,postProcessor=None,obField=None,pre_toggle=None,fieldname=None,prefix = None):
 		self.nType = nType
 		self.nTitle = nTitle
+		self.fieldname = None
 		self.nodeName = nodeName
 		self.nQuestion = nQuestion
 		self.customAfterText=customAfterText
 		self.verboseNode=verboseNode
 		self.validator = validator
-		self.processor = processor #Custom formatting for database storage
-		self.obField = obField #eg 'Carpooler'
-		self.findPool = findPool
+		self.postProcessor = postProcessor #Custom formatting for database storage
+		self.obField = obField #eg 'Carpooler','Trip'
+		self.pre_toggle = pre_toggle
 
-		self.next = next
+		if (quickChoices and (not next) and (not nextChoices)):
+			self.next='quick_menu'
+		else:
+			self.next=next
 		self.nextChoices = nextChoices
-
 		self.choices = choices
 		self.quickChoices = quickChoices
 
-		self.disable_prefix=disable_prefix
-		if not (self.disable_prefix):
-			prefix = "RESPONSE/"+ str(obField) +"/"
+		self.default_prefix = "RESPONSE/"+ str(obField) +"/"
+
+		if prefix:
+			self.prefix = prefix
 		else:
-			prefix = ""
+			self.prefix = self.default_prefix
 
 
+		self.quick_choice_buttons = []
+		if next == 'quick_menu':
+			self.nextChoices = {}
 
+		#Populate Quick Choice Buttons and Next Choices list with prefixed quick-replies (unless disable_prefix, in which case prefix = "")
 		if quickChoices:
-			self.quick_choice_buttons = []
-			for choice, pay in quickChoices.items():
-				self.quick_choice_buttons.append(quick_replies.QuickReplyItem(content_type='text',title=choice,payload=prefix+ pay))
+			if next == 'quick_menu':
+				for choice, pay in quickChoices.items():
+					self.quick_choice_buttons.append(quick_replies.QuickReplyItem(content_type='text',title=choice,payload=pay))
+
+					self.nextChoices[str(pay)]=str(pay)
+			else:
+				for choice, pay in quickChoices.items():
+					self.quick_choice_buttons.append(quick_replies.QuickReplyItem(content_type='text',title=choice,payload= pay))
+
+		if nextChoices:
+			if not 'default' in nextChoices:
+				if self.next != 'quick_menu':
+					self.nextChoices['default']=next
+
 		if choices:
 			self.choice_buttons = []
 			for choice,pay in choices.items():
 				self.choice_buttons.append(elements.PostbackButton(title=choice,payload=pay))
 
-		if next == 'quick_menu':
-			self.nextChoices = {}
-			for key,value in quickChoices.items():
-				self.nextChoices[str(value)]=str(value)
 
-		elif next =='mode_menu':
-			self.nextChoices = {}
-			for key, value in quickChoices.items():
-				self.nextChoices[str(value)]=str(value)
-
-		if nextChoices:
-			if not 'default' in nextChoices:
-				self.nextChoices['default']=next
 
 	#TODO: validation functions that are more than type-checkers, as optional arguments
-	def isValid(self,userInput):
-		if self.next =='quick_menu':
-			if userInput not in self.nextChoices:
-				return False
-			else:
-				return True
-		if not typeCheckers[self.nType](userInput):
-			return False
-		#Optional validator argument
+	def isValid(self,userInput,obField =None):
+		print("in nodeOb.isValid",file = sys.stderr)
+
+		# if obField:
+		# 	if obField != self.obField:
+		# 		return False
+
 		if self.validator:
 			return self.validator(userInput)
+
+		if self.next =='quick_menu':
+			return userInput in self.nextChoices
+
+		if not typeCheckers[self.nType](userInput):
+			return False
+
 		return True
 
 	def process(self,userInput):
-		if self.processor:
-			return self.processor(userInput)
+		if self.postProcessor:
+			return self.postProcessor(userInput)
 		else:
 			return userInput
+
+	def prefixer(self,userInput):
+		print("in nodeOb.prefix",file = sys.stderr)
+		return self.prefix + userInput
+
 
 	def prompt(self):
 		return "Now I need to know more about {1}. Please respond with a(n) {0}.".format(self.nType,self.nTitle)
@@ -104,14 +123,20 @@ class nodeOb:
 
 	def ask(self):
 		return "{}".format(self.nQuestion)
+
 	def nextNode(self,input=None):
-		if self.nextChoices:
-			if input:
-				if input in self.nextChoices:
-					return self.nextChoices[input]
+		print("in nodeOb.nextNode",file = sys.stderr)
+		try:
+			if (self.nextChoices and input):
+				return self.nextChoices[input]
+			else:
+				assert (self.next != 'quick_menu')
+				return self.next
+		except Exception as exc:
+			print("ERROR in nodeOb.nextNode.")
+			print(str(exc))
 			return self.nextChoices['default']
-		else:
-			return self.next
+
 	#TODO: send multiple text messages in one request (prompt AND question).
 	#Choices is of the form {text1:postbacktext1,text2:postbacktext2}
 #    Choices is of the form {text1:postbacktext1,text2:postbacktext2}
@@ -134,8 +159,6 @@ class nodeOb:
 
 		print("copying node")
 		newNode = nodeOb(**copied_args)
-
-		print("finished copying node")
 		return newNode
 
 	def represent(self):

@@ -53,6 +53,16 @@ class MessengerClient(object):
 			return myResponse
 		except MessengerException:
 			raise
+	def send_image(self,recipient_id,image_url):
+		recipient = messages.Recipient(recipient_id=recipient_id)
+		myAttachment = attachments.ImageAttachment(url=image_url)
+		myMessage = messages.Message(attachment=myAttachment)
+		myRequest = messages.MessageRequest(recipient, myMessage)
+		try:
+			myResponse = self.send(myRequest)
+			return myResponse
+		except MessengerException:
+			raise
 	def poolerSay(self,recipient_id,carpooler):
 		recipient = messages.Recipient(recipient_id=recipient_id)
 		myRequest = messages.MessageRequest(recipient=recipient, message=carpooler.payload())

@@ -88,7 +88,7 @@ git push pro master
 
 ** Migrate database upgrade on Heroku. Note that this uses the migrations files created upon local migration (above). To migrate during development, migrate locally (as above), then re-upgrade (as below) on Heroku: **
 
-heroku run python src/manage.py db upgrade --directory 'src/migrations' --app poolchatWT
+heroku run python src/manage.py db upgrade --directory 'src/migrations' --app poolchat
 
 
 ** Install Redis Server on your computer! **

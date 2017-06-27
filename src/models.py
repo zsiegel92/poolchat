@@ -1,4 +1,5 @@
 from app import db,json
+from collections import OrderedDict
 #from sqlalchemy.dialects.postgresql import ARRAY
 # from sqlalchemy.dialects.postgresql import JSON #Import if we use JSON in field
 from fieldTrees import fields,poolfields,findPool,tripfields,modesFirst
@@ -321,20 +322,20 @@ class Carpooler(db.Model):
 		if input:
 			if fieldstate in fields:
 				if getattr(self.quickField(fieldstate),'nodeName',None):
-					tmp = json.loads(self.selfRep)
+					tmp = json.loads(self.selfRep, object_pairs_hook=OrderedDict)
 					tmp[fieldstate]=str(input)
 					self.selfRep = json.dumps(tmp)
 
-					tmp = json.loads(self.selfFormalRep)
+					tmp = json.loads(self.selfFormalRep, object_pairs_hook=OrderedDict)
 					tmp[self.quickField(fieldstate).nodeName]=str(input)
 					self.selfFormalRep = json.dumps(tmp)
 
 
 	def to_dict(self):
 		print('in Carpooler.to_dict',file=sys.stderr)
-		todict = json.loads(self.selfFormalRep)
+		todict = json.loads(self.selfFormalRep, object_pairs_hook=OrderedDict)
 		todict['_all']='\n'.join(['%s: %s' % (key, value) for (key, value) in todict.items()])
-		todict.update(json.loads(self.selfRep))
+		todict.update(json.loads(self.selfRep, object_pairs_hook=OrderedDict))
 		todict['_property']= self.fieldstate
 		todict['tripstring']=self.describe_trips()
 		return todict
@@ -385,12 +386,12 @@ class Pool(db.Model):
 
 		if fieldstate in tree: #Should be
 			if getattr(tree[fieldstate],'nodeName',None):
-				tmp = json.loads(self.selfRep)
+				tmp = json.loads(self.selfRep, object_pairs_hook=OrderedDict)
 				tmp[fieldstate]=str(input)
 				tmp['pool_id']=self.id
 				self.selfRep = json.dumps(tmp)
 
-				tmp = json.loads(self.selfFormalRep)
+				tmp = json.loads(self.selfFormalRep, object_pairs_hook=OrderedDict)
 				tmp['Pool ID']=self.id
 				tmp[tree[fieldstate].nodeName]=str(input)
 				self.selfFormalRep = json.dumps(tmp)
@@ -398,10 +399,10 @@ class Pool(db.Model):
 
 	def to_dict(self):
 		print('in Trip.to_dict',file=sys.stderr)
-		todict = json.loads(self.selfFormalRep)
+		todict = json.loads(self.selfFormalRep, object_pairs_hook=OrderedDict)
 
 		todict['_all']='\n'.join(['%s: %s' % (key, value) for (key, value) in todict.items()])
-		todict.update(json.loads(self.selfRep))
+		todict.update(json.loads(self.selfRep, object_pairs_hook=OrderedDict))
 		return todict
 
 	def update(self,**kwargs):
@@ -449,14 +450,14 @@ class Trip(db.Model):
 		if (self.member):
 			member_prefix = "member_"
 			formal_member_prefix = "Traveler's "
-			carpoolerFields = json.loads(self.member.selfRep)
-			tripFields = json.loads(self.selfRep)
+			carpoolerFields = json.loads(self.member.selfRep, object_pairs_hook=OrderedDict)
+			tripFields = json.loads(self.selfRep, object_pairs_hook=OrderedDict)
 			for key, value in carpoolerFields.items():
 				tripFields[member_prefix+key]=value
 			self.selfRep = json.dumps(tripFields)
 
-			carpoolerFormalFields = json.loads(self.member.selfFormalRep)
-			tripFormalFields = json.loads(self.selfFormalRep)
+			carpoolerFormalFields = json.loads(self.member.selfFormalRep, object_pairs_hook=OrderedDict)
+			tripFormalFields = json.loads(self.selfFormalRep, object_pairs_hook=OrderedDict)
 			for key, value in carpoolerFormalFields.items():
 				tripFormalFields[formal_member_prefix+key]=value
 			self.selfFormalRep = json.dumps(tripFormalFields)
@@ -469,14 +470,14 @@ class Trip(db.Model):
 		if (self.pool):
 			pool_prefix = "pool_"
 			formal_pool_prefix = "Carpool's "
-			poolFields = json.loads(self.pool.selfRep)
-			tripFields = json.loads(self.selfRep)
+			poolFields = json.loads(self.pool.selfRep, object_pairs_hook=OrderedDict)
+			tripFields = json.loads(self.selfRep, object_pairs_hook=OrderedDict)
 			for key, value in poolFields.items():
 				tripFields[pool_prefix+key]=value
 			self.selfRep = json.dumps(tripFields)
 
-			poolFormalFields = json.loads(self.pool.selfFormalRep)
-			tripFormalFields = json.loads(self.selfFormalRep)
+			poolFormalFields = json.loads(self.pool.selfFormalRep, object_pairs_hook=OrderedDict)
+			tripFormalFields = json.loads(self.selfFormalRep, object_pairs_hook=OrderedDict)
 			for key, value in poolFormalFields.items():
 				tripFormalFields[formal_pool_prefix+key]=value
 			self.selfFormalRep = json.dumps(tripFormalFields)
@@ -498,11 +499,11 @@ class Trip(db.Model):
 
 		if fieldstate in tree: #Should be
 			if getattr(tree[fieldstate],'nodeName',None):
-				tmp = json.loads(self.selfRep)
+				tmp = json.loads(self.selfRep, object_pairs_hook=OrderedDict)
 				tmp[fieldstate]=str(input)
 				self.selfRep = json.dumps(tmp)
 
-				tmp = json.loads(self.selfFormalRep)
+				tmp = json.loads(self.selfFormalRep, object_pairs_hook=OrderedDict)
 				if (getattr(self,'member.name',None) and getattr(self,'pool.poolName',None)):
 					tmp['Member']=self.member.name
 					tmp['Pool']=self.pool.poolName
@@ -518,9 +519,9 @@ class Trip(db.Model):
 		if (self.carpoolerRepLoaded ==0):
 			self.loadCarpoolerRep()
 
-		todict = json.loads(self.selfFormalRep)
+		todict = json.loads(self.selfFormalRep, object_pairs_hook=OrderedDict)
 		todict['_all']='\n'.join(['%s: %s' % (key, value) for (key, value) in todict.items()])
-		todict.update(json.loads(self.selfRep))
+		todict.update(json.loads(self.selfRep, object_pairs_hook=OrderedDict))
 		todict['tripstring']=self.member.describe_trips()
 		return todict
 

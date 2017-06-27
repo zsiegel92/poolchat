@@ -48,8 +48,9 @@ def testing():
 		getStarted(fbId)
 		text_rules(fbId,'zsiegel92@gm')#email
 		quick_rules(fbId,'mode') #CHANGE TO MODE FOR POOL
-		# quick_rules(fbId,'SWITCH_MODE/findPool')# calls NEW POOL (triggers postback response)
-
+		quick_rules(fbId,'CREATE_NEW_POOL')# calls NEW POOL (triggers postback response)
+		text_rules(fbId,"IfNotNow HM at David's")#email
+		text_rules(fbId,'153 N New Hampshire Ave, LA, CA')#email
 	except Exception as exc:
 		return "Exception on table drop:\n" + str(exc)
 	else:

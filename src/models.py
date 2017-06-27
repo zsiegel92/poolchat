@@ -84,7 +84,10 @@ class Carpooler(db.Model):
 				self.next(input=input)
 			else:
 				print("Error in update! self.mode = " + str(self.mode) + ", self.fieldstate = " + str(self.fieldstate) + ", self.menu = " + str(self.menu),file=sys.stderr)
-			return
+		else:
+			#no input
+			self.next()
+
 	def switch_modes(self,input):
 		print("in Carpooler.switch_modes. input = " + str(input),file=sys.stderr)
 		if input in modesFirst:
@@ -236,6 +239,11 @@ class Carpooler(db.Model):
 	def afterUpdate(self,response):
 		print('in afterUpdate',file=sys.stderr)
 		return self.head().afterSet(response) #Has formatted fields
+	#called by messengerbot.poolerSay() (in __init__.py)
+	def payload(self):
+		print('in Carpooler.payload',file=sys.stderr)
+		return self.head().payload()
+
 
 #    @RETURN: a nodeOb formatted with user data.
 	def getField(self,field):
@@ -263,10 +271,6 @@ class Carpooler(db.Model):
 		return self.quickHead().nextNode(input)
 
 
-	#called by messengerbot.poolerSay() (in __init__.py)
-	def payload(self):
-		print('in Carpooler.payload',file=sys.stderr)
-		return self.head().payload()
 
 	def format(self, node):
 		print("in Carpooler.format",file=sys.stderr)
@@ -355,7 +359,7 @@ class Pool(db.Model):
 	eventTime = db.Column(db.String())#db.Column(db.Time) #Time of event encoded as int?
 	latenessWindow = db.Column(db.Integer)
 	eventAddress = db.Column(db.String())
-	eventContact = db.Column(db.String())#1 or 0
+	eventContact = db.Column(db.String())
 	eventEmail = db.Column(db.String())
 	eventHostOrg = db.Column(db.String()) #Is this user fully plugged in?
 	signature = db.Column(db.String()) #decision tree state, I guess

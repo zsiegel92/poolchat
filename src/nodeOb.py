@@ -25,6 +25,10 @@ class nodeOb:
 		self.nTitle = nTitle
 		self.fieldname = None
 		self.nodeName = nodeName
+		if not nQuestion:
+			if nTitle:
+				nQuestion = "What is " + str(nTitle) + "?"
+
 		self.nQuestion = nQuestion
 		self.customAfterText=customAfterText
 		self.verboseNode=verboseNode
@@ -78,8 +82,7 @@ class nodeOb:
 
 	#TODO: validation functions that are more than type-checkers, as optional arguments
 	def isValid(self,userInput,obField =None):
-		print("in nodeOb.isValid",file = sys.stderr)
-
+		print("in nodeOb.isValid. self.nTitle = " + str(self.nTitle)+", self.fieldname = " + str(self.fieldname),file = sys.stderr)
 		# if obField:
 		# 	if obField != self.obField:
 		# 		return False
@@ -107,7 +110,7 @@ class nodeOb:
 
 
 	def prompt(self):
-		return "Now I need to know more about {1}. Please respond with a(n) {0}.".format(self.nType,self.nTitle)
+		return "Now I need to know more about {0}.".format(self.nTitle)
 
 	def afterSet(self,response):
 		if self.customAfterText:
@@ -120,9 +123,23 @@ class nodeOb:
 		else:
 			return "Ready to keep moving. (nodeOb.afterSet, no response)"
 
+#TODO: send multiple text messages in one request (prompt AND question).
+	#Choices is of the form {text1:postbacktext1,text2:postbacktext2}
+#    Choices is of the form {text1:postbacktext1,text2:postbacktext2}
+	def payload(self):
+		if self.choices is not None:
+			myTemplate = templates.ButtonTemplate(text=self.ask(), buttons=self.choice_buttons)
+			myAttachment = attachments.TemplateAttachment(template=myTemplate)
+			myMessage = messages.Message(attachment=myAttachment)
+		elif self.quickChoices is not None:
+			myReplies = quick_replies.QuickReplies(quick_replies = self.quick_choice_buttons)
+			myMessage = messages.Message(text=self.ask(),quick_replies=myReplies)
+		else:
+			myMessage = messages.Message(text=self.prompt() + "\n" + self.ask())
+		return myMessage
 
 	def ask(self):
-		return "{}".format(self.nQuestion)
+		return str(self.nQuestion)
 
 	def nextNode(self,input=None):
 		print("in nodeOb.nextNode",file = sys.stderr)
@@ -137,20 +154,6 @@ class nodeOb:
 			print(str(exc))
 			return self.nextChoices['default']
 
-	#TODO: send multiple text messages in one request (prompt AND question).
-	#Choices is of the form {text1:postbacktext1,text2:postbacktext2}
-#    Choices is of the form {text1:postbacktext1,text2:postbacktext2}
-	def payload(self):
-		if self.choices is not None:
-			myTemplate = templates.ButtonTemplate(text=self.ask(), buttons=self.choice_buttons)
-			myAttachment = attachments.TemplateAttachment(template=myTemplate)
-			myMessage = messages.Message(attachment=myAttachment)
-		elif self.quickChoices is not None:
-			myReplies = quick_replies.QuickReplies(quick_replies = self.quick_choice_buttons)
-			myMessage = messages.Message(text=self.ask(),quick_replies=myReplies)
-		else:
-			myMessage = messages.Message(text=self.prompt() + "\n" + self.ask())
-		return myMessage
 
 	def copy(self):
 		copied_args ={}

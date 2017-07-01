@@ -17,6 +17,13 @@ import sys
 
 print('Hello from MODELS.PY!', file=sys.stderr)
 
+def safeformat(str, **kwargs):
+		class SafeDict(dict):
+				def __missing__(self, key):
+						return '{' + key + '}'
+		replacements = SafeDict(**kwargs)
+		return str.format_map(replacements)
+
 class Carpooler(db.Model):
 	__tablename__ = 'carpooler'
 
@@ -88,6 +95,23 @@ class Carpooler(db.Model):
 		else:
 			#no input
 			self.next()
+
+	# @RETURN: next nodeOb
+	# @POST: field state is updated
+	# @POST: self.head() will return what this returns
+	def next(self,input=None):
+		print('in next',file=sys.stderr)
+		if self.menu == 'fieldstate':
+			self.fieldstate = self.nextField(input)
+		elif self.menu =='menu':
+			self.fieldstate = 'menu'
+			self.menu = 'fieldstate'
+		#went somewhere from the menu.
+		#self.menu = (some field)
+		else:
+			self.fieldstate = self.menu
+			self.menu = 'menu'
+
 
 	def switch_modes(self,input):
 		print("in Carpooler.switch_modes. input = " + str(input),file=sys.stderr)
@@ -164,31 +188,16 @@ class Carpooler(db.Model):
 			setattr(trip,fieldstate,value)
 			trip.updateSelfRepresentations(fieldstate,value)
 
-
-
-
-
-	# @RETURN: next nodeOb
-	# @POST: field state is updated
-	# @POST: self.head() will return what this returns
-	def next(self,input=None):
-		print('in next',file=sys.stderr)
-		if self.menu == 'fieldstate':
-			self.fieldstate = self.nextField(input)
-		elif self.menu =='menu':
-			self.fieldstate = 'menu'
-			self.menu = 'fieldstate'
-		#went somewhere from the menu.
-		#self.menu = (some field)
-		else:
-			self.fieldstate = self.menu
-			self.menu = 'menu'
+	def getTree(self,mode=None):
+		namespace = __import__(__name__)
+		if not mode:
+			mode = self.mode
+		return getattr(namespace,mode,None)#tripfields, poolfields, findPool, or fields
 
 	# @RETURN: a nodeOb, not necessarily the current node.
 	def quickField(self,field):
 		print('in quickField: mode = ' + self.mode + ', getting field: ' + field + ', self.fieldstate = ' + self.fieldstate + ', self.menu =' + self.menu,file=sys.stderr)
-		namespace = __import__(__name__) #get current namespace
-		tree = getattr(namespace,self.mode,None)
+		tree = self.getTree()
 		try:
 			print("tree= " + str(self.mode) + ", field = " + str(field),file=sys.stderr)
 			print("tree[field].next = " + str(tree[field].next),file=sys.stderr)
@@ -272,13 +281,11 @@ class Carpooler(db.Model):
 		return self.quickHead().nextNode(input)
 
 
-
 	def format(self, node):
 		print("in Carpooler.format",file=sys.stderr)
 		if not node:
 			print("ERROR",file = sys.stderr)
 			return node
-
 		if node.verboseNode:
 			if (node.obField=='Carpooler'):
 				todict = self.to_dict()
@@ -294,18 +301,30 @@ class Carpooler(db.Model):
 				todict=self.getCurrentTrip().to_dict()
 			node = node.copy()
 			if node.nTitle:
-				node.nTitle = node.nTitle.format(**todict)
+				node.nTitle = safeformat(node.nTitle,**todict)
 			if node.nQuestion:
-				node.nQuestion = node.nQuestion.format(**todict)
+				node.nQuestion = safeformat(node.nQuestion,**todict)
 			if node.customAfterText:
-				node.customAfterText = node.customAfterText.format(**todict)
+				node.customAfterText = safeformat(node.customAfterText,**todict)
 		return node
 
-	def externalUpdate(self,nextFieldState=None,**kwargs):
+	def externalUpdate(self,nextFieldState=None,setForMode=None,**kwargs):
 		print('in Carpooler.externalUpdate',file=sys.stderr)
-		#check hasattr?
-		for arg in kwargs:
-			self.set(fieldstate=arg,value=kwargs[arg])
+		if not setForMode:
+			setForMode = self.mode
+
+		if setForMode =='fields':
+			for arg in kwargs:
+				self.set(fieldstate=arg,value=kwargs[arg])
+		elif setForMode == 'poolfields':
+			for arg in kwargs:
+				self.setForCurrentPool(fieldstate=arg,value=kwargs[arg])
+		elif setForMode == 'tripfields':
+			for arg in kwargs:
+				self.setForCurrentTrip(fieldstate=arg,value=kwargs[arg])
+		else:
+			print("Error in externalUpdate! self.mode = " + str(self.mode) + ", self.fieldstate = " + str(self.fieldstate) + ", self.menu = " + str(self.menu) + ", setForMode = " + str(setForMode),file=sys.stderr)
+
 		# Set this last
 		if nextFieldState:
 			self.set(fieldstate='fieldstate',value=nextFieldState)
@@ -356,18 +375,19 @@ class Pool(db.Model):
 	members = db.relationship("Trip",back_populates="pool") #JSON dump
 
 	poolName = db.Column(db.String())
-	eventDate = db.Column(db.Date())
+	eventDate = db.Column(db.String())
 	eventTime = db.Column(db.String())#db.Column(db.Time) #Time of event encoded as int?
-	latenessWindow = db.Column(db.Integer)
+	eventDateTime = db.Column(db.DateTime())
+	latenessWindow = db.Column(db.Integer())
 	eventAddress = db.Column(db.String())
 	eventContact = db.Column(db.String())
 	eventEmail = db.Column(db.String())
 	eventHostOrg = db.Column(db.String()) #Is this user fully plugged in?
 	signature = db.Column(db.String()) #decision tree state, I guess
-	# solution = db.column(JSON) #Should I store this in a separate db?
-	fireTime = db.column(db.Integer) #Number of minutes before event that a solution is automatically generated (maybe need plugin or package - cron?)
+	fireNotice = db.Column(db.String()) #Number of minutes before event that a solution is automatically generated (maybe need plugin or package - cron?)
 	# eventCoordinators = db.column(JSON) #List of sender_id's for hosts, to enable editing of event, triggering solutions, etc.
 	#distMatrix = db.column(JSON) #Can I store this as a 2d array?
+	# solution = db.column(JSON) #Should I store this in a separate db?
 
 	selfRep = db.Column(db.Text)
 	selfFormalRep = db.Column(db.Text)
@@ -488,10 +508,10 @@ class Trip(db.Model):
 
 	def updateSelfRepresentations(self,fieldstate,input):
 		print('in Trip.updateSelfRepresentations',file=sys.stderr)
-		treename = 'tripfields'
-		namespace = __import__(__name__) #get current namespace
-		tree = getattr(namespace,treename,None)
-
+		# treename = 'tripfields'
+		# namespace = __import__(__name__) #get current namespace
+		# tree = getattr(namespace,treename,None)
+		tree = tripfields
 		if (self.poolRepLoaded ==0):
 			self.loadPoolRep()
 		if (self.carpoolerRepLoaded ==0):

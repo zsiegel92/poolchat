@@ -16,7 +16,17 @@ import sys
 
 typeCheckers ={"String": (lambda stringArg: isinstance(stringArg,str)),"Integer": (lambda stringArg: stringArg.isdigit())}
 
+typeWrappers = {"String":str,"Integer":int}
+
 node_args = ['nType','nTitle','nQuestion','next','nextChoices','quickChoices','choices','customAfterText','nodeName','verboseNode','validator','postProcessor','obField','pre_toggle','fieldname','prefix']
+
+def safeformat(str, **kwargs):
+		class SafeDict(dict):
+				def __missing__(self, key):
+						return '{' + key + '}'
+		replacements = SafeDict(**kwargs)
+		return str.format_map(replacements)
+
 
 class nodeOb:
 
@@ -102,7 +112,7 @@ class nodeOb:
 		if self.postProcessor:
 			return self.postProcessor(userInput)
 		else:
-			return userInput
+			return typeWrappers[self.nType](userInput)
 
 	def prefixer(self,userInput):
 		print("in nodeOb.prefix",file = sys.stderr)
@@ -114,7 +124,7 @@ class nodeOb:
 
 	def afterSet(self,response):
 		if self.customAfterText:
-			return self.customAfterText.format(title=self.nTitle,question=self.nQuestion,type=self.nType)
+			return safeformat(self.customAfterText,title=self.nTitle,question=self.nQuestion,type=self.nType,response = response)
 		elif self.next=='quick_menu':
 			#TODO: nextNode(response) returns a field name. Instead, return a field title.
 			return "OK, now I know you want to go to " + self.nextNode(response)

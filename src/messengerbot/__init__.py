@@ -45,6 +45,12 @@ class MessengerClient(object):
 			self.errors.append("Error sending buttons.")
 			return err
 	def say(self,recipient_id,message_text):
+		if len(message_text)>400:
+			for k in range(0,int(len(message_text)/400)-1):
+				self.say(recipient_id,message_text[k*600+1:(k+1)*600])
+			k=k+1
+			self.say(recipient_id,message_text[k*600+1:len(message_text)-1])
+			return
 		recipient = messages.Recipient(recipient_id=recipient_id)
 		myMessage = messages.Message(text=message_text)
 		myRequest = messages.MessageRequest(recipient, myMessage)

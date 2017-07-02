@@ -1,6 +1,5 @@
-from app import messenger, db,app
+# from app import messenger, db,app,Job,conn,q #,Queue
 import requests
-from models import  Carpooler,Pool, Trip
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
@@ -8,8 +7,18 @@ import re
 import smtplib
 #FOR TESTING ONLY,IMPORT SYS
 import sys
+import os
+import config
+from database import db
 
-
+import numpy as np #INTERACTIONS MOVEMENT!
+from messengerbot import messenger #INTERACTIONS MOVEMENT!
+from rq import Queue #INTERACTIONS MOVEMENT!
+from rq.job import Job  #FOR Redis jobs #INTERACTIONS MOVEMENT!
+from worker import conn #INTERACTIONS MOVEMENT!
+from flask_sqlalchemy import SQLAlchemy
+q = Queue(connection=conn) #INTERACTIONS MOVEMENT!
+from models import  Carpooler,Pool, Trip
 
 #TODO: Don't create dicts at function call! Initialize them earlier.
 def postback_rules(recipient_id,postback_text,referral_text=None,carpooler=None,fromUnPrefixer=False):
@@ -73,6 +82,51 @@ def text_rules(recipient_id, message_text=""):
 		messenger.say(recipient_id, rules[message_text])
 	else:
 		noPrefixResponse(recipient_id,response=message_text)
+
+
+def process_referral(sender_id,referral_text,postback_text=None):
+	#Triggered by visit to m.me/GroupThere?ref=myparam
+	#INTERACTIONS MOVEMENT
+	# messenger.say(sender_id,"Referring to "+ referral_text + " through: m.me/" + app.config['APP_NAME'] + "?ref=" + referral_text) #Do nothing with referral for now.
+	appname=getattr(config,os.environ['APP_SETTINGS'].split('.')[1]).APP_NAME
+	messenger.say(sender_id,"Referring to "+ referral_text + " through: m.me/" + str(appname) + "?ref=" + referral_text)
+	pester(sender_id)
+
+def getStarted(sender_id,referral_text=None,message_text=None):
+	print("in interactions.getStarted", file=sys.stderr)
+	carpooler = Carpooler.query.filter_by(fbId=sender_id).first() #Should have been added already
+
+	if referral_text:
+		messenger.say(sender_id,"You have been referred by: " + referral_text)
+	#Query Pool.query.filter_by(referral_text=referral_text).first()
+	if carpooler is not None:
+		messenger.say(sender_id,"Something weird happened - I already know you!")
+		pester(sender_id, carpooler)
+		return
+	carpooler = Carpooler(fbId=sender_id)
+	info = getInfo(sender_id)
+	if 'first_name' in info:
+		print('carpooler.name: ' + str(carpooler.name))
+		# carpooler.fieldstate='email'
+		carpooler.externalUpdate(name=str(info['first_name'])+" " + str(info['last_name']),nextFieldState='email')
+		print('carpooler.name: ' + str(carpooler.name))
+	if info['timezone'] != -7:
+		messenger.say(sender_id,"You are probably in the wrong timezone for this!")
+	db.session.add(carpooler)
+	db.session.commit()
+	messenger.say(sender_id,"Added you to my database, madude! =D")
+	pester(sender_id,carpooler)
+
+#TODO: Change from messenger.say to messenger.send, where the node stores a general-purpose payload (sans sender_id, though).
+#def pester(sender_id,node):
+##    messenger.say(sender_id,nextNode.prompt())
+##    messenger.say(sender_id,nextNode.ask())
+#    messenger.nodeSay(sender_id,node)
+
+
+
+
+
 
 def test(recipient_id,response,carpooler=None):
 	print("in interactions.test",file=sys.stderr)
@@ -145,15 +199,16 @@ def newPool(recipient_id,carpooler=None):
 
 	messenger.say(recipient_id,"You just created a carpool! Your NEW carpool's 'Pool ID' is " + str(trip.pool.id) + ". Don't forget about your other trips! " + tripstring)
 
-def input_email(recipient_id,prefix,inputted_email,carpooler=None):
-	print("in interactions.input_email",file=sys.stderr)
+def write_and_send_email(recipient_id,prefix,toAddress,carpooler=None,pool=None,trip=None):
+	print("in interactions.write_and_send_email",file=sys.stderr)
 	if not carpooler:
-		carpooler=Carpooler.query.filter_by(fbId=recipient_id).first()
+		return
+	# if not carpooler:
+	# 	carpooler=Carpooler.query.filter_by(fbId=recipient_id).first()
 	if prefix =="Carpooler":
 		message = "Hey, " + str(carpooler.name) +",\nYou just registered as a user of GroupThere!\nCongratulations - you will be able to coordinate carpooling for events with up to 40 people very soon!"
 	elif prefix == "Pool":
 		message = "Hey, " + str(carpooler.name) + ",\nThis email address was just submitted as the primary contact email for a GroupThere event!\n"
-		pool = carpooler.getCurrentPool()
 
 		message = message + "\nPool Name: " + pool.poolName
 		message = message + "\nEvent Date and Time: " + str(pool.eventDate) + " at " + str(pool.eventTime)
@@ -169,32 +224,44 @@ def input_email(recipient_id,prefix,inputted_email,carpooler=None):
 		message = ""
 	else:
 		message = ""
+	# gmail_user = app.config['EMAIL'] #INTERACTIONS MOVEMENT!
+	# gmail_password = app.config['EMAIL_PASSWORD'] #INTERACTIONS MOVEMENT!
+	gmail_user =getattr(config,os.environ['APP_SETTINGS'].split('.')[1]).EMAIL
+	gmail_password=getattr(config,os.environ['APP_SETTINGS'].split('.')[1]).EMAIL_PASSWORD
 
+	sent_from = gmail_user
+	sent_to = toAddress
+	try:
+		server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+		server.ehlo()
+		server.login(gmail_user, gmail_password)
+		server.sendmail(sent_from, sent_to, message)
+		server.close()
+		# messenger.say(recipient_id,"You just got an email from GroupThere!")
+	except Exception as exc:
+		messenger.say(recipient_id,"Tried and failed to send an email to you from " + str(gmail_user))
+		# messenger.say(recipient_id,str(exc))
+		print('Something went wrong with login.')
+
+def input_email(recipient_id,prefix,inputted_email,carpooler=None,pool=None,trip=None):
+	print("in interactions.input_email",file=sys.stderr)
 	if not carpooler:
 		carpooler=Carpooler.query.filter_by(fbId=recipient_id).first()
-
+	if not pool:
+		pool=carpooler.getCurrentPool()
+	if not trip:
+		trip = carpooler.getCurrentTrip()
 	if re.match(r"[^@]+@[^@]+\.[^@]+",inputted_email):
 		fillField(recipient_id,inputted_email,carpooler=carpooler)
-		gmail_user = app.config['EMAIL']
-		gmail_password = app.config['EMAIL_PASSWORD']
-		sent_from = gmail_user
-		sent_to = gmail_user
-		try:
-			server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-			server.ehlo()
-			server.login(gmail_user, gmail_password)
-			server.sendmail(sent_from, sent_to, message)
-			server.close()
-		except:
-			messenger.say(recipient_id,"Something went wrong with login.")
-			messenger.say(recipient_id,"Failed to send an email to you from " + str(gmail_user))
-			print('Something went wrong with login.')
-
-
-
+		db.session.commit()
+		job=q.enqueue_call(
+			func=write_and_send_email, args=(recipient_id,prefix,inputted_email,), kwargs = {'carpooler':carpooler,'pool':pool,'trip':trip},result_ttl=5000
+		)
+		print("SENT A REDIS JOB!!",file=sys.stderr)
+		print("job.get_id() = " + str(job.get_id()),file=sys.stderr)
 	else:
 		messenger.say(recipient_id,"Please enter a valid email address.")
-	db.session.commit()
+
 
 def ampmSwitch(recipient_id,field_to_switch=None,mode=None,carpooler=None):
 	print("in interactions.ampmSwitch",file=sys.stderr)
@@ -267,8 +334,8 @@ def findAddress(sender_id,inputted_address,carpooler=None):
 	if not carpooler:
 		carpooler=Carpooler.query.filter_by(fbId=sender_id).first()
 
-
-	GMAPS_GEOCODE_API_TOKEN = app.config['GMAPS_GEOCODE_API_TOKEN']
+	GMAPS_GEOCODE_API_TOKEN =getattr(config,os.environ['APP_SETTINGS'].split('.')[1]).GMAPS_GEOCODE_API_TOKEN #INTERACTIONS MOVEMENT
+	# GMAPS_GEOCODE_API_TOKEN = app.config['GMAPS_GEOCODE_API_TOKEN']
 
 	geocode_url = "https://maps.googleapis.com/maps/api/geocode/json"
 	querystring = {"address":inputted_address,"key":GMAPS_GEOCODE_API_TOKEN}
@@ -280,7 +347,8 @@ def findAddress(sender_id,inputted_address,carpooler=None):
 	lon = response['results'][0]['geometry']['location']['lng']
 
 
-	GMAPS_STATIC_API_TOKEN = app.config['GMAPS_STATIC_API_TOKEN']
+	# GMAPS_STATIC_API_TOKEN = app.config['GMAPS_STATIC_API_TOKEN']
+	GMAPS_STATIC_API_TOKEN =getattr(config,os.environ['APP_SETTINGS'].split('.')[1]).GMAPS_STATIC_API_TOKEN #INTERACTIONS MOVEMENT
 	marker_attributes="color:red|{lat},{lon}".format(lat=lat,lon=lon)
 	static_maps_base_url = "https://maps.googleapis.com/maps/api/staticmap"
 	querystring = {"center":str(lat)+","+str(lon),"zoom":"14","size":"400x400","markers":marker_attributes,"key":GMAPS_STATIC_API_TOKEN}
@@ -325,41 +393,6 @@ def switchCurrentPool(recipient_id,more):
 	print("in interactions.switchCurrentPool", file=sys.stderr)
 	pass
 
-def process_referral(sender_id,referral_text,postback_text=None):
-	#Triggered by visit to m.me/GroupThere?ref=myparam
-	messenger.say(sender_id,"Referring to "+ referral_text + " through: m.me/" + app.config['APP_NAME'] + "?ref=" + referral_text) #Do nothing with referral for now.
-	pester(sender_id)
-
-def getStarted(sender_id,referral_text=None,message_text=None):
-	print("in interactions.getStarted", file=sys.stderr)
-	carpooler = Carpooler.query.filter_by(fbId=sender_id).first() #Should have been added already
-
-	if referral_text:
-		messenger.say(sender_id,"You have been referred by: " + referral_text)
-	#Query Pool.query.filter_by(referral_text=referral_text).first()
-	if carpooler is not None:
-		messenger.say(sender_id,"Something weird happened - I already know you!")
-		pester(sender_id, carpooler)
-		return
-	carpooler = Carpooler(fbId=sender_id)
-	info = getInfo(sender_id)
-	if 'first_name' in info:
-		print('carpooler.name: ' + str(carpooler.name))
-		# carpooler.fieldstate='email'
-		carpooler.externalUpdate(name=str(info['first_name'])+" " + str(info['last_name']),nextFieldState='email')
-		print('carpooler.name: ' + str(carpooler.name))
-	if info['timezone'] != -7:
-		messenger.say(sender_id,"You are probably in the wrong timezone for this!")
-	db.session.add(carpooler)
-	db.session.commit()
-	messenger.say(sender_id,"Added you to my database, madude! =D")
-	pester(sender_id,carpooler)
-
-#TODO: Change from messenger.say to messenger.send, where the node stores a general-purpose payload (sans sender_id, though).
-#def pester(sender_id,node):
-##    messenger.say(sender_id,nextNode.prompt())
-##    messenger.say(sender_id,nextNode.ask())
-#    messenger.nodeSay(sender_id,node)
 
 def pester(sender_id,carpooler=None):
 	print("in interactions.pester", file=sys.stderr)
@@ -374,7 +407,8 @@ def pester(sender_id,carpooler=None):
 
 def getInfo(sender_id):
 	print("in interactions.getInfo", file=sys.stderr)
-	access_token = app.config["MESSENGER_PLATFORM_ACCESS_TOKEN"]
+	# access_token = app.config["MESSENGER_PLATFORM_ACCESS_TOKEN"]
+	access_token =getattr(config,os.environ['APP_SETTINGS'].split('.')[1]).MESSENGER_PLATFORM_ACCESS_TOKEN #INTERACTIONS MOVEMENT
 	url = "https://graph.facebook.com/v2.6/" + sender_id
 	#unused possible args:profile_pic
 	querystring = {"fields":"first_name,last_name,locale,timezone,gender","access_token":access_token}

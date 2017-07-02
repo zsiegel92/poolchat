@@ -1,4 +1,6 @@
-from app import db,json
+# from app import db #INTERACTIONS MOVEMENT
+from database import db#INTERACTIONS MOVEMENT
+import json
 from collections import OrderedDict
 #from sqlalchemy.dialects.postgresql import ARRAY
 # from sqlalchemy.dialects.postgresql import JSON #Import if we use JSON in field
@@ -431,7 +433,7 @@ class Pool(db.Model):
 				setattr(self,arg,kwargs[arg])
 
 	def __repr__(self):
-		return '<id {}>'.format(self.userId)
+		return '<id {}>'.format(self.id)
 
 
 

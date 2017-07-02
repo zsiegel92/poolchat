@@ -48,7 +48,7 @@ poolfields = {
 
 	"eventAddress":nodeOb(nType="String",fieldname='eventAddress',nTitle="the address you'll be going to",prefix='FIND_ADDRESS/',next="addressMenu",nodeName="Event Address",obField='Pool'),
 
-	"addressMenu":nodeOb(nType="String",fieldname='addressMenu',nTitle="whether that address is correct",nQuestion="Would you like to change the address you entered?\nAddress: {eventAddress}",next='quick_menu',quickChoices=OrderedDict([("Change it",'eventAddress'),("That's fine","eventContact")]),verboseNode=True,prefix="GOTO_NODE/",obField='Pool'),
+	"addressMenu":nodeOb(nType="String",fieldname='addressMenu',nTitle="whether that address is correct",nQuestion="Would you like to change the address you entered?\nAddress: {eventAddress}",next='quick_menu',quickChoices=OrderedDict([("Change it",'eventAddress'),("That's it!","eventContact")]),verboseNode=True,prefix="GOTO_NODE/",obField='Pool'),
 
 	"eventContact":nodeOb(nType="String",fieldname='eventContact',nTitle="the phone number of someone organizing this event",next="eventHostOrg",nodeName="Event Contact",obField='Pool'),
 

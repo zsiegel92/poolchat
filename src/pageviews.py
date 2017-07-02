@@ -5,8 +5,8 @@ from collections import OrderedDict
 from interactions import getStarted#NOTE These are NOT needed for app - only for drop_populate and testing!
 import sys
 
-from app import app,db,request,abort
-
+from app import app,request,abort
+from database import db
 
 @app.route("/", methods=["GET"])
 def root():

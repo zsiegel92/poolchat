@@ -74,13 +74,14 @@ def text_rules(recipient_id, message_text=""):
 		"Menu":"sendmenu",
 		"Unsubscribe":"unsubscribe"
 	}
-	specialRules = {"CREATE_POOL":"It looks like you want to create a carpool!"}
+	specialRules = {"page_scoped_id": (lambda: messenger.say(recipient_id,"Your page-scoped ID is " + str(recipient_id) + "."))}
 	if message_text in specialRules:
-		messenger.say(recipient_id,"You just did something amazing (but I'm not doing anything about it yet)!")
-		messenger.say(recipient_id,specialRules[message_text])
+		messenger.say(recipient_id,"You just did something amazing!")
+		specialRules[message_text]()
 	elif message_text in rules:
 		messenger.say(recipient_id, rules[message_text])
 	else:
+		messenger.say(recipient_id,"routing through text_rules")
 		noPrefixResponse(recipient_id,response=message_text)
 
 

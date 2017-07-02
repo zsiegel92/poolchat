@@ -115,18 +115,8 @@ def getStarted(sender_id,referral_text=None,message_text=None):
 	db.session.add(carpooler)
 	db.session.commit()
 	messenger.say(sender_id,"Added you to my database, madude! =D")
-	messenger.say(sender_id,"Your page-scoped id is " + str(sender_id))
+	# messenger.say(sender_id,"Your page-scoped id is " + str(sender_id))
 	pester(sender_id,carpooler)
-
-#TODO: Change from messenger.say to messenger.send, where the node stores a general-purpose payload (sans sender_id, though).
-#def pester(sender_id,node):
-##    messenger.say(sender_id,nextNode.prompt())
-##    messenger.say(sender_id,nextNode.ask())
-#    messenger.nodeSay(sender_id,node)
-
-
-
-
 
 
 def test(recipient_id,response,carpooler=None):

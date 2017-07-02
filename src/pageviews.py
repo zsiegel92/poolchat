@@ -42,49 +42,49 @@ def drop_and_ping():
 	else:
 		return "Dropped and re-created all tables!", 200
 
-@app.route('/testing', methods=["GET"])
-def testing():
+@app.route('/testing/<int:fbId>', methods=["GET"])
+def testing(fbId):
+	fbId = str(fbId)
+	# db.drop_all()
+	# db.create_all()
+	# db.session.commit()
 
-		# db.drop_all()
-		# db.create_all()
-		# db.session.commit()
+	# fbId = '1512768535401609' #GroupThere page-scoped ID for Zach
+	# fbId = '1585931554790785' #Zach and Friends page-scoped ID for Zach
+	actions = [
+		('start','None'),
+		('text','zsiegel92@gmail.com'),#user email
+		('quick','mode'),
+		('quick','CREATE_NEW_POOL'),
+		('text',"IfNotNow HM at David's"),#eventName
+		('text',"8/30 at 4:30"),#eventDateTime
+		('quick','eventAddress'),
+		('text','100 W 1st St LA CA'),#going TO
+		('quick','eventContact'),
+		('text','9144003675'),#eventContact
+		('text','If Not Now LA'),#host org
+		('text',"Which car are you in? Which car are you in, my people?"),#signature
+		('quick','30'),#latenessWindow
+		('quick','12'),#fireNotice
+		('text','zsiegel92@gmail.com'),#eventEmail
+		# ('quick','SWITCH_MODE/tripfields'),
+		# ('text',"3103 Livonia Ave, LA, CA"),#FROM
+		# ('quick','num_seats'),
+		# ('quick','3'),#num_seats
+		# ('quick','30'),#preWindow
+		# ('quick','1'),#on_time
+		# ('quick','1'),#must_drive
+		# ('quick','mode')
+		]
 
-		fbId = '1512768535401609' #GroupThere page-scoped ID for Zach
+	functions = {'quick':(lambda input: quick_rules(fbId,input)),'text':(lambda input: text_rules(fbId,input)),'start':(lambda input: getStarted(fbId))}
 
-		actions = [
-			('start','None'),
-			('text','zsiegel92@gmail.com'),#user email
-			('quick','mode'),
-			('quick','CREATE_NEW_POOL'),
-			('text',"IfNotNow HM at David's"),#eventName
-			('text',"8/30 at 4:30"),#eventDateTime
-			('quick','eventAddress'),
-			('text','100 W 1st St LA CA'),#going TO
-			('quick','eventContact'),
-			('text','9144003675'),#eventContact
-			('text','If Not Now LA'),#host org
-			('text',"Which car are you in? Which car are you in, my people?"),#signature
-			('quick','30'),#latenessWindow
-			('quick','12'),#fireNotice
-			('text','zsiegel92@gmail.com'),#eventEmail
-			# ('quick','SWITCH_MODE/tripfields'),
-			# ('text',"3103 Livonia Ave, LA, CA"),#FROM
-			# ('quick','num_seats'),
-			# ('quick','3'),#num_seats
-			# ('quick','30'),#preWindow
-			# ('quick','1'),#on_time
-			# ('quick','1'),#must_drive
-			# ('quick','mode')
-			]
+	for tuple in actions:
+		print("DOING AN ACTION IN pageviews.testing()",file=sys.stderr)
+		print('tuple[0]: ' + str(tuple[0]) + ", tuple[1]: " + str(tuple[1]) + ", functions[tuple[0]]: " + str(functions[tuple[0]]),file=sys.stderr)
+		functions[tuple[0]](tuple[1])
 
-		functions = {'quick':(lambda input: quick_rules(fbId,input)),'text':(lambda input: text_rules(fbId,input)),'start':(lambda input: getStarted(fbId))}
-
-		for tuple in actions:
-			print("DOING AN ACTION IN pageviews.testing()",file=sys.stderr)
-			print('tuple[0]: ' + str(tuple[0]) + ", tuple[1]: " + str(tuple[1]) + ", functions[tuple[0]]: " + str(functions[tuple[0]]),file=sys.stderr)
-			functions[tuple[0]](tuple[1])
-
-		return "Ran test!", 200
+	return "Ran test!", 200
 
 @app.route('/pester', methods=["GET"])
 def pester_view():

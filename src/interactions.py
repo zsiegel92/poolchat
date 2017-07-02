@@ -212,11 +212,11 @@ def write_and_send_email(recipient_id,prefix,toAddress,carpooler=None,pool=None,
 
 		message = message + "\nPool Name: " + pool.poolName
 		message = message + "\nEvent Date and Time: " + str(pool.eventDate) + " at " + str(pool.eventTime)
+		message = message + "\nArrival Time Flexibility: some participants can arrive " + str(pool.latenessWindow) + " minutes late"
 		message = message + "\nEvent Address: " + str(pool.eventAddress)
-		message = message + "\nArrival Time Flexibility: " + str(pool.latenessWindow)
-		message = message + "\nPhone Contact: " + str(pool.eventContact)
 		message = message + "\nHost Organization: " + str(pool.eventHostOrg)
-		message = message + "\nHours Notice Given to Participants: " + str(getattr(pool,'fireNotice',27))
+		message = message + "\nPhone Contact: " + str(pool.eventContact)
+		message = message + "\nNotice Given to Participants: instructions sent " + str(getattr(pool,'fireNotice','-1')) + " hours before event"
 		message = message + "\n Your email will be signed with the following:"+ "\n\n'" + str(pool.signature) + "'"
 		message = message + "\n\nLooking forward to your trip on " + str(pool.eventDate) + ".\n\nBest Wishes,\nGroupThere"
 	#Trip confirmation email
@@ -320,7 +320,8 @@ def findDate(recipient_id,inputted_date,carpooler=None):
 	strtime = str(time.strftime("%I:%M %p"))
 
 	if (parsed > datetime.now()):
-		carpooler.externalUpdate(nextFieldState='dateMenu',**{'eventDate':strdate,'eventTime':strtime,'eventDateTime':parsed})
+		carpooler.externalUpdate(**{'eventDate':strdate,'eventTime':strtime,'eventDateTime':parsed})
+		carpooler.next()
 		messenger.say(recipient_id,"Please confirm this date and time: " + str(strdate) + " at " + str(strtime))
 	else:
 		messenger.say(recipient_id,"Your stated event date and time (" + str(strdate) + " at " + str(strtime) + ") has already passed.\nPlease enter a valid date and time.")

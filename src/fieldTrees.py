@@ -39,9 +39,9 @@ findPool = {
 poolfields = {
 	"poolName":nodeOb(nType="String",fieldname='poolName',nTitle="the name of the event you'll be going to",next="eventDate",nodeName="Pool Name",obField='Pool'),
 
-	"eventDate":nodeOb(nType="String",fieldname='eventDate',nTitle="the date and time of your event",nQuestion = "What is the date and time of your event?\nPlease enter them in a standard format (somewhat flexible)",next="dateMenu",nodeName="Event Date and Time",prefix = "SET_DATE/",obField='Pool'),
+	"eventDate":nodeOb(nType="String",fieldname='eventDate',nTitle="the date and time of your event",nQuestion = "What is the date and time of your event?\nPlease enter them in a standard format (somewhat flexible)",customAfterText= "Ok, your event will take place on {response}.",next="dateMenu",nodeName="Event Date",prefix = "SET_DATE/",obField='Pool'),
 
-	"eventTime":nodeOb(nType="String",fieldname='eventTime',nodeName="Event Date and Time",obField='Pool'),
+	"eventTime":nodeOb(nType="String",nTitle="the time of your event",customAfterText= "Your event will take place at {response}.",fieldname='eventTime',nodeName="Event Time",obField='Pool'),
 
 	"dateMenu":nodeOb(nType="String",fieldname='addressMenu',nTitle="whether that date and time is correct",nQuestion="Is this date correct?\nDate: {eventDate}\nTime: {eventTime}",next='quick_menu',quickChoices=OrderedDict([("Change it",'eventDate'),("Switch AM/PM","SWITCH_AM_PM/poolfields/eventDateTime"),("Perfect!","eventAddress")]),verboseNode=True,prefix="GOTO_NODE/",obField='Pool'),
 
@@ -65,7 +65,7 @@ poolfields = {
 	"eventEmail":nodeOb(nType="String",fieldname='eventEmail',nTitle="the email address of someone organizing this event",next="menu",nodeName="Event Email",prefix ='EMAIL_INPUT/Pool/',obField='Pool'),
 
 
-	"menu":nodeOb(nType="String",fieldname='menu',nTitle="whether you'd like to edit your information",nQuestion="Would you like to change the following?\n{_all}",next='quick_menu',quickChoices=OrderedDict([("All good!",'mode'),('Event Name','MENU_RETURN/poolName'),("Date",'MENU_RETURN/eventDate'),("Time",'MENU_RETURN/eventTime'),("Address",'MENU_RETURN/eventAddress'),("Contact",'MENU_RETURN/eventContact'),("Email",'MENU_RETURN/eventEmail'),("Host Org",'MENU_RETURN/eventHostOrg'),("Signature",'MENU_RETURN/signature'),("Arrival Flexibility",'MENU_RETURN/latenessWindow'),("Instruction Notice",'MENU_RETURN/fireNotice')]),verboseNode=True,obField='Pool'),
+	"menu":nodeOb(nType="String",fieldname='menu',nTitle="whether you'd like to edit your information",nQuestion="Would you like to change the following?\n{_all}",next='quick_menu',quickChoices=OrderedDict([("All good!",'mode'),('Event Name','MENU_RETURN/poolName'),("Date/Time",'MENU_RETURN/eventDate'),("Address",'MENU_RETURN/eventAddress'),("Contact",'MENU_RETURN/eventContact'),("Email",'MENU_RETURN/eventEmail'),("Host Org",'MENU_RETURN/eventHostOrg'),("Signature",'MENU_RETURN/signature'),("Arrival Flexibility",'MENU_RETURN/latenessWindow'),("Instruction Notice",'MENU_RETURN/fireNotice')]),verboseNode=True,obField='Pool'),
 
 	"mode":nodeOb(nType="String",fieldname='mode',nTitle="everything you've entered.",nQuestion="Is all of the following correct?\n{_all}",next='quick_menu',quickChoices=OrderedDict([("Yes, I want to go!","SWITCH_MODE/tripfields"),("Need to edit event..","menu")]),verboseNode=True,obField='Pool')
 }

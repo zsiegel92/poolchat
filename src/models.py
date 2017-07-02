@@ -74,20 +74,24 @@ class Carpooler(db.Model):
 	# based on some field of fields[self.fieldstate] (aka self.quickhead()), such as "is_field", we should either do this, or do something else! Like, maybe, it could be "multi_field". Seems like an "intake_format" nodeOb field is necessary!
 	def update(self,input=None,**kwargs):
 		print('in Carpooler.update - self.fieldstate = ' + str(self.fieldstate) + ', self.mode = ' + str(self.mode) + ', self.menu = ' + str(self.menu),file=sys.stderr)
-		for arg in kwargs:
-			self.set(fieldstate=arg,value=kwargs[arg])
 		if input:
 			if self.fieldstate =='mode':
 				self.switch_modes(input)
 				return
 			#DO STUFF BASED ON Carpooler.mode!!
 			if self.mode =='fields':
+				for arg in kwargs:
+					self.set(fieldstate=arg,value=kwargs[arg])
 				self.set(value=input)#default field is self.fieldstate
 				self.next(input= input)
 			elif self.mode == 'poolfields':
+				for arg in kwargs:
+					self.setForCurrentPool(fieldstate=arg,value=kwargs[arg])
 				self.setForCurrentPool(value=input)
 				self.next(input= input)
 			elif self.mode == 'tripfields':
+				for arg in kwargs:
+					self.setForCurrentTrip(fieldstate=arg,value=kwargs[arg])
 				self.setForCurrentTrip(value=input)
 				self.next(input=input)
 			elif self.mode == 'findPool':
@@ -101,7 +105,7 @@ class Carpooler(db.Model):
 	# @RETURN: next nodeOb
 	# @POST: field state is updated
 	# @POST: self.head() will return what this returns
-	def next(self,input=None):
+	def next(self,input=None,delayMenuReturn=False):
 		print('in next',file=sys.stderr)
 		if self.menu == 'fieldstate':
 			self.fieldstate = self.nextField(input)
@@ -111,8 +115,11 @@ class Carpooler(db.Model):
 		#went somewhere from the menu.
 		#self.menu = (some field)
 		else:
-			self.fieldstate = self.menu
-			self.menu = 'menu'
+			if not delayMenuReturn:
+				self.fieldstate = self.menu
+				self.menu = 'menu'
+			else:
+				self.fieldstate=self.nextField(input)
 
 
 	def switch_modes(self,input):

@@ -49,7 +49,7 @@ def testing():
 		# db.create_all()
 		# db.session.commit()
 
-		fbId = '1512768535401609'
+		fbId = '1512768535401609' #GroupThere page-scoped ID for Zach
 
 		actions = [
 			('start','None'),

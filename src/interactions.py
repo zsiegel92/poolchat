@@ -115,6 +115,7 @@ def getStarted(sender_id,referral_text=None,message_text=None):
 	db.session.add(carpooler)
 	db.session.commit()
 	messenger.say(sender_id,"Added you to my database, madude! =D")
+	messenger.say(sender_id,"Your page-scoped id is " + str(sender_id))
 	pester(sender_id,carpooler)
 
 #TODO: Change from messenger.say to messenger.send, where the node stores a general-purpose payload (sans sender_id, though).

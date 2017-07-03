@@ -18,41 +18,7 @@ from rq.job import Job  #FOR Redis jobs #INTERACTIONS MOVEMENT!
 from worker import conn #INTERACTIONS MOVEMENT!
 from flask_sqlalchemy import SQLAlchemy
 q = Queue(connection=conn) #INTERACTIONS MOVEMENT!
-from models import  Carpooler,Pool, Trip
-# from functools import wraps
-
-
-
-def ensure_carpooler_notNone(fbId_index=999,carpooler_index=999):
-	def wrapper(f):
-
-		def get_carpooler(*args,**kwargs):
-			if len(args)>fbId_index:
-				fbId = args[fbId_index]
-			elif 'recipient_id' in kwargs:
-				fbId = kwargs['recipient_id']
-			elif 'sender_id' in kwargs:
-				fbId=kwargs['sender_id']
-			carpooler = Carpooler.query.filter_by(fbId=fbId).first()
-			return carpooler
-
-		def wrapped_f(*args,**kwargs):
-			args = list(args)
-
-			if len(args)>carpooler_index:
-				if not args[carpooler_index]:
-					args[carpooler_index]=get_carpooler(*args,**kwargs)
-			# elif (len(args)==carpooler_index) and ('carpooler' not in kwargs):
-			# 		args[carpooler_index]=get_carpooler(*args,**kwargs)
-			elif 'carpooler' in kwargs:
-				if not kwargs['carpooler']:
-					kwargs['carpooler']=get_carpooler(*args,**kwargs)
-			else:
-				kwargs['carpooler'] = get_carpooler(*args,**kwargs)
-			return(f(*args,**kwargs))
-		return wrapped_f
-	return wrapper
-
+from models import  Carpooler,Pool, Trip,ensure_carpooler_notNone
 
 
 
@@ -149,8 +115,8 @@ def getStarted(sender_id,carpooler=None,referral_text=None,message_text=None):
 		# carpooler.fieldstate='email'
 		carpooler.externalUpdate(name=str(info['first_name'])+" " + str(info['last_name']),nextFieldState='email')
 		print('carpooler.name: ' + str(carpooler.name))
-	if info['timezone'] != -7:
-		messenger.say(sender_id,"You are probably in the wrong timezone for this!")
+	if abs(int(info['timezone'])-(-7)) > 2:
+		messenger.say(sender_id,"You may be in the wrong timezone for this! Your timezone is " + str(info['timezone']) + " (see Facebook API Documentation). This tool functions properly for users close to Los Angeles, California.")
 	db.session.add(carpooler)
 	db.session.commit()
 	messenger.say(sender_id,"Added you to my database, madude! =D")
@@ -163,7 +129,6 @@ def test(recipient_id,response,carpooler=None):
 	messenger.say(recipient_id,"In interactions.test")
 	# if not carpooler:
 	# 	carpooler = Carpooler.query.filter_by(fbId=recipient_id).first()
-
 	fillField(recipient_id,response,carpooler=carpooler)
 	db.session.commit()
 
@@ -286,10 +251,11 @@ def input_email(recipient_id,prefix,inputted_email,carpooler=None,pool=None,trip
 	print("in interactions.input_email",file=sys.stderr)
 	# if not carpooler:
 	# 	carpooler=Carpooler.query.filter_by(fbId=recipient_id).first()
-	if not pool:
-		pool=carpooler.getCurrentPool()
-	if not trip:
-		trip = carpooler.getCurrentTrip()
+	if prefix !="Carpooler":
+		if not pool:
+			pool=carpooler.getCurrentPool()
+		if not trip:
+			trip = carpooler.getCurrentTrip()
 	if re.match(r"[^@]+@[^@]+\.[^@]+",inputted_email):
 		fillField(recipient_id,inputted_email,carpooler=carpooler)
 		db.session.commit()

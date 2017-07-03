@@ -9,6 +9,8 @@ from fieldTrees import fields,poolfields,findPool,tripfields,modesFirst
 import sys
 
 
+
+
 #TODO: Create third model for "Registration". Then, the "engagement" or "participation" table will be a merge of all three tables on userid and carpoolid
 #TODO: Some properties of this relation can't be stored in the user! Such as: time window, address, number of seats, need to arrive, must drive
 #FOR NOW: It's as though every carpooler can have multiple pools, but all those pools have the exact same characteristics for the carpooler xD
@@ -556,4 +558,37 @@ class Trip(db.Model):
 
 
 
+
+from functools import wraps
+
+def ensure_carpooler_notNone(fbId_index=999,carpooler_index=999):
+
+	def wrapper(f):
+		@wraps(f)
+		def get_carpooler(*args,**kwargs):
+			if len(args)>fbId_index:
+				fbId = args[fbId_index]
+			elif 'recipient_id' in kwargs:
+				fbId = kwargs['recipient_id']
+			elif 'sender_id' in kwargs:
+				fbId=kwargs['sender_id']
+			carpooler = Carpooler.query.filter_by(fbId=fbId).first()
+			return carpooler
+
+		def wrapped_f(*args,**kwargs):
+			args = list(args)
+
+			if len(args)>carpooler_index:
+				if not args[carpooler_index]:
+					args[carpooler_index]=get_carpooler(*args,**kwargs)
+			# elif (len(args)==carpooler_index) and ('carpooler' not in kwargs):
+			# 		args[carpooler_index]=get_carpooler(*args,**kwargs)
+			elif 'carpooler' in kwargs:
+				if not kwargs['carpooler']:
+					kwargs['carpooler']=get_carpooler(*args,**kwargs)
+			else:
+				kwargs['carpooler'] = get_carpooler(*args,**kwargs)
+			return(f(*args,**kwargs))
+		return wrapped_f
+	return wrapper
 

@@ -244,6 +244,7 @@ def write_and_send_email(recipient_id,prefix,toAddress,carpooler=None,pool=None,
 		messenger.say(recipient_id,"Tried and failed to send an email to you from " + str(gmail_user))
 		# messenger.say(recipient_id,str(exc))
 		print('Something went wrong with login.')
+		print("exception: " + str(exc))
 
 @ensure_carpooler_notNone(fbId_index=0,carpooler_index=3)
 def input_email(recipient_id,prefix,inputted_email,carpooler=None,pool=None,trip=None):

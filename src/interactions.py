@@ -19,6 +19,43 @@ from worker import conn #INTERACTIONS MOVEMENT!
 from flask_sqlalchemy import SQLAlchemy
 q = Queue(connection=conn) #INTERACTIONS MOVEMENT!
 from models import  Carpooler,Pool, Trip
+# from functools import wraps
+
+
+
+def ensure_carpooler_notNone(fbId_index=999,carpooler_index=999):
+	def wrapper(f):
+
+		def get_carpooler(*args,**kwargs):
+			if len(args)>fbId_index:
+				fbId = args[fbId_index]
+			elif 'recipient_id' in kwargs:
+				fbId = kwargs['recipient_id']
+			elif 'sender_id' in kwargs:
+				fbId=kwargs['sender_id']
+			carpooler = Carpooler.query.filter_by(fbId=fbId).first()
+			return carpooler
+
+		def wrapped_f(*args,**kwargs):
+			args = list(args)
+
+			if len(args)>carpooler_index:
+				if not args[carpooler_index]:
+					args[carpooler_index]=get_carpooler(*args,**kwargs)
+			# elif (len(args)==carpooler_index) and ('carpooler' not in kwargs):
+			# 		args[carpooler_index]=get_carpooler(*args,**kwargs)
+			elif 'carpooler' in kwargs:
+				if not kwargs['carpooler']:
+					kwargs['carpooler']=get_carpooler(*args,**kwargs)
+			else:
+				kwargs['carpooler'] = get_carpooler(*args,**kwargs)
+			return(f(*args,**kwargs))
+		return wrapped_f
+	return wrapper
+
+
+
+
 
 #TODO: Don't create dicts at function call! Initialize them earlier.
 def postback_rules(recipient_id,postback_text,referral_text=None,carpooler=None,fromUnPrefixer=False):
@@ -81,7 +118,7 @@ def text_rules(recipient_id, message_text=""):
 	elif message_text in rules:
 		messenger.say(recipient_id, rules[message_text])
 	else:
-		messenger.say(recipient_id,"routing through text_rules")
+		# messenger.say(recipient_id,"routing through text_rules")
 		noPrefixResponse(recipient_id,response=message_text)
 
 
@@ -93,9 +130,10 @@ def process_referral(sender_id,referral_text,postback_text=None):
 	messenger.say(sender_id,"Referring to "+ referral_text + " through: m.me/" + str(appname) + "?ref=" + referral_text)
 	pester(sender_id)
 
-def getStarted(sender_id,referral_text=None,message_text=None):
+@ensure_carpooler_notNone(fbId_index=0,carpooler_index=1)
+def getStarted(sender_id,carpooler=None,referral_text=None,message_text=None):
 	print("in interactions.getStarted", file=sys.stderr)
-	carpooler = Carpooler.query.filter_by(fbId=sender_id).first() #Should have been added already
+	# carpooler = Carpooler.query.filter_by(fbId=sender_id).first() #Should have been added already
 
 	if referral_text:
 		messenger.say(sender_id,"You have been referred by: " + referral_text)
@@ -119,16 +157,17 @@ def getStarted(sender_id,referral_text=None,message_text=None):
 	# messenger.say(sender_id,"Your page-scoped id is " + str(sender_id))
 	pester(sender_id,carpooler)
 
-
+@ensure_carpooler_notNone(fbId_index=0,carpooler_index=2)
 def test(recipient_id,response,carpooler=None):
 	print("in interactions.test",file=sys.stderr)
 	messenger.say(recipient_id,"In interactions.test")
-	if not carpooler:
-		carpooler = Carpooler.query.filter_by(fbId=recipient_id).first()
+	# if not carpooler:
+	# 	carpooler = Carpooler.query.filter_by(fbId=recipient_id).first()
 
 	fillField(recipient_id,response,carpooler=carpooler)
 	db.session.commit()
 
+@ensure_carpooler_notNone(fbId_index=0,carpooler_index=2)
 def set_fire_notice(recipient_id,firenotice,carpooler=None):
 	print("in interactions.set_fire_notice",file=sys.stderr)
 	fillField(recipient_id,firenotice,carpooler=carpooler,afterText=False)
@@ -140,37 +179,41 @@ def set_fire_notice(recipient_id,firenotice,carpooler=None):
 	message = "OK, now I know that instructions should be sent out " + str(firenotice) + " hours before the event starts on " + str(pool.eventDate) + " at " + str(pool.eventTime) + ".\n\nInstructions will be send out on: " + date + " at " + time + "."
 	messenger.say(recipient_id,message)
 
+@ensure_carpooler_notNone(fbId_index=0,carpooler_index=2)
 def go_to_node(recipient_id,nodeName,carpooler=None):
 	print("in interactions.go_to_node", file=sys.stderr)
-	if not carpooler:
-		carpooler = Carpooler.query.filter_by(fbId=recipient_id).first()
+	# if not carpooler:
+	# 	carpooler = Carpooler.query.filter_by(fbId=recipient_id).first()
 	carpooler.fieldstate = nodeName
 	db.session.commit()
 
+@ensure_carpooler_notNone(fbId_index=0,carpooler_index=2)
 def menu_go_to_node(recipient_id,nodeName,carpooler=None):
 	print("in interactions.menu_go_to_node",file=sys.stderr)
-	if not carpooler:
-		carpooler=Carpooler.query.filter_by(fbId=recipient_id).first()
+	# if not carpooler:
+	# 	carpooler=Carpooler.query.filter_by(fbId=recipient_id).first()
 	carpooler.menu = nodeName
 	carpooler.update()
 	db.session.commit()
 
 
 # @Pre: carpooler with fbId = recipient_id exists!
+@ensure_carpooler_notNone(fbId_index=0,carpooler_index=2)
 def switchMode(recipient_id,mode,carpooler=None):
 	print("in interactions.switchMode", file=sys.stderr)
-	if not carpooler:
-		carpooler = Carpooler.query.filter_by(fbId=recipient_id).first()
+	# if not carpooler:
+	# 	carpooler = Carpooler.query.filter_by(fbId=recipient_id).first()
 	carpooler.switch_modes(mode)
 	db.session.commit()
 
 
 
 # @Pre: carpooler with fbId = recipient_id exists!
+@ensure_carpooler_notNone(fbId_index=0,carpooler_index=1)
 def newPool(recipient_id,carpooler=None):
 	print("in interactions.newPool",file=sys.stderr)
-	if not carpooler:
-		carpooler=Carpooler.query.filter_by(fbId=recipient_id).first()
+	# if not carpooler:
+	# 	carpooler=Carpooler.query.filter_by(fbId=recipient_id).first()
 
 	trip=Trip()
 	trip.pool=Pool()
@@ -191,6 +234,7 @@ def newPool(recipient_id,carpooler=None):
 
 	messenger.say(recipient_id,"You just created a carpool! Your NEW carpool's 'Pool ID' is " + str(trip.pool.id) + ". Don't forget about your other trips! " + tripstring)
 
+@ensure_carpooler_notNone(fbId_index=0,carpooler_index=3)
 def write_and_send_email(recipient_id,prefix,toAddress,carpooler=None,pool=None,trip=None):
 	print("in interactions.write_and_send_email",file=sys.stderr)
 	if not carpooler:
@@ -198,19 +242,21 @@ def write_and_send_email(recipient_id,prefix,toAddress,carpooler=None,pool=None,
 	# if not carpooler:
 	# 	carpooler=Carpooler.query.filter_by(fbId=recipient_id).first()
 	if prefix =="Carpooler":
-		message = "Hey, " + str(carpooler.name) +",\nYou just registered as a user of GroupThere!\nCongratulations - you will be able to coordinate carpooling for events with up to 40 people very soon!"
+		message = "Hey, {carpooler.name},\nYou just registered as a user of GroupThere!\nCongratulations - you will be able to coordinate carpooling for events with up to 40 people very soon!".format(**locals())
 	elif prefix == "Pool":
-		message = "Hey, " + str(carpooler.name) + ",\nThis email address was just submitted as the primary contact email for a GroupThere event!\n"
-
-		message = message + "\nPool Name: " + pool.poolName
-		message = message + "\nEvent Date and Time: " + str(pool.eventDate) + " at " + str(pool.eventTime)
-		message = message + "\nArrival Time Flexibility: some participants can arrive " + str(pool.latenessWindow) + " minutes late"
-		message = message + "\nEvent Address: " + str(pool.eventAddress)
-		message = message + "\nHost Organization: " + str(pool.eventHostOrg)
-		message = message + "\nPhone Contact: " + str(pool.eventContact)
-		message = message + "\nNotice Given to Participants: instructions sent " + str(getattr(pool,'fireNotice','-1')) + " hours before event"
-		message = message + "\n Your email will be signed with the following:"+ "\n\n'" + str(pool.signature) + "'"
-		message = message + "\n\nLooking forward to your trip on " + str(pool.eventDate) + ".\n\nBest Wishes,\nGroupThere"
+		message = ("Hey {carpooler.name},"
+		"\nThis email address was just submitted as the primary contact email for a GroupThere event!"
+		"\nPool Name: {pool.poolName}"
+		"\nEvent Date and Time: {pool.eventDate} at {pool.eventTime}"
+		"\nArrival Time Flexibility: some participants can arrive {pool.latenessWindow} minutes late"
+		"\nEvent Address: {pool.eventAddress}"
+		"\nHost Organization: {pool.eventHostOrg}"
+		"\nPhone Contact: {pool.eventContact}"
+		"\nNotice Given to Participants: instructions sent {pool.fireNotice} hours before event"
+		"\n Your email will be signed with the following:"
+		"\n\n'{pool.signature}'"
+		"\n\nLooking forward to your trip on {pool.eventDate}."
+		"\n\nBest Wishes,\nGroupThere").format(**locals())
 	#Trip confirmation email
 	elif prefix == "Confirm":
 		message = ""
@@ -235,10 +281,11 @@ def write_and_send_email(recipient_id,prefix,toAddress,carpooler=None,pool=None,
 		# messenger.say(recipient_id,str(exc))
 		print('Something went wrong with login.')
 
+@ensure_carpooler_notNone(fbId_index=0,carpooler_index=3)
 def input_email(recipient_id,prefix,inputted_email,carpooler=None,pool=None,trip=None):
 	print("in interactions.input_email",file=sys.stderr)
-	if not carpooler:
-		carpooler=Carpooler.query.filter_by(fbId=recipient_id).first()
+	# if not carpooler:
+	# 	carpooler=Carpooler.query.filter_by(fbId=recipient_id).first()
 	if not pool:
 		pool=carpooler.getCurrentPool()
 	if not trip:
@@ -254,12 +301,12 @@ def input_email(recipient_id,prefix,inputted_email,carpooler=None,pool=None,trip
 	else:
 		messenger.say(recipient_id,"Please enter a valid email address.")
 
-
+@ensure_carpooler_notNone(fbId_index=0,carpooler_index=3)
 def ampmSwitch(recipient_id,field_to_switch=None,mode=None,carpooler=None):
 	print("in interactions.ampmSwitch",file=sys.stderr)
 	try:
-		if not carpooler:
-			carpooler=Carpooler.query.filter_by(fbId=recipient_id).first()
+		# if not carpooler:
+		# 	carpooler=Carpooler.query.filter_by(fbId=recipient_id).first()
 		if not mode:
 			mode = carpooler.mode
 		if mode =='fields':
@@ -295,10 +342,11 @@ def ampmSwitch(recipient_id,field_to_switch=None,mode=None,carpooler=None):
 		print("Error in interactions.ampmSwitch",file=sys.stderr)
 		print(str(exc),file=sys.stderr)
 
+@ensure_carpooler_notNone(fbId_index=0,carpooler_index=2)
 def findDate(recipient_id,inputted_date,carpooler=None):
 	print("in interactions.findDate",file=sys.stderr)
-	if not carpooler:
-		carpooler=Carpooler.query.filter_by(fbId=recipient_id).first()
+	# if not carpooler:
+	# 	carpooler=Carpooler.query.filter_by(fbId=recipient_id).first()
 	try:
 		parsed=parse(inputted_date,fuzzy=True,dayfirst=False)
 	except:
@@ -319,13 +367,13 @@ def findDate(recipient_id,inputted_date,carpooler=None):
 		messenger.say(recipient_id,"Your stated event date and time (" + str(strdate) + " at " + str(strtime) + ") has already passed.\nPlease enter a valid date and time.")
 	db.session.commit()
 
-
+@ensure_carpooler_notNone(fbId_index=0,carpooler_index=2)
 def findAddress(sender_id,inputted_address,carpooler=None):
 	print("in interactions.findAddress",file=sys.stderr)
 	messenger.say(sender_id,"Here is a picture of that address! If this isn't right, you can change it later.")
 
-	if not carpooler:
-		carpooler=Carpooler.query.filter_by(fbId=sender_id).first()
+	# if not carpooler:
+	# 	carpooler=Carpooler.query.filter_by(fbId=sender_id).first()
 
 	GMAPS_GEOCODE_API_TOKEN =getattr(config,os.environ['APP_SETTINGS'].split('.')[1]).GMAPS_GEOCODE_API_TOKEN #INTERACTIONS MOVEMENT
 	# GMAPS_GEOCODE_API_TOKEN = app.config['GMAPS_GEOCODE_API_TOKEN']
@@ -354,10 +402,11 @@ def findAddress(sender_id,inputted_address,carpooler=None):
 	db.session.commit()
 
 # @Pre: carpooler with fbId = recipient_id exists!
+@ensure_carpooler_notNone(fbId_index=0,carpooler_index=2)
 def findPool(recipient_id,pool_id,carpooler=None):
 	print("in interactions.findPool", file=sys.stderr)
-	if not carpooler:
-		carpooler = Carpooler.query.filter_by(fbId=recipient_id).first()
+	# if not carpooler:
+	# 	carpooler = Carpooler.query.filter_by(fbId=recipient_id).first()
 
 	pool = Pool.query.filter_by(id=pool_id).first()
 	if pool:
@@ -386,11 +435,11 @@ def switchCurrentPool(recipient_id,more):
 	print("in interactions.switchCurrentPool", file=sys.stderr)
 	pass
 
-
+@ensure_carpooler_notNone(fbId_index=0,carpooler_index=1)
 def pester(sender_id,carpooler=None):
 	print("in interactions.pester", file=sys.stderr)
-	if not carpooler:
-		carpooler = Carpooler.query.filter_by(fbId=sender_id).first()
+	# if not carpooler:
+	# 	carpooler = Carpooler.query.filter_by(fbId=sender_id).first()
 	if not carpooler:
 		messenger.say(sender_id,"unsuccessful pester")
 		getStarted(sender_id)
@@ -416,11 +465,11 @@ def getInfo(sender_id):
 	# messenger.say(sender_id,response.text)
 	return response.json()
 
-
+@ensure_carpooler_notNone(fbId_index=0,carpooler_index=3)
 def fillField(sender_id,response,obField=None,carpooler=None,afterText=True):
 	print("in interactions.fillField", file=sys.stderr)
-	if not carpooler:
-		carpooler = Carpooler.query.filter_by(fbId=sender_id).first()
+	# if not carpooler:
+	# 	carpooler = Carpooler.query.filter_by(fbId=sender_id).first()
 	if carpooler:
 		if carpooler.isValid(response,obField):
 			response = carpooler.process(response) #format time for storage, etc.
@@ -439,9 +488,10 @@ def fillField(sender_id,response,obField=None,carpooler=None,afterText=True):
 #        messenger.say(sender_id,'exiting db function')
 #Add params argument! Dict? List?
 #def toDB(sender_id,carpoolGroupId=None,address=None,email=None,name=None,preWindow=None,need_to_arrive_on_time=None,num_seats = None,engaged = None,state=None):
-def noPrefixResponse(sender_id,response,**kwargs):
+@ensure_carpooler_notNone(fbId_index=0,carpooler_index=2)
+def noPrefixResponse(sender_id,response,carpooler=None,**kwargs):
 	print("in interactions.noPrefixResponse, response = " + str(response),file=sys.stderr)
-	carpooler = Carpooler.query.filter_by(fbId=sender_id).first()
+	# carpooler = Carpooler.query.filter_by(fbId=sender_id).first()
 
 	if carpooler:
 		response = carpooler.prefix(response) #format time for storage, etc.

@@ -66,7 +66,7 @@ def testing(fbId):
 		('text',"Which car are you in? Which car are you in, my people?"),#signature
 		('quick','30'),#latenessWindow
 		('quick','12'),#fireNotice
-		('text','zsiegel92@gmail.com'),#eventEmail
+		# ('text','zsiegel92@gmail.com'),#eventEmail
 		# ('quick','SWITCH_MODE/tripfields'),
 		# ('text',"3103 Livonia Ave, LA, CA"),#FROM
 		# ('quick','num_seats'),

@@ -249,13 +249,16 @@ def write_and_send_email(recipient_id,prefix,toAddress,carpooler=None,pool=None,
 @ensure_carpooler_notNone(fbId_index=0,carpooler_index=3)
 def input_email(recipient_id,prefix,inputted_email,carpooler=None,pool=None,trip=None):
 	print("in interactions.input_email",file=sys.stderr)
-	# if not carpooler:
+	if not carpooler:
+		print("Hey, carpooler is none in input_email!!")
 	# 	carpooler=Carpooler.query.filter_by(fbId=recipient_id).first()
 	if prefix !="Carpooler":
 		if not pool:
 			pool=carpooler.getCurrentPool()
 		if not trip:
 			trip = carpooler.getCurrentTrip()
+	if inputted_email == 'OWN_EMAIL':
+		inputted_email = carpooler.email
 	if re.match(r"[^@]+@[^@]+\.[^@]+",inputted_email):
 		fillField(recipient_id,inputted_email,carpooler=carpooler)
 		db.session.commit()

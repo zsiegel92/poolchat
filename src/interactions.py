@@ -199,7 +199,6 @@ def newPool(recipient_id,carpooler=None):
 
 	messenger.say(recipient_id,"You just created a carpool! Your NEW carpool's 'Pool ID' is " + str(trip.pool.id) + ". Don't forget about your other trips! " + tripstring)
 
-@ensure_carpooler_notNone(fbId_index=0,carpooler_index=3)
 def write_and_send_email(recipient_id,prefix,toAddress,carpooler=None,pool=None,trip=None):
 	print("in interactions.write_and_send_email",file=sys.stderr)
 	if not carpooler:
@@ -259,11 +258,11 @@ def input_email(recipient_id,prefix,inputted_email,carpooler=None,pool=None,trip
 	if re.match(r"[^@]+@[^@]+\.[^@]+",inputted_email):
 		fillField(recipient_id,inputted_email,carpooler=carpooler)
 		db.session.commit()
-		job=q.enqueue_call(
-			func=write_and_send_email, args=(recipient_id,prefix,inputted_email,), kwargs = {'carpooler':carpooler,'pool':pool,'trip':trip},result_ttl=5000
-		)
-		print("SENT A REDIS JOB!!",file=sys.stderr)
+		job=q.enqueue_call(func=write_and_send_email, args=(recipient_id,prefix,inputted_email,), kwargs = {'carpooler':carpooler,'pool':pool,'trip':trip},result_ttl=5000)
 		print("job.get_id() = " + str(job.get_id()),file=sys.stderr)
+		# write_and_send_email(recipient_id,prefix,inputted_email,carpooler=carpooler,pool=pool,trip=trip)
+		print("SENT A REDIS JOB!!",file=sys.stderr)
+
 	else:
 		messenger.say(recipient_id,"Please enter a valid email address.")
 

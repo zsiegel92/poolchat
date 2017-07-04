@@ -21,6 +21,17 @@ def drop_table():
   else:
     return "Dropped and re-created all tables!", 200
 
+#TODO: Flip through users in db, message them their table has been dropped :)
+@app.route('/drop_only', methods=["GET"])
+def drop_table_only():
+  try:
+    db.drop_all()
+    # db.session.commit()
+  except Exception as exc:
+    return "Exception on table drop:\n" + str(exc)
+  else:
+    return "Dropped and re-created all tables!", 200
+
 
 @app.route('/drop_ping', methods=["GET"])
 def drop_and_ping():

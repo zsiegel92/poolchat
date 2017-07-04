@@ -49,6 +49,8 @@ class Carpooler(db.Model):
 	fieldstate = db.Column(db.String()) #decision tree state
 	mode = db.Column(db.Text)
 
+	firstname = db.Column(db.String())
+	lastname = db.Column(db.String())
 
 	name = db.Column(db.String())
 	email = db.Column(db.String())
@@ -355,15 +357,16 @@ class Carpooler(db.Model):
 					tmp = json.loads(self.selfRep, object_pairs_hook=OrderedDict)
 					tmp[fieldstate]=str(input)
 					self.selfRep = json.dumps(tmp)
-
-					tmp = json.loads(self.selfFormalRep, object_pairs_hook=OrderedDict)
-					tmp[self.quickField(fieldstate).nodeName]=str(input)
-					self.selfFormalRep = json.dumps(tmp)
+					if not getattr(self.quickField(fieldstate),'internalOnly',False):
+						tmp = json.loads(self.selfFormalRep, object_pairs_hook=OrderedDict)
+						tmp[self.quickField(fieldstate).nodeName]=str(input)
+						self.selfFormalRep = json.dumps(tmp)
 
 
 	def to_dict(self):
 		print('in Carpooler.to_dict',file=sys.stderr)
 		todict = json.loads(self.selfFormalRep, object_pairs_hook=OrderedDict)
+		print("todict: " + str(todict),file=sys.stderr)
 		todict['_all']='\n'.join(['%s: %s' % (key, value) for (key, value) in todict.items()])
 		todict.update(json.loads(self.selfRep, object_pairs_hook=OrderedDict))
 		todict['_property']= self.fieldstate

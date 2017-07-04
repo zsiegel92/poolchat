@@ -14,10 +14,12 @@ modesFirst = {'fields':'name','poolfields':'poolName','findPool':'id','tripfield
 # select engaged, fieldstate, name, email, address, num_seats, on_time, must_drive, menu, confirming, "preWindow", "fbId" from carpooler;
 
 fields = {
+	"firstname":nodeOb(nType="String",fieldname='firstname',nodeName="First Name",obField="Carpooler",internalOnly=True),
+	"lastname":nodeOb(nType="String",fieldname='lastname',nodeName="Last Name",obField="Carpooler",internalOnly=True),
 
 	"name":nodeOb(nType="String",fieldname='name',nTitle="your name",next="email",nodeName="Name",obField="Carpooler"),
 
-	"email":nodeOb(nType="String",fieldname='email',nTitle="your email, {name}",customAfterText="Please check {response} for a ping from GroupThere!",obField="Carpooler",next="menu",prefix = 'EMAIL_INPUT/Carpooler/',nodeName="Email",verboseNode=True),
+	"email":nodeOb(nType="String",fieldname='email',nTitle="your email, {firstname}",nQuestion = "What is your email address?",customAfterText="Please check {response} for a ping from GroupThere!",obField="Carpooler",next="menu",prefix = 'EMAIL_INPUT/Carpooler/',nodeName="Email",verboseNode=True),
 
 	"menu":nodeOb(nType="String",fieldname='menu',nTitle="whether you'd like to edit your information",nQuestion="Would you like to change the following?\n{_all}",next='quick_menu',quickChoices=OrderedDict([("All good!",'mode'),("Name",'name'),("Email",'email')]),verboseNode=True,obField='Carpooler'),
 

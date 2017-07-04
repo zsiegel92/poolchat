@@ -113,7 +113,7 @@ def getStarted(sender_id,carpooler=None,referral_text=None,message_text=None):
 	if 'first_name' in info:
 		print('carpooler.name: ' + str(carpooler.name))
 		# carpooler.fieldstate='email'
-		carpooler.externalUpdate(name=str(info['first_name'])+" " + str(info['last_name']),nextFieldState='email')
+		carpooler.externalUpdate(name=str(info['first_name'])+" " + str(info['last_name']),firstname = str(info['first_name']),lastname=str(info['last_name']),nextFieldState='email')
 		print('carpooler.name: ' + str(carpooler.name))
 	if abs(int(info['timezone'])-(-7)) > 2:
 		messenger.say(sender_id,"You may be in the wrong timezone for this! Your timezone is " + str(info['timezone']) + " (see Facebook API Documentation). This tool functions properly for users close to Los Angeles, California.")

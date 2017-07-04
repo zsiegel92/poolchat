@@ -34,7 +34,7 @@ db.init_app(app)
 #webhookviews imports from interactions which imports from app.
 import webhookviews
 import pageviews
-
+import triggerviews
 # from interactions import db
 #Webhook views can be placed here
 #Interactions can be placed here

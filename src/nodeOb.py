@@ -18,7 +18,7 @@ typeCheckers ={"String": (lambda stringArg: isinstance(stringArg,str)),"Integer"
 
 typeWrappers = {"String":str,"Integer":int}
 
-node_args = ['nType','nTitle','nQuestion','next','nextChoices','quickChoices','choices','customAfterText','nodeName','verboseNode','validator','postProcessor','obField','pre_toggle','fieldname','prefix']
+node_args = ['nType','nTitle','nQuestion','next','nextChoices','quickChoices','choices','customAfterText','nodeName','verboseNode','validator','postProcessor','obField','pre_toggle','fieldname','prefix','internalOnly']
 
 def safeformat(str, **kwargs):
 		class SafeDict(dict):
@@ -30,7 +30,7 @@ def safeformat(str, **kwargs):
 
 class nodeOb:
 
-	def __init__(self,nType=None,nTitle = None,nQuestion=None,next=None,nextChoices=None,quickChoices=None,choices=None,customAfterText=None,nodeName=None,verboseNode=False,validator = None,postProcessor=None,obField=None,pre_toggle=None,fieldname=None,prefix = None):
+	def __init__(self,nType=None,nTitle = None,nQuestion=None,next=None,nextChoices=None,quickChoices=None,choices=None,customAfterText=None,nodeName=None,verboseNode=False,validator = None,postProcessor=None,obField=None,pre_toggle=None,fieldname=None,prefix = None,internalOnly=False):
 		self.nType = nType
 		self.nTitle = nTitle
 		self.fieldname = None
@@ -38,7 +38,6 @@ class nodeOb:
 		if not nQuestion:
 			if nTitle:
 				nQuestion = "What is " + str(nTitle) + "?"
-
 		self.nQuestion = nQuestion
 		self.customAfterText=customAfterText
 		self.verboseNode=verboseNode
@@ -46,7 +45,7 @@ class nodeOb:
 		self.postProcessor = postProcessor #Custom formatting for database storage
 		self.obField = obField #eg 'Carpooler','Trip'
 		self.pre_toggle = pre_toggle
-
+		self.internalOnly = internalOnly
 		if (quickChoices and (not next) and (not nextChoices)):
 			self.next='quick_menu'
 		else:

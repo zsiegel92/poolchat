@@ -6,7 +6,7 @@ from interactions import getStarted#NOTE These are NOT needed for app - only for
 import sys
 
 from app import app,request,abort
-from database import db
+from app import db
 
 
 #TODO: Flip through users in db, message them their table has been dropped :)
@@ -30,7 +30,7 @@ def drop_table_only():
   except Exception as exc:
     return "Exception on table drop:\n" + str(exc)
   else:
-    return "Dropped and re-created all tables!", 200
+    return "Dropped and DID NOT re-create all tables!", 200
 
 
 @app.route('/drop_ping', methods=["GET"])

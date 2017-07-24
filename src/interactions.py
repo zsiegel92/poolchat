@@ -249,9 +249,12 @@ def write_and_send_email(recipient_id,prefix,toAddress,carpooler=None,pool=None,
 @ensure_carpooler_notNone(fbId_index=0,carpooler_index=3)
 def input_email(recipient_id,prefix,inputted_email,carpooler=None,pool=None,trip=None):
 	print("in interactions.input_email",file=sys.stderr)
-	if not carpooler:
-		print("Hey, carpooler is none in input_email!!")
-	# 	carpooler=Carpooler.query.filter_by(fbId=recipient_id).first()
+	carpooler2=Carpooler.query.filter_by(email=inputted_email).first()
+	if carpooler2:
+		messenger.say(recipient_id,"Someone already has that email!")
+		#ask for password, etc
+		return
+
 	if prefix !="Carpooler":
 		if not pool:
 			pool=carpooler.getCurrentPool()
@@ -339,36 +342,41 @@ def findDate(recipient_id,inputted_date,carpooler=None):
 @ensure_carpooler_notNone(fbId_index=0,carpooler_index=2)
 def findAddress(sender_id,inputted_address,carpooler=None):
 	print("in interactions.findAddress",file=sys.stderr)
-	messenger.say(sender_id,"Here is a picture of that address! If this isn't right, you can change it later.")
+	try:
+		messenger.say(sender_id,"Here is a picture of that address! If this isn't right, you can change it later.")
 
-	# if not carpooler:
-	# 	carpooler=Carpooler.query.filter_by(fbId=sender_id).first()
+		# if not carpooler:
+		# 	carpooler=Carpooler.query.filter_by(fbId=sender_id).first()
 
-	GMAPS_GEOCODE_API_TOKEN =getattr(config,os.environ['APP_SETTINGS'].split('.')[1]).GMAPS_GEOCODE_API_TOKEN #INTERACTIONS MOVEMENT
-	# GMAPS_GEOCODE_API_TOKEN = app.config['GMAPS_GEOCODE_API_TOKEN']
+		GMAPS_GEOCODE_API_TOKEN =getattr(config,os.environ['APP_SETTINGS'].split('.')[1]).GMAPS_GEOCODE_API_TOKEN #INTERACTIONS MOVEMENT
+		# GMAPS_GEOCODE_API_TOKEN = app.config['GMAPS_GEOCODE_API_TOKEN']
 
-	geocode_url = "https://maps.googleapis.com/maps/api/geocode/json"
-	querystring = {"address":inputted_address,"key":GMAPS_GEOCODE_API_TOKEN}
-	response = requests.request("GET", geocode_url, params=querystring)
-	response=response.json()
+		geocode_url = "https://maps.googleapis.com/maps/api/geocode/json"
+		querystring = {"address":inputted_address,"key":GMAPS_GEOCODE_API_TOKEN}
+		response = requests.request("GET", geocode_url, params=querystring)
+		response=response.json()
 
-	formatted_address =response['results'][0]['formatted_address']
-	lat = response['results'][0]['geometry']['location']['lat']
-	lon = response['results'][0]['geometry']['location']['lng']
+		formatted_address =response['results'][0]['formatted_address']
+		lat = response['results'][0]['geometry']['location']['lat']
+		lon = response['results'][0]['geometry']['location']['lng']
 
 
-	# GMAPS_STATIC_API_TOKEN = app.config['GMAPS_STATIC_API_TOKEN']
-	GMAPS_STATIC_API_TOKEN =getattr(config,os.environ['APP_SETTINGS'].split('.')[1]).GMAPS_STATIC_API_TOKEN #INTERACTIONS MOVEMENT
-	marker_attributes="color:red|{lat},{lon}".format(lat=lat,lon=lon)
-	static_maps_base_url = "https://maps.googleapis.com/maps/api/staticmap"
-	querystring = {"center":str(lat)+","+str(lon),"zoom":"14","size":"400x400","markers":marker_attributes,"key":GMAPS_STATIC_API_TOKEN}
-	response = requests.request("GET", static_maps_base_url, params=querystring,stream=True)
-	full_url= response.url
-	del response
-	# img = response.content
-	messenger.send_image(sender_id,full_url)
-	fillField(sender_id,formatted_address,carpooler=carpooler)
-	db.session.commit()
+		# GMAPS_STATIC_API_TOKEN = app.config['GMAPS_STATIC_API_TOKEN']
+		GMAPS_STATIC_API_TOKEN =getattr(config,os.environ['APP_SETTINGS'].split('.')[1]).GMAPS_STATIC_API_TOKEN #INTERACTIONS MOVEMENT
+		marker_attributes="color:red|{lat},{lon}".format(lat=lat,lon=lon)
+		static_maps_base_url = "https://maps.googleapis.com/maps/api/staticmap"
+		querystring = {"center":str(lat)+","+str(lon),"zoom":"14","size":"400x400","markers":marker_attributes,"key":GMAPS_STATIC_API_TOKEN}
+		response = requests.request("GET", static_maps_base_url, params=querystring,stream=True)
+		full_url= response.url
+		del response
+		# img = response.content
+	except Exception as exc:
+		print(exc)
+		messenger.say(sender_id,"There was an error with that address. Please try again.")
+	else:
+		messenger.send_image(sender_id,full_url)
+		fillField(sender_id,formatted_address,carpooler=carpooler)
+		db.session.commit()
 
 # @Pre: carpooler with fbId = recipient_id exists!
 @ensure_carpooler_notNone(fbId_index=0,carpooler_index=2)

@@ -1,19 +1,26 @@
 from interactions import quick_rules,pester,text_rules,process_referral#Note: have to import webhookviews at bottom of app
 from collections import OrderedDict
+import requests
 from flask import render_template
-
-#IMPORTS FOR TESTING:
-from interactions import getStarted#NOTE These are NOT needed for app - only for drop_populate and testing!
-
 
 from app import app,request,abort
 from database import db
 
-@app.route("/", methods=["GET"])
-def root():
-#    assert app.debug == False
-	try:
-#        messenger.say('1512768535401609','booting now')
-		return render_template('index.html'), 200
-	except Exception as exc:
-		return str(exc)
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+	errors = []
+	results = {}
+	if request.method == "POST":
+		# get url that the user has entered
+		try:
+			url = request.form['url']
+			r = requests.get(url)
+			print(r.text)
+			results = {"hey":"dude","who":"are","you":"?"}
+		except:
+			errors.append(
+				"Unable to get URL. Please make sure it's valid and try again."
+			)
+	return render_template('index.html', errors=errors, results=results)
+

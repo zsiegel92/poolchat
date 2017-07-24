@@ -53,7 +53,7 @@ class Carpooler(db.Model):
 	lastname = db.Column(db.String())
 
 	name = db.Column(db.String())
-	email = db.Column(db.String())
+	email = db.Column(db.String(),unique=True)
 	menu = db.Column(db.String())
 	mode = db.Column(db.String())
 

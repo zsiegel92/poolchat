@@ -1,7 +1,8 @@
 # Stuff by Zach:
 .env
 src/Scratch/
-src/GT_PYTHON/.env
+src/groupThere/Inputs/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

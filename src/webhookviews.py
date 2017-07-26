@@ -2,14 +2,13 @@
 from interactions import quick_rules,text_rules,process_referral,postback_rules
 from app import app,request,abort
 
+
 # webhook for facebook to initialize the bot
 @app.route('/webhook', methods=['GET'])
 def get_webhook():
 	if not 'hub.verify_token' in request.args or not 'hub.challenge' in request.args:
 		abort(400)
 	return request.args.get('hub.challenge')
-
-
 
 
 @app.route('/webhook', methods=['POST'])

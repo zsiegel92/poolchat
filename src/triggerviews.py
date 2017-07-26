@@ -8,6 +8,14 @@ import sys
 from app import app,request,abort
 from app import db
 
+from groupThere.GroupThere import GroupThere
+
+
+@app.route('/do_groupthere', methods=['GET'])
+def do_groupthere():
+  params = GroupThere()
+  return str(params.solution['named_assignments'])
+
 
 #TODO: Flip through users in db, message them their table has been dropped :)
 @app.route('/dropTabs', methods=["GET"])

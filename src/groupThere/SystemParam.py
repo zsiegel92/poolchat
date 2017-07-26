@@ -103,7 +103,7 @@ class SystemParam:
 
 	@sayname
 	def coordinate_and_clean(self):
-		GMAPS_GEOCODE_API_TOKEN='AIzaSyBZOMnco4p7dC-OLv1f1xI-txujDoSCrms'
+		GMAPS_GEOCODE_API_TOKEN=os.environ['GEOCODE_API_KEY']
 		geocode_url = "https://maps.googleapis.com/maps/api/geocode/json"
 		for index, address in enumerate(self.address):
 			print("Geocoding address " + str(index) + ": " + str(address))
@@ -142,7 +142,7 @@ class SystemParam:
 		addresses=self.address
 		leavetime = self.eventDateTime - relativedelta(hours=1)
 
-		APIkey= 'AIzaSyDn-zSmuif-Mf8z16Pm1MLYp41zYcFoaX0'
+		APIkey= os.environ['DISTMAT_API_KEY']
 		# pre_url = 'https://maps.googleapis.com/maps/api/distancematrix/json?'
 		gmaps = googlemaps.Client(key=APIkey)
 		issue = False

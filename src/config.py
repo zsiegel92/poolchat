@@ -14,6 +14,7 @@ class Config(object):
 	SQLALCHEMY_TRACK_MODIFICATIONS = True
 
 
+
 class ProductionConfig(Config):
 	APP_NAME="ZachAndFriends"
 	DEBUG = False
@@ -26,6 +27,8 @@ class ProductionConfig(Config):
 	GEOCODE_API_KEY='AIzaSyBZOMnco4p7dC-OLv1f1xI-txujDoSCrms'
 	EMAIL = os.environ['EMAIL']
 	EMAIL_PASSWORD = os.environ['EMAIL_PASSWORD']
+	SEND_FILE_MAX_AGE_DEFAULT = 1200#seconds
+
 #NOTE: I can change this to:
 
 #    MESSENGER_PLATFORM_ACCESS_TOKEN=os.environ.get('MESSENGER_PLATFORM_ACCESS_TOKEN')
@@ -54,6 +57,7 @@ class DevelopmentConfig(Config):
 	GEOCODE_API_KEY='AIzaSyBZOMnco4p7dC-OLv1f1xI-txujDoSCrms'
 	EMAIL = str(os.environ.get('EMAIL'))
 	EMAIL_PASSWORD = str(os.environ.get('EMAIL_PASSWORD'))
+	SEND_FILE_MAX_AGE_DEFAULT = 0#seconds
 
 class TestingConfig(Config):
 	TESTING = True

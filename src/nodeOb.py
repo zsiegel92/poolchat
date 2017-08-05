@@ -128,7 +128,7 @@ class nodeOb:
 			#TODO: nextNode(response) returns a field name. Instead, return a field title.
 			return "OK, now I know you want to go to " + self.nextNode(response)
 		elif response:
-			return "OK, now I know that " + self.nTitle + " is " + response + "."
+			return "OK, now I know that " + self.nTitle + " is " + str(response) + "."
 		else:
 			return "Ready to keep moving. (nodeOb.afterSet, no response)"
 

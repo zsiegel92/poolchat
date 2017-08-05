@@ -22,7 +22,6 @@ from models import  Carpooler,Pool, Trip,ensure_carpooler_notNone
 
 
 
-
 #TODO: Don't create dicts at function call! Initialize them earlier.
 def postback_rules(recipient_id,postback_text,referral_text=None,carpooler=None,fromUnPrefixer=False):
 	print("in interactions.postback_rules. postback_text = " + str(postback_text) +", fromUnPrefixer = " + str(fromUnPrefixer),file=sys.stderr)
@@ -43,6 +42,7 @@ def postback_rules(recipient_id,postback_text,referral_text=None,carpooler=None,
 		"CREATE_NEW_POOL":(lambda: newPool(recipient_id,carpooler)),
 		"FIND_ADDRESS":(lambda *inputted_address_args: findAddress(recipient_id,"/".join(inputted_address_args),carpooler)),
 		"FIRENOTICE":(lambda firenotice: set_fire_notice(recipient_id,firenotice,carpooler)),
+		"CONFIRM_PREWINDOW":(lambda preWindow: confirm_preWindow(recipient_id,preWindow,carpooler)),
 		"FIND_POOL":(lambda inputted_pool_id: findPool(recipient_id,inputted_pool_id,carpooler)),
 		"SWITCH_MODE":(lambda mode: switchMode(recipient_id,mode,carpooler)),
 		"GOTO_NODE":(lambda nodeName: go_to_node(recipient_id,nodeName,carpooler)),
@@ -138,11 +138,46 @@ def set_fire_notice(recipient_id,firenotice,carpooler=None):
 	fillField(recipient_id,firenotice,carpooler=carpooler,afterText=False)
 	db.session.commit()
 	pool = carpooler.getCurrentPool()
-	fireDT = pool.eventDateTime + relativedelta(hours=-int(firenotice))
-	date = str(fireDT.date().strftime("%B") + " " + fireDT.date().strftime("%d") + ", " + fireDT.date().strftime("%Y"))
-	time = str(fireDT.time().strftime("%I:%M %p"))
+
+	# fireDT = pool.eventDateTime + relativedelta(hours=-int(firenotice))
+	# date = str(fireDT.date().strftime("%B") + " " + fireDT.date().strftime("%d") + ", " + fireDT.date().strftime("%Y"))
+	# time = str(fireDT.time().strftime("%I:%M %p"))
+
+	fireDT=pool.eventDateTime
+	[date,time,fireDt]=findRelativeDelta(fireDT,firenotice,mode='hours',delta_after=-1)
 	message = "OK, now I know that instructions should be sent out " + str(firenotice) + " hours before the event starts on " + str(pool.eventDate) + " at " + str(pool.eventTime) + ".\n\nInstructions will be send out on: " + date + " at " + time + "."
 	messenger.say(recipient_id,message)
+
+@ensure_carpooler_notNone(fbId_index=0,carpooler_index=2)
+def confirm_preWindow(recipient_id,inputted_delta,carpooler=None):
+	print("in interactions.confirm_preWindow")
+	fillField(recipient_id,inputted_delta,carpooler=carpooler,afterText=False)
+	db.session.commit()
+
+	pool = carpooler.getCurrentPool()
+	dt = pool.eventDateTime
+	[date,time,leaveDt] = findRelativeDelta(dt,inputted_delta,mode='minutes',delta_after=-1)
+
+	message = "The event starts on " + str(pool.eventDate) + " at " +str(pool.eventTime) + ".\nPlease be ready to go " + str(inputted_delta)+" minutes prior, on " + str(date) + " at " + str(time) + "."
+
+	messenger.say(recipient_id, message)
+
+
+def findRelativeDelta(dt,inputted_delta,mode='minutes',delta_after=-1):
+	print("in interactions.findRelativeDelta")
+	if mode not in ['minutes','hours','days']:
+		return "ERROR"
+	difDt = dt + relativedelta(**{mode:delta_after*int(inputted_delta)})
+	date = str(difDt.date().strftime("%B") + " " + difDt.date().strftime("%d") + ", " + difDt.date().strftime("%Y"))
+	time = str(difDt.time().strftime("%I:%M %p"))
+	return [date,time,difDt]
+
+
+
+
+
+
+
 
 @ensure_carpooler_notNone(fbId_index=0,carpooler_index=2)
 def go_to_node(recipient_id,nodeName,carpooler=None):
@@ -175,12 +210,12 @@ def switchMode(recipient_id,mode,carpooler=None):
 
 # @Pre: carpooler with fbId = recipient_id exists!
 @ensure_carpooler_notNone(fbId_index=0,carpooler_index=1)
-def newPool(recipient_id,carpooler=None):
+def newPool(recipient_id,carpooler=None,verbose=True):
 	print("in interactions.newPool",file=sys.stderr)
 	# if not carpooler:
 	# 	carpooler=Carpooler.query.filter_by(fbId=recipient_id).first()
 
-	trip=Trip()
+	trip=Trip(carpooler_id = carpooler.id)
 	trip.pool=Pool()
 	carpooler.pools.append(trip)
 	#Have to populate carpooler.pools and trip.pool (at least) before adding/committing due to non-null constraint!
@@ -195,9 +230,11 @@ def newPool(recipient_id,carpooler=None):
 
 	db.session.commit()
 
-	tripstring = carpooler.describe_trips()
 
-	messenger.say(recipient_id,"You just created a carpool! Your NEW carpool's 'Pool ID' is " + str(trip.pool.id) + ". Don't forget about your other trips! " + tripstring)
+
+	if verbose:
+		tripstring = carpooler.describe_trips()
+		messenger.say(recipient_id,"You just created a carpool! Your NEW carpool's 'Pool ID' is " + str(trip.pool.id) + ". Don't forget about your other trips! " + tripstring)
 
 def write_and_send_email(recipient_id,prefix,toAddress,carpooler=None,pool=None,trip=None):
 	print("in interactions.write_and_send_email",file=sys.stderr)
@@ -314,6 +351,10 @@ def ampmSwitch(recipient_id,field_to_switch=None,mode=None,carpooler=None):
 		print("Error in interactions.ampmSwitch",file=sys.stderr)
 		print(str(exc),file=sys.stderr)
 
+
+
+
+
 @ensure_carpooler_notNone(fbId_index=0,carpooler_index=2)
 def findDate(recipient_id,inputted_date,carpooler=None):
 	print("in interactions.findDate",file=sys.stderr)
@@ -348,7 +389,7 @@ def findAddress(sender_id,inputted_address,carpooler=None):
 		# if not carpooler:
 		# 	carpooler=Carpooler.query.filter_by(fbId=sender_id).first()
 
-		GMAPS_GEOCODE_API_TOKEN =getattr(config,os.environ['APP_SETTINGS'].split('.')[1]).GMAPS_GEOCODE_API_TOKEN #INTERACTIONS MOVEMENT
+		GMAPS_GEOCODE_API_TOKEN =getattr(config,os.environ['APP_SETTINGS'].split('.')[1]).GEOCODE_API_KEY #INTERACTIONS MOVEMENT
 		# GMAPS_GEOCODE_API_TOKEN = app.config['GMAPS_GEOCODE_API_TOKEN']
 
 		geocode_url = "https://maps.googleapis.com/maps/api/geocode/json"
@@ -389,7 +430,7 @@ def findPool(recipient_id,pool_id,carpooler=None):
 	if pool:
 		trip = Trip.query.filter_by(carpooler_id=carpooler.id,pool_id=pool.id).first()
 		if not trip:
-			trip = Trip()
+			trip = Trip(carpooler_id = carpooler.id,pool_id = pool.id)
 			trip.pool=pool
 			carpooler.pools.append(trip)
 			messenger.say(recipient_id,"You just joined the carpool with ID " + str(pool.id)+ "!")

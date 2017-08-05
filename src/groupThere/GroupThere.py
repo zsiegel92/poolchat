@@ -89,11 +89,11 @@ def GroupThere(inputFilename=None,queryOrLoad='load'):
 	# (params.solution['fun'],params.solution['x'],params.solution['success'])=optimizeCVXPY(params.model)
 	say("optimization complete")
 	say("Assigning rides")
-	(params.solution['assignments'],params.solution['named_assignments'])=gen_assignment_fromParams(params)
+	params.solution['assignments']=gen_assignment_fromParams(params)
 
 	say("Rides assigned")
-	for named_ass in params.solution['named_assignments']:
-		print(named_ass)
+	for ass in params.solution['assignments']:
+		print(ass['names'])
 	os.system('say "GroupThere Complete"')
 	return params
 

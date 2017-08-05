@@ -182,7 +182,7 @@ class Carpooler(db.Model):
 		if hasattr(pool,fieldstate):
 			setattr(pool,fieldstate,value)
 			pool.updateSelfRepresentations(fieldstate,value)
-
+			print("setting self.getGurrentPool()." + str(fieldstate) + " = " + str(value))
 	def getCurrentTrip(self):
 		print('in getCurrentTrip',file=sys.stderr)
 		#checks if self.pools is empty
@@ -200,6 +200,7 @@ class Carpooler(db.Model):
 		if hasattr(trip,fieldstate):
 			setattr(trip,fieldstate,value)
 			trip.updateSelfRepresentations(fieldstate,value)
+			print("setting self.getCurrentTrip()." + str(fieldstate) + " = " + str(value))
 
 	def getTree(self,mode=None):
 		namespace = __import__(__name__)
@@ -473,8 +474,12 @@ class Trip(db.Model):
 	poolRepLoaded = db.Column(db.Integer)
 	carpoolerRepLoaded = db.Column(db.Integer)
 
-	def __init__(self):
+	def __init__(self,carpooler_id=None,pool_id=None):
 		super().__init__()
+		if carpooler_id is not None:
+			self.carpooler_id = carpooler_id
+		if pool_id is not None:
+			self.pool_id = pool_id
 		self.selfRep = "{}"
 		self.selfFormalRep="{}"
 		self.poolRepLoaded=0

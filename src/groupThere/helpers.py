@@ -344,7 +344,9 @@ def gen_assignment(Aeq,x,name,array_duration,boolList_canBeLate,int_minsAvailFor
 	for ass in assignments:
 		print(itemgetter(*ass['bestOrder'])(name))
 		named_assignments.append(itemgetter(*ass['bestOrder'])(name))
-	return (assignments,named_assignments)
+		ass['names']=itemgetter(*ass['bestOrder'])(name)
+
+	return assignments
 
 
 class shortTime:

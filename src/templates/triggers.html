@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html ng-app="TriggerPane">
+    <head>
+        <title>Triggers</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <style>
+            .container {
+                max-width: 1000px;
+            }
+        </style>
+    </head>
+    <body ng-controller="TriggerController">
+        <div class="container">
+            <div class="row">
+                <div class='col' style="float:left; width:50%;">
+                    <h1> Actions </h1>
+
+                    <h2>Generic Auto-Populate</h2>
+                        <h2>POST</h2>
+                            <br>
+                            <form action="/triggers/" method="post" target="_self">
+                                Number of Generic Participants: <input type="number" name="n" value=5><br>
+                                <input type="submit" value="Submit POST">
+                            </form>
+                        <h3>GET</h3>
+                            <br>
+                            <form action="/triggers/" method="get" target="_self">
+                                Number of Generic Participants: <input type="number" name="n" value=5><br>
+                                <input type="submit" value="Submit GET">
+                            </form>
+                        <h3>Enqueue (Get)</h3>
+                            <br>
+                            <form action="/q_populate/" method="get" target="_blank">
+                                Number of Generic Participants: <input type="number" name="n" value=5><br>
+                                <input type="submit" value="Submit GET">
+                            </form>
+                    <h2>Angular Enqueue (Get)</h2>
+                        <br>
+                        <form role="form" ng-submit="getResult()">
+                                Number of Generic Participants: <input type="number" name="n" class="form-control" id="n-box" ng-init="n=10"placeholder="Enter a number" style="max-width: 300px;" ng-model="n" required>
+                                Number Pools per Person (or max): <input type="number" name="numberPools" class="form-control" id="numberPools-box" ng-init="numberPools=4" placeholder="Enter a number" style="max-width: 300px;" ng-model="numberPools" required>
+                            <button type="submit" ng-click="randGen=false" ng-init="randGen=false" class="btn btn-default">Submit</button>
+                            <button type="submit" ng-click="randGen=true" ng-init="randGen=false" class="btn btn-default">Submit RANDOM PARAMS</button>
+                        </form>
+                    <h2>Drop and Recreate Tables </h2>
+                    <br>
+                        <form action='/triggers/' method='get' target='_self'>
+                            <button type="submit" name ='submit' value='drop_tabs' onclick="alert('Dropping all tabs!')">Drop Tabs GET</button>
+                        </form>
+                        <br>
+                        <form action='/triggers/' method='post' target='_self'>
+                            <button type="submit" name ='submit' value='drop_tabs' onclick="alert('Dropping all tabs!')">Drop Tabs POST</button>
+                        </form>
+                        <br>
+                        <form role="form" ng-click="clearScope()" ng-submit="dropTabs()">
+                            <button type="submit">Drop Tabs ANGULAR</button>
+                        </form>
+
+                </div><!-- Column -->
+                <div class='col' style="float:right; width:50%;">
+                    <h1>OUTPUTS</h1>
+
+                    <div ng-show="resultText">
+                        <h1> Raw Result Text</h1>
+                        {% raw %}
+                        {{resultText}}
+                        {% endraw %}
+                    </div>
+                    <div ng-show="resultJSON">
+                        <br>
+                           <!--  <h2>Text Output</h2>
+                                {% raw %}
+                                <div id="results">
+
+                                        {{resultText}}
+
+                                </div>
+                                {% endraw %} -->
+                            <h2>Object-Iterated Dict Output:</h2>
+                            {% raw %}
+                            <ul>
+                                <li ng-repeat="(name,value) in resultJSON as results">
+                                    Person: {{name}}
+                                    <ul>
+                                        <!-- <li>Full Description: {{value}}</li> -->
+                                        <li> Carpooler info: {{value.Carpooler}}   </li>
+                                        <li> Pool info: {{value.Pool}}   </li>
+                                        <li> Trip info: {{value.Trip}}   </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                            {% endraw %}
+                    </div>
+                   <!--  {% raw %}
+                    <div ng-controller="repeatController">
+                    <input type="search" ng-model="q" placeholder="filter friends..." aria-label="filter friends" />
+                    <ul class="example-animate-container">
+                        <li class="animate-repeat" ng-repeat="(name,value) in resultJSON as results | filter:q">
+                            Person: {{name}}
+                            <ul>
+                                <li>Full Description: {{value}}</li>
+                                <li> Carpooler info: {{value.Carpooler}}   </li>
+                                <li> Pool info: {{value.Pool}}   </li>
+                                <li> Trip info: {{value.Trip}}   </li>
+                            </ul>
+                        </li>
+                        <li class="animate-repeat" ng-if="results.length === 0">
+                         <strong>No results found...</strong>
+                        </li>
+                    </ul>
+                    </div>
+                    {% endraw %} -->
+                    <div ng-show="resultJSON">
+                        <h2>Raw JSON Output:</h2>
+                        {% raw %}
+                        {{resultJSON}}
+                        {% endraw %}
+                        <br>
+                    </div>
+
+                    <div ng-show="output_list">
+                        <h1>Output Carpoolers</h1>
+                            <ol id="output">
+                            {% for output in output_list %}
+                                {% if output is mapping %}
+                                    <li> <ul> {%for key, val in output.items() %}
+                                        <li> {{key}} : {{val}}</li> {% endfor %}</ul> </li>
+                                {% else %}
+                                <li> {{output}} : {{val}}</li>
+                                {% endif %}
+                            {% endfor %}
+                            </ol>
+                        <br>
+                    </div>
+                    <div ng-show="request_vars">
+                        <h1>Request Variables </h1>
+                            <ul id="request_var_list">
+                            {% for key, val in request_vars.items() %}
+                                <li> {{key}} : {{val}} </li>
+                            {% endfor %}
+                            </ul>
+                            <br>
+                    </div>
+                </div><!-- Column -->
+            </div><!-- Row -->
+        </div><!-- Container -->
+        <br><br>
+        <script src="//code.jquery.com/jquery-2.2.1.min.js"></script>
+        <script src="//netdna.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.5.4/angular.min.js"></script>
+        <script src="{{ url_for('static', filename='main.js') }}"></script>
+    </body>
+</html>
+

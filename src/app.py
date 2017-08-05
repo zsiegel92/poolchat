@@ -30,11 +30,18 @@ db.init_app(app)
 # 	from messengerbot import messenger #imported by interactions
 
 
+from utils import KwargConverter
+app.url_map.converters['kwarg'] = KwargConverter
+
+
+
 #NOTE: Have to import webhookviews at the END because of circular import.
 #webhookviews imports from interactions which imports from app.
 import webhookviews
 import pageviews
 import triggerviews
+
+import unusedViews
 # from interactions import db
 #Webhook views can be placed here
 #Interactions can be placed here

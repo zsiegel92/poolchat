@@ -18,6 +18,12 @@ from interactions import newPool,findRelativeDelta
 from models import  Carpooler,Pool, Trip,ensure_carpooler_notNone
 from groupThere.GroupThere import GroupThere
 
+from groupThere.MailParam import MailParam
+from groupThere.SystemParam import SystemParam
+from groupThere.helpers import sayname, generate_groups_fromParam, generate_model,optimizePulp,gen_assignment,gen_assignment_fromParams, test_groups,test_model,groupsToLists,shortTime#, generate_groups
+
+
+
 from app import app,request,abort
 from database import db
 
@@ -300,11 +306,26 @@ def create_generic_parameters(n=1,numberPools=None,randGen=False):
 
 @app.route('/q_groupthere/', methods=['GET','POST'])
 def q_groupthere():
+	print('in q_groupthere')
+	pool_id = request.args.get('pool_id',None)
+	if pool_id is None:
+		data= request.get_json()
+		if data is not None:
+			pool_id = data.get("pool_id",None)
+	print("pool_id is " + str(pool_id))
 
-	job = q.enqueue_call(func=GroupThere,result_ttl=5000)
+	job = q.enqueue_call(func=doGroupThere,kwargs={'pool_id':pool_id},result_ttl=5000)
+	# kwargs = {'n':n,'randGen': randGen,'numberPools':numberPools}
 	print("job.get_id() = " + str(job.get_id())) #job.result will store output of populate_generic(n), which is "output_list" in the non-enqueued version above
 	return job.get_id()
 
+def doGroupThere(pool_id=None):
+	if pool_id is not None:
+		pass
+		#make mailparam
+		#make systemparam
+		#etc
+	return GroupThere()
 
 @app.route("/GTresults/", methods=['POST'])
 def post_GT_results():

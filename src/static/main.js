@@ -136,9 +136,9 @@
 	    $log.log("Calling GroupThere");
 
 	    // get the number of generic participants from the input
-
+	    var pool_id = $scope.pool_id
 	    // fire the API request
-	    $http.post('/q_groupthere/').
+	    $http.post('/q_groupthere/',{'pool_id':pool_id}).
 	      success(function(results) {
 	        $log.log(results);
 	        $log.log("For full results, visit: /GTresults/" + results)

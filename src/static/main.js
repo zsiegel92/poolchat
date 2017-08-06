@@ -67,6 +67,7 @@
 	  	$scope.output_list=undefined;
 	  	$scope.viewPool=undefined;
 	  	$scope.haventStarted=undefined;
+	  	$scope.GT_JSON=undefined;
 	  };
 
 	   $scope.isNotEmpty = function(elementId) {

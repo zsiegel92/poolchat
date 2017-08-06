@@ -86,6 +86,7 @@ def GroupThere(inputFilename=None,queryOrLoad='load'):
 
 	say("optimizing")
 	(params.solution['fun'],params.solution['x'],params.solution['success']) = optimizePulp(params.model)
+	print("Solution success: " + str(params.solution['success']))
 	# (params.solution['fun'],params.solution['x'],params.solution['success'])=optimizeCVXPY(params.model)
 	say("optimization complete")
 	say("Assigning rides")

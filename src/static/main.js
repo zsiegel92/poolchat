@@ -130,7 +130,19 @@
 	        $scope.resultText="error"
 	      });
 	  };
-
+	  $scope.repeatGroupThere = function() {
+	  	$log.log("Calling repeatGroupThere");
+	    // fire the API request
+	    $http.post('/q_repeat_groupthere/').
+	      success(function(results) {
+	        $log.log(results);
+	        $log.log("For full results, visit: /GTresults/" + results)
+	        getGTList(results);
+	      }).
+	      error(function(error) {
+	        $log.log(error);
+	      });
+	  };
 	  $scope.doGroupThere = function() {
 
 	    $log.log("Calling GroupThere");

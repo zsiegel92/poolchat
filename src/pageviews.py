@@ -13,6 +13,7 @@ from rq import Queue
 from rq.job import Job
 from worker import conn
 q = Queue(connection=conn)
+import pickle
 
 from interactions import newPool,findRelativeDelta
 from models import  Carpooler,Pool, Trip,ensure_carpooler_notNone
@@ -274,7 +275,7 @@ def create_generic_parameters(n=1,numberPools=None,randGen=False):
 		poolName = "poolName_" + str(k)
 		numberDaysInFuture= (random.randint(1,35) if randGen else 10)
 		[eventDate,eventTime,eventDateTime] = findRelativeDelta(today,numberDaysInFuture,mode='days',delta_after=1)
-		latenessWindow= (10*random.randint(0,3) if randGen else 30)
+		latenessWindow= (10*random.randint(2,3) if randGen else 30)
 		eventAddress = real_event_addresses[k]
 		eventContact = "555-555-5555_" + str(k)
 		eventEmail = "eventEmail_"+str(k)+"@notARealThing.com"
@@ -284,15 +285,16 @@ def create_generic_parameters(n=1,numberPools=None,randGen=False):
 
 		##Trip
 		tripAddress=real_addresses[k]
-		num_seats = (random.randint(0,1)*random.randint(1,4) if randGen else 4)
-		preWindow = (5*random.randint(1,9) if randGen else 30)
-		on_time = (random.randint(0,1) if randGen else 0)
-		must_drive = (random.randint(0,1) if (randGen and num_seats>0) else 0)
+		a=random.randint(0,1)
+		num_seats = (a*4 + (1-a)*2*random.randint(0,1) if randGen else 4)
+		preWindow = (10*random.randint(2,5) if randGen else 30)
+		on_time = (random.randint(0,1)*random.randint(0,1) if randGen else 0)
+		must_drive = (random.randint(0,1)*random.randint(0,1) if (randGen and num_seats>0) else 0)
 
 		#formalrep? created and maintained by externalUpdate.
 		carpoolDict = {'first':first,'last':last,'name':name,'email':email}
 		if k<=numberPools:
-			poolDict = {'poolName':poolName,'latenessWindow':latenessWindow,'eventAddress':eventAddress,'eventContact':eventContact,'eventEmail':eventEmail,'eventHostOrg':eventHostOrg,'signature':signature,'fireNotice':fireNotice}
+			poolDict = {'poolName':poolName,'latenessWindow':latenessWindow,'eventAddress':eventAddress,'eventContact':eventContact,'eventEmail':eventEmail,'eventHostOrg':eventHostOrg,'signature':signature,'fireNotice':fireNotice,'eventDate':eventDate,'eventTime':eventTime,'eventDateTime':eventDateTime}
 		else:
 			numPoolsToJoin=min((random.randint(1,numberPools) if randGen else numberPools),k)#All have been created thus far, but if code is changed, it will definitely be true that at most k have been created at this point.
 			poolDict={'joinPools':list(range(1,numPoolsToJoin+1))}
@@ -319,12 +321,96 @@ def q_groupthere():
 	print("job.get_id() = " + str(job.get_id())) #job.result will store output of populate_generic(n), which is "output_list" in the non-enqueued version above
 	return job.get_id()
 
+
+@app.route('/q_repeat_groupthere/', methods=['GET','POST'])
+def q_repeat_groupthere():
+	print('in q_repeat_groupthere')
+	job = q.enqueue_call(func=GroupThere,result_ttl=5000)
+	# kwargs = {'n':n,'randGen': randGen,'numberPools':numberPools}
+	print("job.get_id() = " + str(job.get_id())) #job.result will store output of populate_generic(n), which is "output_list" in the non-enqueued version above
+	return job.get_id()
+
+
+
 def doGroupThere(pool_id=None):
 	if pool_id is not None:
-		pass
-		#make mailparam
-		#make systemparam
-		#etc
+		try:
+			with app.app_context():
+				pool = Pool.query.filter_by(id=pool_id).first()
+				assert(pool is not None)
+				print("creating mailParam!")
+				mailParam=MailParam(
+						eventDate=str(pool.eventDate),
+						eventTime=str(pool.eventTime),
+						eventName = str(pool.poolName),
+						eventLocation = str(pool.poolName) + " at " + str(pool.eventAddress),
+						eventAddress= str(pool.eventAddress),
+						eventContact= str(pool.eventContact),
+						eventEmail = str(pool.eventEmail),
+						email_password = "junk",
+						email_user = "junk@junk.com",
+						eventHostOrg = str(pool.eventHostOrg),
+						signature = str(pool.signature),
+						latenessWindow= str(pool.latenessWindow)
+					)
+				print("created mailParam!")
+				# email = [trip.member.email for trip in pool.members]
+				# name = [trip.member.name for trip in pool.members]
+				# canLeaveAt = [trip.preWindow for trip in pool.members] #DIFFERENT FROM SP CONSTRUCTOR
+				email = []
+				name = []
+				address = []
+				numberCarSeats =[]
+				minsAvail=[]
+				extra=[]
+				must_drive= []
+				for trip in pool.members:
+					email.append(trip.member.email) #trip.member.email is String
+					name.append(trip.member.name) #trip.member.name is String
+					address.append(trip.address) #trip.address is String
+					numberCarSeats.append(trip.num_seats) #trip.num_seats is int
+					minsAvail.append(trip.preWindow) #CONVERT TO DATETIME #trip.preWindow is int
+					extra.append(trip.on_time) #OPPOSITE/INVERTED #trip.on_time is int
+					must_drive.append(trip.must_drive) #trip.must_drive is int
+
+				print("creating SystemParam!")
+				params= SystemParam(email=email,name=name,address=address,numberCarSeats=numberCarSeats,minsAvail=minsAvail,extra=extra,must_drive=must_drive)
+				print("created SystemParam!")
+				params.numel = len(email)
+				params.get_event_info_from_mailparam(mailParam)
+				print("got params info from mailparam")
+				params.coordinate_and_clean()
+				print("did coordinate_and_clean")
+				params.gen_dist_mat()
+				with open("params/GTparams_"+str(datetime.now())[0:10]+".txt",'wb') as openfile:
+					pickle.dump(params.to_dict(),openfile)
+				with open("params/GTparams_prev.txt",'wb') as openfile:
+					pickle.dump(params.to_dict(),openfile)
+				# pickleFile = "params/GTparams_prev.txt"
+				# print("Loading all parameters from file: " + pickleFile)
+				# params=SystemParam(**pickle.load(open(pickleFile,'rb')))
+				print("wrote pickles!")
+				print(params)
+
+				n=params.numel
+				mx=max(list(map(int,params.numberCarSeats)))
+				(groups,times) = generate_groups_fromParam(params,testing=True)
+				print("generated groups")
+				params.groups['groups']=groups
+				params.groups['times'] = times
+				params.model = generate_model(groups,times,n,mx)
+				(params.solution['fun'],params.solution['x'],params.solution['success']) = optimizePulp(params.model)
+				print("Solution success: " + str(params.solution['success']))
+				params.solution['assignments']=gen_assignment_fromParams(params)
+				for ass in params.solution['assignments']:
+					print(ass['names'])
+				return params
+				#make mailparam
+				#make systemparam
+				#etc
+		except Exception as exc:
+			print("Error creating GT params. Returning from hardcoded dummy GroupThere params.")
+			print(exc)
 	return GroupThere()
 
 @app.route("/GTresults/", methods=['POST'])

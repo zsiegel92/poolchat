@@ -11,7 +11,7 @@ import time
 
 
 class SystemParam:
-	def __init__(self,email=[],name=[],address=[],numberCarSeats =[],canLeaveAt=[],extra=[],latenessWindow=0,must_drive=[],timestamps=[],headers_colNames = [],eventAddress=None,eventDate=None,eventTime=None,eventDateTime=None,eventCoords=None,dist_mats = {'Distances':None,'Durations':None},dists_to_event={'Distances':None,'Durations':None},coords =[],numel=None,model={'A':None,'Aeq':None,'b':None,'beq':None,'f':None},solution={'x':None,'fun':None,'success':None,'assignments':None},filename=None,groups={'groups':None,'times':None}, **kwargs):
+	def __init__(self,email=[],name=[],address=[],numberCarSeats =[],canLeaveAt=[],minsAvail=None,extra=[],latenessWindow=0,must_drive=[],timestamps=[],headers_colNames = [],eventAddress=None,eventDate=None,eventTime=None,eventDateTime=None,eventCoords=None,dist_mats = {'Distances':None,'Durations':None},dists_to_event={'Distances':None,'Durations':None},coords =[],numel=None,model={'A':None,'Aeq':None,'b':None,'beq':None,'f':None},solution={'x':None,'fun':None,'success':None,'assignments':None},filename=None,groups={'groups':None,'times':None}, **kwargs):
 		self.email = email
 		self.name = name
 		self.address= address
@@ -22,6 +22,8 @@ class SystemParam:
 		self.must_drive=must_drive
 		self.timestamps = timestamps
 		self.headers_colNames = headers_colNames
+
+		self.minsAvail=minsAvail
 
 		self.must_drive=[True if ((int(val)>0) and (self.must_drive[idx]!='No')) else False for idx,val in enumerate(self.numberCarSeats)]
 
@@ -306,7 +308,11 @@ class SystemParam:
 	@sayname
 	def make_generate_groups_input(self):
 		boolList_canBeLate = list(map((lambda s: s!='No'),self.extra))
-		int_minsAvailForTransit = self.canLeaveToMinsAvailable(self.canLeaveAt,self.latenessWindow)
+		if (self.minsAvail is not None):
+			int_minsAvailForTransit=self.minsAvail
+		elif (self.canLeaveAt is not None):
+			int_minsAvailForTransit = self.canLeaveToMinsAvailable(self.canLeaveAt,self.latenessWindow)
+
 		int_numCarSeats = list(map(int,self.numberCarSeats))
 		must_drive = list(map((lambda s: s!='No'),self.must_drive))
 

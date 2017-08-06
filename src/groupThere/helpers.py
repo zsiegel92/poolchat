@@ -39,19 +39,28 @@ def generate_groups_bits(array_duration,boolList_canBeLate,int_minsAvailForTrans
 	maxNumberSeats=max(int_numCarSeats)
 	array_duration=np.floor(array_duration/60)#convert to minutes
 	doubleList_durs_toEvent = np.floor(np.array(doubleList_durs_toEvent)/60)
+	try:
+		if len(doubleList_durs_toEvent.shape)>1:
+			doubleList_durs_toEvent = doubleList_durs_toEvent[0]
+	except:
+		print("doubleList_durs_toEvent inexplicably already a list...")
 	numPeople = len(int_minsAvailForTransit)
 	st = shortTime(array_duration,maxNumberSeats,boolList_canBeLate,int_minsAvailForTransit,int_numCarSeats,doubleList_durs_toEvent,int_latenessWindow,must_drive)
-
-
 	groups = {}
 	times = {}
 	drivers = {i:bax((1 if val>=i else 0 for val in int_numCarSeats)) for i in range(1,maxNumberSeats+1)}
 	manditory_drivers=bax((1 if ((val>=1) and (must_drive[idx])) else 0 for idx,val in enumerate(int_numCarSeats)))
+
 	mandk = {k:manditory_drivers&drivers[k] for k in range(1,maxNumberSeats+1)}
 	mand_not_k = {k:manditory_drivers&(drivers[k].inverted()) for k in range(1,maxNumberSeats+1)}
-
 	#Generate groups of size 1
 	groups[1] = bax((1 if drivers[1][j]==1 else 0 for j in range(0,numPeople)),enum=en)
+
+	# doubleList_durs_toEvent: [[ 10.   0.  28.]]
+	# groups: {1: bitarray('010')}
+	# Error creating GT params. Returning from hardcoded dummy GroupThere params.
+	# index 1 is out of bounds for axis 0 with size 1
+
 	times[1]=[doubleList_durs_toEvent[i] for i in range(0,numPeople) if groups[1][i]==1]
 
 	calledForSingleDriver=False
@@ -329,14 +338,20 @@ def gen_assignment_fromParams(params):
 #This function outputs a list of tuples consisting of participants in each carload. The tuples are ordered with driver at index 0 in pickup-order.
 @sayname
 def gen_assignment(Aeq,x,name,array_duration,boolList_canBeLate,int_minsAvailForTransit,int_numCarSeats,doubleList_durs_toEvent,int_latenessWindow,must_drive):
-	print("Aeq: " + str(Aeq))
 	maxNumberSeats=max(int_numCarSeats)
 	array_duration=np.floor(array_duration/60)#convert to minutes
 	doubleList_durs_toEvent = np.floor(np.array(doubleList_durs_toEvent)/60)
+	try:
+		if len(doubleList_durs_toEvent.shape)>1:
+			doubleList_durs_toEvent = doubleList_durs_toEvent[0]
+	except:
+		print("doubleList_durs_toEvent inexplicably already a list...")
 
 	st = shortTime(array_duration,maxNumberSeats,boolList_canBeLate,int_minsAvailForTransit,int_numCarSeats,doubleList_durs_toEvent,int_latenessWindow,must_drive)
+
 	cols = Aeq[:,x.nonzero()[1]]#EDITED FOR FLASK
 	cols=np.array(list(map(np.ndarray.flatten,cols)))
+
 	gps = [list((i for i in range(cols.shape[0]) if cols[i,j]==1)) for j in range(cols.shape[1])]
 	assignments=list(map(st.returnFormattedGroup,gps))
 

@@ -62,7 +62,9 @@
                              Pool ID: <input type="number" name="pool_id" class="form-control" id="pool_id-box_for_GT" ng-init="pool_id=1" placeholder="Enter a Carpool ID number" style="max-width: 300px;" ng-model="pool_id" required>
                             <button type="submit">Do GroupThere</button>
                         </form>
-
+                        <form role="form" ng-click="clearScope()" ng-submit="repeatGroupThere()">
+                            <button type="submit">REPEAT GroupThere (same params, no API queries)</button>
+                        </form>
 <!--                     <h2>Generic Auto-Populate</h2>
                         <h2>POST</h2>
                             <br>

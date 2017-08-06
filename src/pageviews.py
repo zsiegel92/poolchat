@@ -5,6 +5,7 @@ import random
 from flask import render_template,url_for,jsonify,json,make_response
 
 from collections import OrderedDict
+import numpy as np
 
 from datetime import datetime
 from rq import Queue
@@ -14,7 +15,7 @@ q = Queue(connection=conn)
 
 from interactions import newPool,findRelativeDelta
 from models import  Carpooler,Pool, Trip,ensure_carpooler_notNone
-
+from groupThere.GroupThere import GroupThere
 
 from app import app,request,abort
 from database import db
@@ -38,6 +39,22 @@ def index():
 				"Unable to get URL. Please make sure it's valid and try again."
 			)
 	return render_template('index.html', errors=errors, results=results)
+
+@app.route('/view_pool/<int:number>/',methods=['GET'])
+def call_view_pool(number):
+	poolDict=view_pool(number)
+	poolRep = '<br>'.join(['{0}: {1}'.format(key, value) for (key, value) in poolDict.items()])
+	return poolRep,200
+
+@app.route('/view_pool/',methods=['POST'])
+def post_call_view_pool():
+	# pool_id = request.args.get('pool_id',None)
+	data = json.loads(request.data.decode())
+	pool_id = data.get("pool_id",None)
+	print("POOL ID IS " + str(pool_id))
+	poolDict=view_pool(pool_id)
+	return jsonify(poolDict),200
+
 
 
 #TODO: Flip through users in db, message them their table has been dropped :)
@@ -130,9 +147,10 @@ def post_get_results():
 
 @app.route("/results/<job_key>", methods=['GET'])
 def get_results(job_key):
-
-	job = Job.fetch(job_key, connection=conn)
-
+	try:
+		job = Job.fetch(job_key, connection=conn)
+	except:
+		return "No such job!",200
 	if job.is_finished:
 		result=job.result
 		print("Job finished in get_results: " + str(result))
@@ -144,8 +162,6 @@ def get_results(job_key):
 	else:
 		# print("PROBLEM IS HERE?!")
 		return "Still working on it!", 202
-
-
 
 #NOTE: All POOL creators are ONLY IN THAT SINGLE POOL
 def populate_generic(n,numberPools=2,randGen = False):
@@ -206,10 +222,31 @@ def populate_generic(n,numberPools=2,randGen = False):
 		return dicts
 
 
+def get_real_generic_addresses(n):
+	import csv
+	filename='addresses.txt'
+	addresses=[]
+	with open(filename,'rt',newline='') as csvfile:
+		s = csv.reader(csvfile,delimiter = '\n',quotechar='"')
+		for row in s:
+			for field in row:
+				if field!='':
+					addresses.append(field)
+	return (addresses * int((((n)/len(addresses))+1)))[:n] #repeat until given length
+
+		# f = open(filename, newline='')
+		# reader = csv.reader(f)
+		# for row in reader:
+		# 	for field in row:
+		# 		addresses.append(field)
+
 
 
 def create_generic_parameters(n=1,numberPools=None,randGen=False):
 	print("In create_generic_parameters. n = " + str(n) + ", numberPools = " + str(numberPools) + ", randGen = " + str(randGen) + ".")
+	real_addresses = get_real_generic_addresses(n+1)
+	real_event_addresses = list(reversed(real_addresses))
+
 	dicts=[]
 	today = datetime.now()
 	if (not numberPools) or (int(numberPools) > n):
@@ -231,7 +268,7 @@ def create_generic_parameters(n=1,numberPools=None,randGen=False):
 		numberDaysInFuture= (random.randint(1,35) if randGen else 10)
 		[eventDate,eventTime,eventDateTime] = findRelativeDelta(today,numberDaysInFuture,mode='days',delta_after=1)
 		latenessWindow= (10*random.randint(0,3) if randGen else 30)
-		eventAddress = "eventAddress_" + str(k)
+		eventAddress = real_event_addresses[k]
 		eventContact = "555-555-5555_" + str(k)
 		eventEmail = "eventEmail_"+str(k)+"@notARealThing.com"
 		eventHostOrg = "eventHostOrg_"+str(k)
@@ -239,7 +276,7 @@ def create_generic_parameters(n=1,numberPools=None,randGen=False):
 		fireNotice = (6*random.randint(1,5) if randGen else 12)
 
 		##Trip
-		tripAddress='tripAddress_'+str(k)
+		tripAddress=real_addresses[k]
 		num_seats = (random.randint(0,1)*random.randint(1,4) if randGen else 4)
 		preWindow = (5*random.randint(1,9) if randGen else 30)
 		on_time = (random.randint(0,1) if randGen else 0)
@@ -259,3 +296,50 @@ def create_generic_parameters(n=1,numberPools=None,randGen=False):
 
 		dicts.append(fullDict)
 	return dicts
+
+@app.route('/q_groupthere/', methods=['GET','POST'])
+def q_groupthere():
+
+	job = q.enqueue_call(func=GroupThere,result_ttl=5000)
+	print("job.get_id() = " + str(job.get_id())) #job.result will store output of populate_generic(n), which is "output_list" in the non-enqueued version above
+	return job.get_id()
+
+	params = GroupThere()
+	for ass in params.solution['assignments']:
+		names = ass['names']
+		print(names)
+		#check if names is iterable
+		#print each name
+	return  str(params.solution['assignments'])
+
+
+@app.route("/GTresults/", methods=['POST'])
+def post_GT_results():
+	try:
+		data = json.loads(request.data.decode())
+		job_key = data["jobID"]
+		print("job_key is " + str(job_key))
+	except:
+		print("ERROR IN post_get_results")
+		return "Error",500
+	return GT_results(job_key)
+
+@app.route("/GTresults/<job_key>", methods=['GET'])
+def GT_results(job_key):
+	try:
+		job = Job.fetch(job_key, connection=conn)
+	except:
+		return "No such job",200
+	if job.is_finished:
+		params=job.result
+		print("Job finished in get_results: " + str(params))
+		output = [[('names',ass['names']),('isPossible',ass['isPossible']),('notLatePossible',ass['notLatePossible']),('lateOk',ass['lateOk']),('bestTimes',ass['bestTimes'])] for ass in params.solution['assignments']]
+		output = [[ (tup[0],np.asscalar(tup[1]) if isinstance(tup[1],np.generic) else tup[1]) for tup in piece] for piece in output] #Convert np.bool_ to bool, eg
+		# output = [{'names':ass['names'],'bestTimes':ass['bestTimes']} for ass in params.solution['assignments']]
+		print("output before jsonify: " + str(output))
+		return jsonify(output),200
+	else:
+		# print("PROBLEM IS HERE?!")
+		return "Still working on GROUPTHERE!!", 202
+
+

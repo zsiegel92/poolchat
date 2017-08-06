@@ -25,10 +25,9 @@ from interactions import newPool,findRelativeDelta
 def view_pool(number):
 	pool = Pool.query.filter_by(id=number).first()
 	if pool:
-		poolRep = '<br/>'.join(['{0}: {1}'.format(key, value) for (key, value) in (pool.to_dict()).items()])
-		return poolRep
+		return pool.to_dict()
 	else:
-		return "There is no such carpool :("
+		return "There is no carpool with id " + str(number) + " :("
 
 
 def populate_group_test():

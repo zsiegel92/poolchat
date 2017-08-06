@@ -1,5 +1,5 @@
 from interactions import quick_rules,pester,text_rules,process_referral#Note: have to import webhookviews at bottom of app
-from page_interactions import view_pool,populate_group_test
+from page_interactions import populate_group_test
 from collections import OrderedDict
 
 #IMPORTS FOR TESTING:
@@ -52,9 +52,6 @@ def populate_group():
 # 	return 'Populated database with ' + str(n) + " people.\r\n\r\n" + str("\r\n".join(map(str,dicts))),200
 
 
-@app.route('/view_pool/<int:number>/',methods=['GET'])
-def call_view_pool(number):
-	return view_pool(number),200
 
 
 @app.route('/do_groupthere/', methods=['GET'])
@@ -66,7 +63,6 @@ def do_groupthere():
 		#check if names is iterable
 		#print each name
 	return  str(params.solution['assignments'])
-
 
 
 

@@ -333,18 +333,21 @@ def GT_results(job_key):
 		job = Job.fetch(job_key, connection=conn)
 	except:
 		return "No such job",200
-	if job.is_finished:
-		params=job.result
-		print("Job finished in GT_results: " + str(params),file=sys.stderr)
-		output = [[('names',ass['names']),('isPossible',ass['isPossible']),('notLatePossible',ass['notLatePossible']),('lateOk',ass['lateOk']),('bestTimes',ass['bestTimes'])] for ass in params.solution['assignments']]
-		output = [[ (tup[0],np.asscalar(tup[1]) if isinstance(tup[1],np.generic) else tup[1]) for tup in piece] for piece in output] #Convert np.bool_ to bool, eg
-		# output = [{'names':ass['names'],'bestTimes':ass['bestTimes']} for ass in params.solution['assignments']]
-		print("output before jsonify: " + str(output),file=sys.stderr)
-		a=jsonify(output)
-		print("successfully jsonified output!",file=sys.stderr)
-		return a,200
-	else:
-		# print("PROBLEM IS HERE?!")
-		return "Still working on GROUPTHERE!!", 202
+	try:
+		if job.is_finished:
+			params=job.result
+			print("Job finished in GT_results: " + str(params),file=sys.stderr)
+			output = [[('names',ass['names']),('isPossible',ass['isPossible']),('notLatePossible',ass['notLatePossible']),('lateOk',ass['lateOk']),('bestTimes',ass['bestTimes'])] for ass in params.solution['assignments']]
+			output = [[ (tup[0],np.asscalar(tup[1]) if isinstance(tup[1],np.generic) else tup[1]) for tup in piece] for piece in output] #Convert np.bool_ to bool, eg
+			# output = [{'names':ass['names'],'bestTimes':ass['bestTimes']} for ass in params.solution['assignments']]
+			print("output before jsonify: " + str(output),file=sys.stderr)
+			a=jsonify(output)
+			print("successfully jsonified output!",file=sys.stderr)
+			return a,200
+		else:
+			# print("PROBLEM IS HERE?!")
+			return "Still working on GROUPTHERE!!", 202
+	except Exception as exc:
+		return "Something bad happened" + str(exc),500
 
 

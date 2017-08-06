@@ -114,7 +114,7 @@
                         </div>
                     </div>
 
-                    <div ng-show="GT_JSON">
+                    <div ng-show="GT_JSON" ng-if="!isString(GT_JSON)">
                         <br>
                             <h2>GroupThere Output (iterated in angular):</h2>
                             {% raw %}

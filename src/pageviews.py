@@ -328,6 +328,7 @@ def post_GT_results():
 
 @app.route("/GTresults/<job_key>", methods=['GET'])
 def GT_results(job_key):
+	print("in GT_results",file=sys.stderr)
 	try:
 		job = Job.fetch(job_key, connection=conn)
 	except:

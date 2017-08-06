@@ -431,6 +431,10 @@ class Pool(db.Model):
 				tmp[tree[fieldstate].nodeName]=str(input)
 				self.selfFormalRep = json.dumps(tmp)
 
+	def to_dict_formal(self):
+		todict = json.loads(self.selfFormalRep, object_pairs_hook=OrderedDict)
+		todict['Trips']= [trip.to_dict_formal() for trip in self.members]
+		return todict
 
 	def to_dict(self):
 		print('in Trip.to_dict',file=sys.stderr)
@@ -548,6 +552,9 @@ class Trip(db.Model):
 					tmp['Pool']=self.pool.poolName
 				tmp[tree[fieldstate].nodeName]=str(input)
 				self.selfFormalRep = json.dumps(tmp)
+
+	def to_dict_formal(self):
+		return json.loads(self.selfFormalRep, object_pairs_hook=OrderedDict)
 
 
 	def to_dict(self):

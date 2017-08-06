@@ -1,4 +1,4 @@
-from page_interactions import view_pool,populate_group_test
+from page_interactions import view_pool,view_pool_formal,populate_group_test
 import requests
 import copy
 import random
@@ -50,7 +50,7 @@ def index():
 
 @app.route('/view_pool/<int:number>/',methods=['GET'])
 def call_view_pool(number):
-	poolDict=view_pool(number)
+	poolDict=view_pool_formal(number)
 	poolRep = '<br>'.join(['{0}: {1}'.format(key, value) for (key, value) in poolDict.items()])
 	return poolRep,200
 
@@ -60,7 +60,7 @@ def post_call_view_pool():
 	data = json.loads(request.data.decode())
 	pool_id = data.get("pool_id",None)
 	print("POOL ID IS " + str(pool_id))
-	poolDict=view_pool(pool_id)
+	poolDict=view_pool_formal(pool_id)
 	return jsonify(poolDict),200
 
 

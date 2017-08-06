@@ -29,6 +29,12 @@ def view_pool(number):
 	else:
 		return "There is no carpool with id " + str(number) + " :("
 
+def view_pool_formal(number):
+	pool = Pool.query.filter_by(id=number).first()
+	if pool:
+		return pool.to_dict_formal()
+	else:
+		return "There is no carpool with id " + str(number) + " :("
 
 def populate_group_test():
 	sender_id=5

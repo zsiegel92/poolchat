@@ -85,10 +85,14 @@
 		$scope.isString = function(what) {
 			// $log.log("Checking whether something is a string. Something:")
 			// $log.log(what)
-			var stringifiedVar = String(what)
+			var stringifiedVar = String(what);
 			// $log.log("Stringified version:")
 			// $log.log(stringifyifiedVar)
     	return stringifiedVar[0]==what[0];
+		};
+
+		$scope.hasChildren = function(bigL1) {
+            return angular.isArray(bigL1);
 		};
 
 	  $scope.dropTabs = function() {

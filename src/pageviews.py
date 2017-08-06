@@ -305,14 +305,6 @@ def q_groupthere():
 	print("job.get_id() = " + str(job.get_id())) #job.result will store output of populate_generic(n), which is "output_list" in the non-enqueued version above
 	return job.get_id()
 
-	params = GroupThere()
-	for ass in params.solution['assignments']:
-		names = ass['names']
-		print(names)
-		#check if names is iterable
-		#print each name
-	return  str(params.solution['assignments'])
-
 
 @app.route("/GTresults/", methods=['POST'])
 def post_GT_results():
@@ -337,20 +329,23 @@ def GT_results(job_key):
 	if job.is_finished:
 		params=job.result
 		print("Job finished in GT_results: " + str(params),file=sys.stderr)
-		try:
-			output = [[('names',ass['names']),('isPossible',ass['isPossible']),('notLatePossible',ass['notLatePossible']),('lateOk',ass['lateOk']),('bestTimes',ass['bestTimes'])] for ass in params.solution['assignments']]
-			output = [[ (tup[0],np.asscalar(tup[1]) if isinstance(tup[1],np.generic) else tup[1]) for tup in piece] for piece in output] #Convert np.bool_ to bool, eg
-			# output = [{'names':ass['names'],'bestTimes':ass['bestTimes']} for ass in params.solution['assignments']]
-		except Exception as exc:
-			return "Something bad happened BEFORE jsonify " + str(exc),500
-
+		output = [[('names',ass['names']),('isPossible',ass['isPossible']),('notLatePossible',ass['notLatePossible']),('lateOk',ass['lateOk']),('bestTimes',ass['bestTimes'])] for ass in params.solution['assignments']]
+		output = [[ (tup[0],np.asscalar(tup[1]) if isinstance(tup[1],np.generic) else tup[1]) for tup in piece] for piece in output] #Convert np.bool_ to bool, eg
+		# output = [{'names':ass['names'],'bestTimes':ass['bestTimes']} for ass in params.solution['assignments']]
 		print("output before jsonify: " + str(output),file=sys.stderr)
+		print("output before jsonify: " + str(output))
+		a=str(output)
 		try:
 			a=jsonify(output)
-			print("successfully jsonified output!",file=sys.stderr)
-			return a,200
 		except Exception as exc:
-			return "Something bad happened DURING jsonify " + str(exc),500
+			a += "\nSomething bad happened DURING jsonify " + str(exc)
+		print("successfully jsonified output!")
+
+		if isinstance(a,str):
+			return a ,200
+		else:
+			return a,200
+
 	else:
 		# print("PROBLEM IS HERE?!")
 		return "Still working on GROUPTHERE!!", 202

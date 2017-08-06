@@ -6,6 +6,7 @@ from flask import render_template,url_for,jsonify,json,make_response
 
 from collections import OrderedDict
 import numpy as np
+import sys
 
 from datetime import datetime
 from rq import Queue
@@ -319,9 +320,10 @@ def post_GT_results():
 		data = json.loads(request.data.decode())
 		job_key = data["jobID"]
 		print("job_key is " + str(job_key))
+		print("job_key is " + str(job_key),file=sys.stderr)
 	except:
-		print("ERROR IN post_get_results")
-		return "Error",500
+		print("ERROR IN post_get_results",file=sys.stderr)
+		return "in post_GT_results",500
 	return GT_results(job_key)
 
 @app.route("/GTresults/<job_key>", methods=['GET'])
@@ -332,12 +334,14 @@ def GT_results(job_key):
 		return "No such job",200
 	if job.is_finished:
 		params=job.result
-		print("Job finished in get_results: " + str(params))
+		print("Job finished in GT_results: " + str(params),file=sys.stderr)
 		output = [[('names',ass['names']),('isPossible',ass['isPossible']),('notLatePossible',ass['notLatePossible']),('lateOk',ass['lateOk']),('bestTimes',ass['bestTimes'])] for ass in params.solution['assignments']]
 		output = [[ (tup[0],np.asscalar(tup[1]) if isinstance(tup[1],np.generic) else tup[1]) for tup in piece] for piece in output] #Convert np.bool_ to bool, eg
 		# output = [{'names':ass['names'],'bestTimes':ass['bestTimes']} for ass in params.solution['assignments']]
-		print("output before jsonify: " + str(output))
-		return jsonify(output),200
+		print("output before jsonify: " + str(output),file=sys.stderr)
+		a=jsonify(output)
+		print("successfully jsonified output!",file=sys.stderr)
+		return a,200
 	else:
 		# print("PROBLEM IS HERE?!")
 		return "Still working on GROUPTHERE!!", 202

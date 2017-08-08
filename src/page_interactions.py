@@ -19,7 +19,7 @@ from flask_sqlalchemy import SQLAlchemy
 q = Queue(connection=conn) #INTERACTIONS MOVEMENT!
 from models import  Carpooler,Pool, Trip,ensure_carpooler_notNone
 
-from interactions import newPool,findRelativeDelta
+from interactions import newPool
 
 #TODO: Display information regarding all participants of this pool.
 def view_pool(number):
@@ -33,6 +33,7 @@ def view_pool_formal(number):
 	pool = Pool.query.filter_by(id=number).first()
 	if pool:
 		return pool.to_dict_formal()
+		db.session.commit()
 	else:
 		return "There is no carpool with id " + str(number) + " :("
 

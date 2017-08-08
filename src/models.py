@@ -441,6 +441,11 @@ class Pool(db.Model):
 
 	def to_dict_formal(self):
 		todict = json.loads(self.selfFormalRep, object_pairs_hook=OrderedDict)
+		todict['noticeWentOut']=self.noticeWentOut
+		todict['optimizedYet']=self.optimizedYet
+		todict['optimizationCurrent']=self.optimizationCurrent
+		self.selfFormalRep = json.dumps(todict)
+
 		todict['Trips']= [trip.to_dict_formal() for trip in self.members]
 		return todict
 

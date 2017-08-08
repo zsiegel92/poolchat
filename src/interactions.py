@@ -2,6 +2,7 @@
 import requests
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
+from helpers import findRelativeDelta
 from datetime import datetime
 import re
 import smtplib
@@ -162,15 +163,6 @@ def confirm_preWindow(recipient_id,inputted_delta,carpooler=None):
 
 	messenger.say(recipient_id, message)
 
-
-def findRelativeDelta(dt,inputted_delta,mode='minutes',delta_after=-1):
-	print("in interactions.findRelativeDelta")
-	if mode not in ['minutes','hours','days']:
-		return "ERROR"
-	difDt = dt + relativedelta(**{mode:delta_after*int(inputted_delta)})
-	date = str(difDt.date().strftime("%B") + " " + difDt.date().strftime("%d") + ", " + difDt.date().strftime("%Y"))
-	time = str(difDt.time().strftime("%I:%M %p"))
-	return [date,time,difDt]
 
 
 

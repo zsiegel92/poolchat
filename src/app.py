@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 from flask import Flask, request, abort, json
-from database import db
+# from database import db
+from app_factory import create_app
 # from flask_sqlalchemy import SQLAlchemy #INTERACTIONS MOVEMENT!
 # from rq import Queue #INTERACTIONS MOVEMENT!
 # from rq.job import Job  #FOR Redis jobs #INTERACTIONS MOVEMENT!
@@ -9,9 +10,16 @@ from database import db
 # import numpy as np #INTERACTIONS MOVEMENT!
 
 
-app = Flask(__name__)
-app.config.from_object(os.environ['APP_SETTINGS'])
-db.init_app(app)
+# app = Flask(__name__)
+# app.config.from_object(os.environ['APP_SETTINGS'])
+# db.init_app(app)
+app = create_app(__name__)
+
+
+
+
+
+
 
 #NOTE: SQLALCHEMY_TRACK_MODIFICATIONS prints model object fields when they are edited!
 #SQLAlchemy(app,session_options={'autocommit': True})
@@ -47,10 +55,10 @@ import unusedViews
 #Webhook views can be placed here
 #Interactions can be placed here
 
-import scheduler_tasks
 
 
 if __name__ == '__main__':
-	with app.app_context():
-		db.create_all()
+	# with app.app_context():
+	# 	db.create_all()
 	app.run(debug = app.debug)
+

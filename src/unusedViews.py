@@ -5,7 +5,7 @@ from interactions import quick_rules,pester,text_rules,process_referral#Note: ha
 from interactions import getStarted#NOTE These are NOT needed for app - only for drop_populate and testing!
 
 from app import app,request,abort
-from app import db
+from database import db
 
 from groupThere.GroupThere import GroupThere
 

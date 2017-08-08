@@ -199,7 +199,7 @@
 		          var resultText = JSON.stringify(data);
 		          $log.log(resultText);
 		          $scope.GT_JSON=data;
-		          $scope.resultText = "Successfully did GroupThere!";
+		          $scope.resultText = "Successfully did GroupThere!" + JSON.stringify(data.full);
 		          // $scope.resultText = "FINISHED";
 		          $timeout.cancel(timeout);
 		          $log.log("For full results, visit: /GTresults/" + jobID)

@@ -73,7 +73,23 @@ class SystemParam:
 		# stuff = ['email','name','address','numberCarSeats','canLeaveAt','extra','latenessWindow','timestamps','headers_colNames','eventAddress','eventDate','eventTime','eventDateTime','eventCoords','dist_mats','dists_to_event','coords','model','filename','numel']
 		# selfdict = {key:getattr(self,key,None) for key in stuff}
 		# return selfdict
-		return (vars(self))
+		def jsonifyMe(data):
+			json_data = dict()
+			for key, value in data.items():
+				if isinstance(value, list): # for lists
+					value = [ jsonifyMe(item) if isinstance(item, dict) else item for item in value ]
+				if isinstance(value, dict): # for nested lists
+					value = jsonifyMe(value)
+				if type(value).__module__=='numpy': # if value is numpy.*: > to python list
+					value = value.tolist()
+				if type(value).__name__=='matrix': # if value is numpy.*: > to python list
+					value = value.tolist()
+				if type(value).__name__=='bax' or type(value).__name__=='bitarray':
+					value = str(value)
+				json_data[key] = value
+			return json_data
+
+		return jsonifyMe(vars(self))
 
 	@sayname
 	def get_event_info_from_mailparam(self,mailparam):
@@ -335,4 +351,5 @@ class SystemParam:
 		params=[array_duration,boolList_canBeLate,int_minsAvailForTransit,int_numCarSeats,doubleList_durs_toEvent,int_latenessWindow,must_drive]
 
 		return params
+
 

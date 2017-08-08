@@ -7,7 +7,7 @@ from interactions import getStarted#NOTE These are NOT needed for app - only for
 import sys
 from flask import render_template
 from app import app,request
-from app import db
+from database import db
 
 from groupThere.GroupThere import GroupThere
 

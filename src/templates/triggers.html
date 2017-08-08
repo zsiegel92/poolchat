@@ -84,6 +84,18 @@
                                 Number of Generic Participants: <input type="number" name="n" value=5><br>
                                 <input type="submit" value="Submit GET">
                             </form> -->
+                    <h2>Email Participants</h2>
+
+                    <br>
+                        <form ng-click="resultText='Emailing from selected carpool!'"ng-submit="sendSomeEmails()">
+                             Pool ID: <input type="number" name="pool_id" class="form-control" id="pool_id-box_for_Email" ng-init="pool_id=1" placeholder="Enter a Carpool ID number" style="max-width: 300px;" ng-model="pool_id" required>
+                            <button type="submit">Send Emails to Group Members</button>
+                        </form>
+                        <form ng-click="resultText='Emailing all!'"ng-submit="sendAllEmails()">
+                             <button type="submit" name ='submit' value='send_all_emails' onclick="alert('Emailing all carpoolers')">Send All Emails</button>
+                        </form>
+
+
 
 
                 </div><!-- Column -->
@@ -143,15 +155,23 @@
                                 <ol>
                                     <li ng-repeat="group in GT_JSON">
 
-                                        <div ng-if="!isString(group[0][1])">
+                                        <div ng-if="!isString(group[0][1])"> <!-- groupt[0] is ('names',<named assignments>) -->
                                             {{group[0][1][0]}} picks up <span ng-repeat="person in (group[0][1]).slice(1,(group[0][1]).length)"> {{person}}, then </span> they drive to the event.
                                         </div>
                                         <div ng-if="isString(group[0][1])">
                                         {{group[0][1]}} drives alone.
                                         </div>
 
+
+                                        <div ng-if="!isString(group[1][1])"> <!-- groupt[1] is ('emails',<email-indexed assignments>) -->
+                                            {{group[1][1][0]}} picks up <span ng-repeat="person in (group[1][1]).slice(1,(group[1][1]).length)"> {{person}}, then </span> they drive to the event.
+                                        </div>
+                                        <div ng-if="isString(group[1][1])">
+                                        {{group[1][1]}} drives alone.
+                                        </div>
+
                                         <ul>
-                                            <li ng-repeat="tup in group.slice(1, group.length)">
+                                            <li ng-repeat="tup in group.slice(2, group.length)">
                                                 {{tup[0]}} : {{tup[1]}}
                                             </li>
                                         </ul>

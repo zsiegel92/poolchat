@@ -60,7 +60,7 @@ def GroupThere(inputFilename=None,queryOrLoad='load'):
 		params=SystemParam(**pickle.load(open(pickleFile,'rb')))
 
 
-
+	params.mailParam = mailparam
 
 	print(params)
 

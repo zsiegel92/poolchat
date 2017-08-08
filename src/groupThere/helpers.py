@@ -332,12 +332,12 @@ def optimizePulp(model):
 
 @sayname
 def gen_assignment_fromParams(params):
-	return gen_assignment(params.model['Aeq'],params.solution['x'],params.name,*params.make_generate_groups_input())
+	return gen_assignment(params.model['Aeq'],params.solution['x'],params.name,params.email,*params.make_generate_groups_input(),ids=params.carpooler_id)
 
 
 #This function outputs a list of tuples consisting of participants in each carload. The tuples are ordered with driver at index 0 in pickup-order.
 @sayname
-def gen_assignment(Aeq,x,name,array_duration,boolList_canBeLate,int_minsAvailForTransit,int_numCarSeats,doubleList_durs_toEvent,int_latenessWindow,must_drive):
+def gen_assignment(Aeq,x,name,email,array_duration,boolList_canBeLate,int_minsAvailForTransit,int_numCarSeats,doubleList_durs_toEvent,int_latenessWindow,must_drive,ids=None):
 	maxNumberSeats=max(int_numCarSeats)
 	array_duration=np.floor(array_duration/60)#convert to minutes
 	doubleList_durs_toEvent = np.floor(np.array(doubleList_durs_toEvent)/60)
@@ -356,10 +356,22 @@ def gen_assignment(Aeq,x,name,array_duration,boolList_canBeLate,int_minsAvailFor
 	assignments=list(map(st.returnFormattedGroup,gps))
 
 	named_assignments=[]
+	email_assignments=[]
+	id_assignments=[]
 	for ass in assignments:
 		print(itemgetter(*ass['bestOrder'])(name))
 		named_assignments.append(itemgetter(*ass['bestOrder'])(name))
 		ass['names']=itemgetter(*ass['bestOrder'])(name)
+
+		email_assignments.append(itemgetter(*ass['bestOrder'])(email))
+		ass['emails']=itemgetter(*ass['bestOrder'])(email)
+
+		ass['ids']=[]
+		try:
+			ass['ids']=itemgetter(*ass['bestOrder'])(ids)
+			id_assignments.append(itemgetter(*ass['bestOrder'])(ids))
+		except:
+			print("Groupthere pool does not have carpooler_id")
 
 	return assignments
 

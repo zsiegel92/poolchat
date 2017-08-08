@@ -407,10 +407,18 @@ class Pool(db.Model):
 	selfRep = db.Column(db.Text)
 	selfFormalRep = db.Column(db.Text)
 
+	noticeWentOut=db.Column(db.Boolean())
+	optimizedYet = db.Column(db.Boolean())
+	optimizationCurrent = db.Column(db.Boolean())
+
 	def __init__(self):
 		super().__init__()
 		self.selfRep = "{}"
 		self.selfFormalRep="{}"
+
+		self.noticeWentOut=False
+		self.optimizedYet=False
+		self.optimizationCurrent=False
 
 
 	def updateSelfRepresentations(self,fieldstate,input):

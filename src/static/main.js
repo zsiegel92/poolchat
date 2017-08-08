@@ -9,6 +9,27 @@
 	.controller('TriggerController', ['$scope', '$log', '$http', '$timeout',
 	  function($scope, $log, $http, $timeout) {
 
+	  $scope.sendSomeEmails = function() {
+	  	var pool_id = $scope.pool_id;
+	  	$http.post('/email_all/',{"pool_id":pool_id}).
+	      success(function(results) {
+	        $log.log(results);
+					$scope.resultText="Successfuly sent all emails (js)" + String(results);
+	      }).
+	      error(function(error) {
+	        $log.log(error);
+	      });
+	  };
+	  $scope.sendAllEmails = function() {
+	  	$http.post('/email_all/').
+	      success(function(results) {
+	        $log.log(results);
+					$scope.resultText="Successfuly sent all emails (js)" + String(results);
+	      }).
+	      error(function(error) {
+	        $log.log(error);
+	      });
+	  };
 	  $scope.getResult = function() {
 
 	    $log.log("Beginning Population");

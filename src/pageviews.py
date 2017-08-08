@@ -273,15 +273,15 @@ def create_generic_parameters(n=1,numberPools=None,randGen=False):
 
 		##Pool
 		poolName = "poolName_" + str(k)
-		numberDaysInFuture= (random.randint(1,35) if randGen else 10)
+		numberDaysInFuture= (random.randint(-10,10) if randGen else 10)
 		[eventDate,eventTime,eventDateTime] = findRelativeDelta(today,numberDaysInFuture,mode='days',delta_after=1)
 		latenessWindow= (10*random.randint(2,3) if randGen else 30)
 		eventAddress = real_event_addresses[k]
 		eventContact = "555-555-5555_" + str(k)
-		eventEmail = "eventEmail_"+str(k)+"@notARealThing.com"
+		eventEmail = "eventEmail_"+str(k)+"@notARealThing.com" #"groupThereLA@gmail.com"
 		eventHostOrg = "eventHostOrg_"+str(k)
 		signature = "signature_"+str(k)
-		fireNotice = (6*random.randint(1,5) if randGen else 12)
+		fireNotice = (6*random.randint(1,3) if randGen else 12)
 
 		##Trip
 		tripAddress=real_addresses[k]
@@ -305,157 +305,3 @@ def create_generic_parameters(n=1,numberPools=None,randGen=False):
 
 		dicts.append(fullDict)
 	return dicts
-
-@app.route('/q_groupthere/', methods=['GET','POST'])
-def q_groupthere():
-	print('in q_groupthere')
-	pool_id = request.args.get('pool_id',None)
-	if pool_id is None:
-		data= request.get_json()
-		if data is not None:
-			pool_id = data.get("pool_id",None)
-	print("pool_id is " + str(pool_id))
-
-	job = q.enqueue_call(func=doGroupThere,kwargs={'pool_id':pool_id},result_ttl=5000)
-	# kwargs = {'n':n,'randGen': randGen,'numberPools':numberPools}
-	print("job.get_id() = " + str(job.get_id())) #job.result will store output of populate_generic(n), which is "output_list" in the non-enqueued version above
-	return job.get_id()
-
-
-@app.route('/q_repeat_groupthere/', methods=['GET','POST'])
-def q_repeat_groupthere():
-	print('in q_repeat_groupthere')
-	job = q.enqueue_call(func=GroupThere,result_ttl=5000)
-	# kwargs = {'n':n,'randGen': randGen,'numberPools':numberPools}
-	print("job.get_id() = " + str(job.get_id())) #job.result will store output of populate_generic(n), which is "output_list" in the non-enqueued version above
-	return job.get_id()
-
-
-
-def doGroupThere(pool_id=None):
-	if pool_id is not None:
-		try:
-			with app.app_context():
-				pool = Pool.query.filter_by(id=pool_id).first()
-				assert(pool is not None)
-				print("creating mailParam!")
-				mailParam=MailParam(
-						eventDate=str(pool.eventDate),
-						eventTime=str(pool.eventTime),
-						eventName = str(pool.poolName),
-						eventLocation = str(pool.poolName) + " at " + str(pool.eventAddress),
-						eventAddress= str(pool.eventAddress),
-						eventContact= str(pool.eventContact),
-						eventEmail = str(pool.eventEmail),
-						email_password = "junk",
-						email_user = "junk@junk.com",
-						eventHostOrg = str(pool.eventHostOrg),
-						signature = str(pool.signature),
-						latenessWindow= str(pool.latenessWindow)
-					)
-				print("created mailParam!")
-				# email = [trip.member.email for trip in pool.members]
-				# name = [trip.member.name for trip in pool.members]
-				# canLeaveAt = [trip.preWindow for trip in pool.members] #DIFFERENT FROM SP CONSTRUCTOR
-				email = []
-				name = []
-				address = []
-				numberCarSeats =[]
-				minsAvail=[]
-				extra=[]
-				must_drive= []
-				for trip in pool.members:
-					email.append(trip.member.email) #trip.member.email is String
-					name.append(trip.member.name) #trip.member.name is String
-					address.append(trip.address) #trip.address is String
-					numberCarSeats.append(trip.num_seats) #trip.num_seats is int
-					minsAvail.append(trip.preWindow) #CONVERT TO DATETIME #trip.preWindow is int
-					extra.append(trip.on_time) #OPPOSITE/INVERTED #trip.on_time is int
-					must_drive.append(trip.must_drive) #trip.must_drive is int
-
-				print("creating SystemParam!")
-				params= SystemParam(email=email,name=name,address=address,numberCarSeats=numberCarSeats,minsAvail=minsAvail,extra=extra,must_drive=must_drive)
-				print("created SystemParam!")
-				params.numel = len(email)
-				params.get_event_info_from_mailparam(mailParam)
-				print("got params info from mailparam")
-				params.coordinate_and_clean()
-				print("did coordinate_and_clean")
-				params.gen_dist_mat()
-				with open("params/GTparams_"+str(datetime.now())[0:10]+".txt",'wb') as openfile:
-					pickle.dump(params.to_dict(),openfile)
-				with open("params/GTparams_prev.txt",'wb') as openfile:
-					pickle.dump(params.to_dict(),openfile)
-				# pickleFile = "params/GTparams_prev.txt"
-				# print("Loading all parameters from file: " + pickleFile)
-				# params=SystemParam(**pickle.load(open(pickleFile,'rb')))
-				print("wrote pickles!")
-				print(params)
-
-				n=params.numel
-				mx=max(list(map(int,params.numberCarSeats)))
-				(groups,times) = generate_groups_fromParam(params,testing=True)
-				print("generated groups")
-				params.groups['groups']=groups
-				params.groups['times'] = times
-				params.model = generate_model(groups,times,n,mx)
-				(params.solution['fun'],params.solution['x'],params.solution['success']) = optimizePulp(params.model)
-				print("Solution success: " + str(params.solution['success']))
-				params.solution['assignments']=gen_assignment_fromParams(params)
-				for ass in params.solution['assignments']:
-					print(ass['names'])
-				return params
-				#make mailparam
-				#make systemparam
-				#etc
-		except Exception as exc:
-			print("Error creating GT params. Returning from hardcoded dummy GroupThere params.")
-			print(exc)
-	return GroupThere()
-
-@app.route("/GTresults/", methods=['POST'])
-def post_GT_results():
-	try:
-		data = json.loads(request.data.decode())
-		job_key = data["jobID"]
-		print("job_key is " + str(job_key))
-		print("job_key is " + str(job_key),file=sys.stderr)
-	except:
-		print("ERROR IN post_get_results",file=sys.stderr)
-		return "in post_GT_results",500
-	return GT_results(job_key)
-
-@app.route("/GTresults/<job_key>", methods=['GET'])
-def GT_results(job_key):
-	print("in GT_results",file=sys.stderr)
-	try:
-		job = Job.fetch(job_key, connection=conn)
-	except:
-		return "No such job",200
-
-	if job.is_finished:
-		params=job.result
-		print("Job finished in GT_results: " + str(params),file=sys.stderr)
-		output = [[('names',ass['names']),('isPossible',ass['isPossible']),('notLatePossible',ass['notLatePossible']),('lateOk',ass['lateOk']),('bestTimes',ass['bestTimes'])] for ass in params.solution['assignments']]
-		output = [[ (tup[0],np.asscalar(tup[1]) if isinstance(tup[1],np.generic) else tup[1]) for tup in piece] for piece in output] #Convert np.bool_ to bool, eg
-		# output = [{'names':ass['names'],'bestTimes':ass['bestTimes']} for ass in params.solution['assignments']]
-		print("output before jsonify: " + str(output),file=sys.stderr)
-		print("output before jsonify: " + str(output))
-		a=str(output)
-		try:
-			a=jsonify(output)
-		except Exception as exc:
-			a += "\nSomething bad happened DURING jsonify " + str(exc)
-		print("successfully jsonified output!")
-
-		if isinstance(a,str):
-			return a ,200
-		else:
-			return a,200
-
-	else:
-		# print("PROBLEM IS HERE?!")
-		return "Still working on GROUPTHERE!!", 202
-
-
-

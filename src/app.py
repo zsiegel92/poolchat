@@ -40,11 +40,14 @@ app.url_map.converters['kwarg'] = KwargConverter
 import webhookviews
 import pageviews
 import triggerviews
+import GTviews
 
 import unusedViews
 # from interactions import db
 #Webhook views can be placed here
 #Interactions can be placed here
+
+import scheduler_tasks
 
 
 if __name__ == '__main__':

@@ -11,7 +11,7 @@ import time
 
 
 class SystemParam:
-	def __init__(self,email=[],name=[],address=[],numberCarSeats =[],canLeaveAt=[],minsAvail=None,extra=[],latenessWindow=0,must_drive=[],timestamps=[],headers_colNames = [],eventAddress=None,eventDate=None,eventTime=None,eventDateTime=None,eventCoords=None,dist_mats = {'Distances':None,'Durations':None},dists_to_event={'Distances':None,'Durations':None},coords =[],numel=None,model={'A':None,'Aeq':None,'b':None,'beq':None,'f':None},solution={'x':None,'fun':None,'success':None,'assignments':None},filename=None,groups={'groups':None,'times':None}, **kwargs):
+	def __init__(self,email=[],name=[],carpooler_id=[],address=[],numberCarSeats =[],canLeaveAt=[],minsAvail=None,extra=[],latenessWindow=0,must_drive=[],timestamps=[],headers_colNames = [],eventAddress=None,eventDate=None,eventTime=None,eventDateTime=None,eventCoords=None,dist_mats = {'Distances':None,'Durations':None},dists_to_event={'Distances':None,'Durations':None},coords =[],mailParam=None,numel=None,model={'A':None,'Aeq':None,'b':None,'beq':None,'f':None},solution={'x':None,'fun':None,'success':None,'assignments':None},filename=None,groups={'groups':None,'times':None},pool_id=None, **kwargs):
 		self.email = email
 		self.name = name
 		self.address= address
@@ -27,12 +27,17 @@ class SystemParam:
 
 		self.must_drive=[True if ((int(val)>0) and (self.must_drive[idx]!='No')) else False for idx,val in enumerate(self.numberCarSeats)]
 
+		self.mailParam=mailParam
+
 		self.eventAddress=eventAddress
 		self.eventDate=eventDate
 		self.eventTime=eventTime
 		self.eventDateTime=eventDateTime
 		self.eventCoords = eventCoords
 		self.numel=len(email)
+
+		self.pool_id=pool_id
+		self.carpooler_id=carpooler_id
 
 		self.dist_mats = dist_mats#GENERATE DIST MATS (call f'n)
 		self.dists_to_event = dists_to_event

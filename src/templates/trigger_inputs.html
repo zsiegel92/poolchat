@@ -1,0 +1,80 @@
+{% import 'forms_macros.html' as forms %}
+{# <!-- {% include 'forms_macros_importer.html' %} --> #}
+<h1> <u>Actions</u> </h1>
+
+
+<h2>Angular Enqueue (Get)</h2>
+    <br>
+    <form role="form" ng-submit="getResult()">
+            Number of Generic Participants: <input type="number" name="n" class="form-control" id="n-box" ng-init="n=10"placeholder="Enter a number" style="max-width: 300px;" ng-model="n" required>
+            Number Pools per Person (or max): <input type="number" name="numberPools" class="form-control" id="numberPools-box" ng-init="numberPools=4" placeholder="Enter a number" style="max-width: 300px;" ng-model="numberPools" required>
+        <button type="submit" ng-click="randGen=false" ng-init="randGen=false" class="btn btn-default">Submit</button>
+        <button type="submit" ng-click="randGen=true" ng-init="randGen=false" class="btn btn-default">Submit RANDOM PARAMS</button>
+    </form>
+<h2>Drop and Recreate Tables </h2>
+    <div>
+        <div id="c1">
+        <form action='/triggers/' method='get' target='_self'>
+            <button type="submit" name ='submit' value='drop_tabs' onclick="alert('Dropping all tabs!')">Drop Tabs GET</button>
+        </form>
+        </div>
+        <div id="c2">
+        <form action='/triggers/' method='post' target='_self'>
+            <button type="submit" name ='submit' value='drop_tabs' onclick="alert('Dropping all tabs!')">Drop Tabs POST</button>
+        </form>
+        </div>
+        <div id="c3">
+        <form role="form" ng-click="clearScope()" ng-submit="dropTabs()">
+            <button type="submit">Drop Tabs ANGULAR</button>
+        </form>
+        </div>
+    </div>
+<h2>View Pool</h2>
+    <br>
+    <form role="form" ng-submit="getPoolInfo()">
+            Pool ID: <input type="number" name="pool_id" class="form-control" id="pool_id-box" ng-init="pool_id=1"placeholder="Enter a number" style="max-width: 300px;" ng-model="pool_id" required>
+        <button type="submit" ng-click="clearScope()" ng-init="" class="btn btn-default">Query regarding pool</button>
+    </form>
+
+<h2>Do GroupThere </h2>
+<br>
+    <form role="form" ng-click="clearScope()" ng-submit="doGroupThere()">
+
+         Pool ID: <input type="number" name="pool_id" class="form-control" id="pool_id-box_for_GT" ng-init="pool_id=1" placeholder="Enter a Carpool ID number" style="max-width: 300px;" ng-model="pool_id" required>
+        <button type="submit">Do GroupThere</button>
+    </form>
+    <form role="form" ng-click="clearScope()" ng-submit="repeatGroupThere()">
+        <button type="submit">REPEAT GroupThere (same params, no API queries)</button>
+    </form>
+<!--                     <h2>Generic Auto-Populate</h2>
+    <h2>POST</h2>
+        <br>
+        <form action="/triggers/" method="post" target="_self">
+            Number of Generic Participants: <input type="number" name="n" value=5><br>
+            <input type="submit" value="Submit POST">
+        </form>
+    <h3>GET</h3>
+        <br>
+        <form action="/triggers/" method="get" target="_self">
+            Number of Generic Participants: <input type="number" name="n" value=5><br>
+            <input type="submit" value="Submit GET">
+        </form>
+    <h3>Enqueue (Get)</h3>
+        <br>
+        <form action="/q_populate/" method="get" target="_blank">
+            Number of Generic Participants: <input type="number" name="n" value=5><br>
+            <input type="submit" value="Submit GET">
+        </form> -->
+<h2>Email Participants</h2>
+
+<br>
+    <form ng-click="resultText='Emailing from selected carpool!'"ng-submit="sendSomeEmails()">
+         Pool ID: <input type="number" name="pool_id" class="form-control" id="pool_id-box_for_Email" ng-init="pool_id=1" placeholder="Enter a Carpool ID number" style="max-width: 300px;" ng-model="pool_id" required>
+        <button type="submit">Send Emails to Group Members</button>
+    </form>
+    <form ng-click="resultText='Emailing all!'"ng-submit="sendAllEmails()">
+         <button type="submit" name ='submit' value='send_all_emails' onclick="alert('Emailing all carpoolers')">Send All Emails</button>
+    </form>
+
+
+

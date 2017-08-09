@@ -102,7 +102,7 @@ def load_triggers():
 			output_list = ['drop_tab_output: ' + str(resp)]
 	else:
 		output_list = ["Request_Type = "+ str(request.method),"submit = " + str(submit),"n = " + str(n)]
-	return render_template('triggers.html',output_list=output_list,request_vars=request_vars)
+	return render_template('trigger_base.html',output_list=output_list,request_vars=request_vars)
 
 
 

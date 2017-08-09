@@ -1,0 +1,7 @@
+{%- macro textarea(name, value='', rows=10, cols=40) -%}
+    <textarea name="{{ name }}" rows="{{ rows }}" cols="{{ cols
+        }}">{{ value|e }}</textarea>
+        <!-- Example Usage -->
+				<!-- <p>{{ forms.textarea('comment') }}</p> -->
+{%- endmacro %}
+

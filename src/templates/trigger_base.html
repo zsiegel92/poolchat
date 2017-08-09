@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html ng-app="TriggerPane">
+    <head>
+        <title>Triggers</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <style>
+            .container {
+                max-width: 1000px;
+            }
+            #c1, #c2, #c3{
+                display:inline-block;
+                width: 25%;
+                height:20;
+            }
+        </style>
+    </head>
+    <body ng-controller="TriggerController">
+        <div class="container">
+            <div class="row">
+                <div class='col' style="float:left; width:50%;">
+                    {% include 'trigger_inputs.html' %}
+
+                </div><!-- Column -->
+                <div class='col' style="float:right; width:50%;">
+                    {%include 'trigger_outputs.html' %}
+                </div><!-- Column -->
+            </div><!-- Row -->
+        </div><!-- Container -->
+        <br><br>
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+        <script src="{{ url_for('static', filename='main.js') }}"></script>
+    </body>
+</html>
+

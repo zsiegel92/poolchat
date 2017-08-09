@@ -1,0 +1,142 @@
+{% import 'display_macros.html' as disps %}
+<h1><u>OUTPUTS</u></h1>
+<div ng-show="resultText">
+    <h1> Raw Result Text</h1>
+    {% raw %}
+    {{resultText}}
+    {% endraw %}
+</div>
+
+
+<div ng-if="viewPool">
+    <div ng-show="viewPool">
+        <h2>Queried Pool:</h2>
+        <div ng-if="!isString(viewPool)">
+            <ul>
+                <li ng-repeat="(kw,value) in viewPool">
+
+                    <span ng-if="!hasChildren(value)">
+                        {% raw %}
+                        {{kw}} : {{value}}
+                        {% endraw %}
+                    </span>
+                    <span ng-if="hasChildren(value)">
+                        {%raw%} {{kw}} {% endraw %} - every carpooler traveling here:
+                        <ol>
+                            <li ng-repeat="trip in value">
+                                <ul>
+                                    <li ng-repeat="(tripKey,tripVal) in trip">
+                                       {% raw %}
+                                       {{tripKey}} : {{tripVal}}
+                                       {% endraw %}
+                                    </li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </span>
+                </li>
+            </ul>
+        </div>
+        <div ng-if="isString(viewPool)">
+            {% raw %}
+            {{viewPool}}
+            {% endraw %}
+        </div>
+        <br>
+    </div>
+</div>
+<div ng-if="GT_JSON">
+    <div ng-show="GT_JSON" ng-if="!isString(GT_JSON)">
+        <br>
+            <h2>GroupThere Output (iterated in angular):</h2>
+            {% raw %}
+            There are {{GT_JSON.groups.length}} carpools!
+            <ol>
+                <li ng-repeat="group in GT_JSON.groups">
+
+                    <div ng-if="!isString(group[0][1])"> <!-- groupt[0] is ('names',<named assignments>) -->
+                        {{group[0][1][0]}} picks up <span ng-repeat="person in (group[0][1]).slice(1,(group[0][1]).length)"> {{person}}, then </span> they drive to the event.
+                    </div>
+                    <div ng-if="isString(group[0][1])">
+                    {{group[0][1]}} drives alone.
+                    </div>
+
+
+                    <div ng-if="!isString(group[1][1])"> <!-- groupt[1] is ('emails',<email-indexed assignments>) -->
+                        {{group[1][1][0]}} picks up <span ng-repeat="person in (group[1][1]).slice(1,(group[1][1]).length)"> {{person}}, then </span> they drive to the event.
+                    </div>
+                    <div ng-if="isString(group[1][1])">
+                    {{group[1][1]}} drives alone.
+                    </div>
+
+                    <ul>
+                        <li ng-repeat="tup in group.slice(2, group.length)">
+                            {{tup[0]}} : {{tup[1]}}
+                        </li>
+                    </ul>
+                </li>
+            </ol>
+            {% endraw %}
+    </div>
+</div>
+<div ng-if='resultJSON'>
+    <div ng-show="resultJSON">
+        <br>
+            <h2>Creation Output (iterated in angular):</h2>
+            {% raw %}
+            <ol>
+                <li ng-repeat="(name,value) in resultJSON as results">
+                    Person: {{name}}
+                    <ul>
+                        <!-- <li>Full Description: {{value}}</li> -->
+                        <li> Carpooler info: {{value.Carpooler}}   </li>
+                        <li> Pool info: {{value.Pool}}   </li>
+                        <li> Trip info: {{value.Trip}}   </li>
+                    </ul>
+                </li>
+            </ol>
+            {% endraw %}
+    </div>
+</div>
+<div ng-if='resultJSON'>
+    <div ng-show="resultJSON">
+        <h2>Raw JSON Output:</h2>
+        {% raw %}
+        {{resultJSON}}
+        {% endraw %}
+        <br>
+    </div>
+</div>
+<!-- "document.getElementById('outputList').length>0" -->
+<div ng-if='AngularOutputList'>
+    <div ng-init="haventStarted=true" ng-show="isNotEmpty('AngularOutputList') && haventStarted">
+        <h1>Output Carpoolers (iterated in Jinja)</h1>
+            <ol id="AngularOutputList">
+            {% for output in output_list %}
+                {% if output is mapping %}
+                    <li>
+                        <ul>
+                            {%for key, val in output.items() %}
+                                <li> {{key}} : {{val}}</li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% else %}
+                <li> {{output}} : {{val}}</li>
+                {% endif %}
+            {% endfor %}
+            </ol>
+        <br>
+    </div>
+</div>
+<div ng-show="haventStarted" ng-init="haventStarted=true">
+    <div ng-show="isNotEmpty('request_var_list')">
+        <h1>Request Variables (iterated in Jinja)</h1>
+            <ul id="request_var_list">
+            {% for key, val in request_vars.items() %}
+                <li> {{key}} : {{val}} </li>
+            {% endfor %}
+            </ul>
+            <br>
+    </div>
+</div>

@@ -1,0 +1,11 @@
+{% macro input(name, value='', type='text') -%}
+    <input type="{{ type }}" value="{{ value|e }}" name="{{ name }}">
+	<!-- Example Usage -->
+	<!-- <dl>
+	    <dt>Username</dt>
+	    <dd>{{ forms.input('username') }}</dd>
+	    <dt>Password</dt>
+	    <dd>{{ forms.input('password', type='password') }}</dd>
+	</dl> -->
+	<!-- NOTE to use 'raw' here for all angularjs-intended blocks -->
+{%- endmacro %}

@@ -11,22 +11,23 @@
 
 	  $scope.sendSomeEmails = function() {
 	  	var pool_id = $scope.pool_id;
-	  	$http.post('/email_all/',{"pool_id":pool_id}).then(function(response) {
-	        $log.log(response.data);
-					$scope.resultText="Successfuly sent all emails (js)" + String(response.data);
+	  	$http.post('/email_all/',{"pool_id":pool_id}).
+	      success(function(results) {
+	        $log.log(results);
+					$scope.resultText="Successfuly sent all emails (js)" + String(results);
 	      }).
-	      catch(function(response) {
-	        $log.log(response.data);
+	      error(function(error) {
+	        $log.log(error);
 	      });
 	  };
 	  $scope.sendAllEmails = function() {
 	  	$http.post('/email_all/').
-	      then(function(response) {
-	        $log.log(response.data);
-					$scope.resultText="Successfuly sent all emails (js)" + String(response.data);
+	      success(function(results) {
+	        $log.log(results);
+					$scope.resultText="Successfuly sent all emails (js)" + String(results);
 	      }).
-	      catch(function(response) {
-	        $log.log(response.data);
+	      error(function(error) {
+	        $log.log(error);
 	      });
 	  };
 	  $scope.getResult = function() {
@@ -41,12 +42,12 @@
 	    $log.log(randGen)
 	    // fire the API request
 	    $http.post('/q_populate/', {"n": userInput,"randGen":randGen,"numberPools":numberPools}).
-	      then(function(response) {
-	        $log.log(response.data);
-	        getCarpoolerList(response.data);
+	      success(function(results) {
+	        $log.log(results);
+	        getCarpoolerList(results);
 	      }).
-	      catch(function(response) {
-	        $log.log(response.data);
+	      error(function(error) {
+	        $log.log(error);
 	      });
 	  };
 		function getCarpoolerList(jobID) {
@@ -55,17 +56,17 @@
 		 		var poller = function() {
 		    // fire another request
 		    $http.post('/results/',{'jobID':jobID}).
-		      then(function(response) {
-		        if(response.status === 202) {
-		        	$scope.resultText = "Trying hard to add to database (JS). " + response.data + " (Flask)."
-		          $log.log(response.data, response.status);
+		      success(function(data, status, headers, config) {
+		        if(status === 202) {
+		        	$scope.resultText = "Trying hard to add to database (JS). " + data + " (Flask)."
+		          $log.log(data, status);
 		          $log.log("SOME JS SHIT");
-		        } else if (response.status === 200){
-		          $log.log(response.data);
-		          var resultText = JSON.stringify(response.data);
+		        } else if (status === 200){
+		          $log.log(data);
+		          var resultText = JSON.stringify(data);
 		          $log.log(resultText);
-		          $log.log(typeof response.data)
-		          $scope.resultJSON=response.data;
+		          $log.log(typeof data)
+		          $scope.resultJSON=data;
 		          $scope.resultText = "Successfully added carpoolers to database!";
 		          // $scope.resultText = "FINISHED";
 		          $timeout.cancel(timeout);
@@ -124,13 +125,13 @@
 
 	    // fire the API request
 	    $http.get('/dropTabs').
-	      then(function(response) {
-	        $log.log(response.data);
-	        $scope.resultText="Dropped table successfullly using angular! " + String(response.data) + "(server output)"
+	      success(function(data, status, headers, config) {
+	        $log.log(data);
+	        $scope.resultText="Dropped table successfullly using angular!"
 	      }).
-	      catch(function(response) {
-	        $log.log(response.data);
-	        $scope.resultText="error in dropTabs"
+	      error(function(error) {
+	        $log.log(error);
+	        $scope.resultText="error"
 	      });
 	  };
 
@@ -141,15 +142,16 @@
 	    // get the number of generic participants from the input
 	    var pool_id = $scope.pool_id;
 	    // fire the API request
-	    $http.post('/view_pool/',{'pool_id':pool_id}).then(function(response) {
+	    $http.post('/view_pool/',{'pool_id':pool_id}).
+	      success(function(data, status, headers, config) {
 	      	$log.log("Logging pool info. Pool id:")
 	      	$log.log(pool_id)
-	        $log.log(response.data);
+	        $log.log(data);
 	        $scope.resultText="Successfully queried for pool info!";
-	        $scope.viewPool=response.data;
+	        $scope.viewPool=data;
 	      }).
-	      catch(function(response) {
-	        $log.log(response.data);
+	      error(function(error) {
+	        $log.log(error);
 	        $scope.resultText="error"
 	      });
 	  };
@@ -157,13 +159,13 @@
 	  	$log.log("Calling repeatGroupThere");
 	    // fire the API request
 	    $http.post('/q_repeat_groupthere/').
-	      then(function(response) {
-	        $log.log(response.data);
-	        $log.log("For full results, visit: /GTresults/" + responts.data)
-	        getGTList(response.data);
+	      success(function(results) {
+	        $log.log(results);
+	        $log.log("For full results, visit: /GTresults/" + results)
+	        getGTList(results);
 	      }).
-	      catch(function(response) {
-	        $log.log(response.data);
+	      error(function(error) {
+	        $log.log(error);
 	      });
 	  };
 	  $scope.doGroupThere = function() {
@@ -174,39 +176,39 @@
 	    var pool_id = $scope.pool_id
 	    // fire the API request
 	    $http.post('/q_groupthere/',{'pool_id':pool_id}).
-	      then(function(response) {
-	        $log.log(response.data);
-	        $log.log("For full results, visit: /GTresults/" + response.data)
-	        getGTList(responts.data);
+	      success(function(results) {
+	        $log.log(results);
+	        $log.log("For full results, visit: /GTresults/" + results)
+	        getGTList(results);
 	      }).
-	      catch(function(response) {
-	        $log.log(response.data);
+	      error(function(error) {
+	        $log.log(error);
 	      });
 	  };
 		function getGTList(jobID) {
 
 		  var timeout = "";
-	 		var poller2 = function() {
-	    // fire another request
-	    $http.post('/GTresults/',{'jobID':jobID}).
-	      then(function(response) {
-	        if(response.status === 202) {
-	        	$scope.resultText = "Asking Flask for a response (JS). " + response.data + " (Flask).";
-	          $log.log(response.data, response.status);
-	        } else if (response.status === 200){
-	          var resultText = JSON.stringify(response.data);
-	          $log.log(resultText);
-	          $scope.GT_JSON=response.data;
-	          $scope.resultText = "Successfully did GroupThere!" + JSON.stringify(response.data.full);
-	          // $scope.resultText = "FINISHED";
-	          $timeout.cancel(timeout);
-	          $log.log("For full results, visit: /GTresults/" + jobID)
-	          return false;
-	        }
-	        // continue to call the poller() function every 2 seconds
-	        // until the timeout is cancelled
-	        timeout = $timeout(poller2, 2000);
-	      });
+		 		var poller2 = function() {
+		    // fire another request
+		    $http.post('/GTresults/',{'jobID':jobID}).
+		      success(function(data, status, headers, config) {
+		        if(status === 202) {
+		        	$scope.resultText = "Asking Flask for a response (JS). " + data + " (Flask).";
+		          $log.log(data, status);
+		        } else if (status === 200){
+		          var resultText = JSON.stringify(data);
+		          $log.log(resultText);
+		          $scope.GT_JSON=data;
+		          $scope.resultText = "Successfully did GroupThere!" + JSON.stringify(data.full);
+		          // $scope.resultText = "FINISHED";
+		          $timeout.cancel(timeout);
+		          $log.log("For full results, visit: /GTresults/" + jobID)
+		          return false;
+		        }
+		        // continue to call the poller() function every 2 seconds
+		        // until the timeout is cancelled
+		        timeout = $timeout(poller2, 2000);
+		      });
 		  };
 		  poller2();
 		};

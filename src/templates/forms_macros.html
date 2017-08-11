@@ -1,11 +1,121 @@
-{% macro input(name, value='', type='text') -%}
-    <input type="{{ type }}" value="{{ value|e }}" name="{{ name }}">
-	<!-- Example Usage -->
+{#	<!-- Example Usage -->
 	<!-- <dl>
 	    <dt>Username</dt>
 	    <dd>{{ forms.input('username') }}</dd>
 	    <dt>Password</dt>
 	    <dd>{{ forms.input('password', type='password') }}</dd>
 	</dl> -->
-	<!-- NOTE to use 'raw' here for all angularjs-intended blocks -->
-{%- endmacro %}
+	<!-- NOTE to use 'raw' here for all angularjs-intended blocks -->#}
+
+{% macro input(name, value='', type='text') -%}
+    <input type="{{ type }}" value="{{ value|e }}" name="{{ name }}">
+{% endmacro %}
+
+
+{% macro one_Text_Field_Form(name='',type='text',button_label='submit',ng_init='',ng_click='',ng_submit='',class='form-control') %}
+
+
+<form {% if name !='' %}name={{name}}{% endif %} type ="{{type}}" role="form" ng-init = "{{ng_init}}" ng-click="{{ng_click}}" ng-submit="{{ng_submit}}" class="{{class}}">
+            <button type="submit">{{button_label}}</button>
+        </form>
+
+{% endmacro %}
+
+
+{% macro simpleButton(action='/',button_text='submit',target='_self',method='post',fieldname='submit',fieldvalue='submit',onclickAlert='') %}
+        <form action='{{action}}' method='{{method}}' target='{{target}}'>
+            <button type="submit" name ='{{fieldname}}' value='{{fieldvalue}}' {% if onclickAlert!='' %} onclick="alert('{{onclickAlert}}'"" {% endif %})>{{button_text}}</button>
+        </form>
+{% endmacro %}
+
+
+
+{#
+	ng-model="{{element_name}}.email"
+	ng-init="{{element_name}}.email=''"
+#}
+{% macro emailField(element_name='email_form',ng_submit='',placeholder="Enter email address") %}
+
+  <ng-form name={{element_name}} >
+    <label>Enter Email</label>
+    <input type="email" ng-model="{{element_name}}.email" placeholder="{{placeholder}}" required>
+    <p class="help-block" ng-show="{{element_name}}.$invalid">Valid Email Address Required</p>
+   <br>
+  <button ng-disabled="{{element_name}}.$invalid" ng-click="{{ng_submit}}" type="submit" id="submit">Login</button>
+  </ng-form>
+
+{% endmacro %}
+
+
+{% macro field_with_help(field) %}
+    {{ field.label() }}
+    {{ field() }}
+    <p class="help-block" ng-show="{{field.name}}.$invalid">Valid Input Required</p>
+{% endmacro %}
+
+{% macro showField(field) %}
+	    <tr>
+	        <th>{{ field.label() }}</th>
+	        <td>{{ field() }}</td>
+
+	    </tr>
+{% endmacro %}
+
+
+
+
+
+
+{#
+Usage: {{ with_errors(form.field, style='font-weight: bold') }}
+
+
+
+
+ng-show="{%if form_name %}{{form_name}}.$invalid{% endif %}{%if not form_name %}{{field.render_kw['ng-model']}}.$invalid{% endif %}"
+
+ng-show="{%if form_name %}{{form_name}}.{% endif %}{{field.render_kw['ng-model']}}.$invalid"
+
+in Jinja syntax, "~" does string casting and concatenation.
+#}
+
+{% macro ng_field_with_help(field,form_name=None) %}
+	{% set fieldname = field.name ~ field.type %}
+   {{ field.label() }}
+    <input type="{{field.render_kw['type']}}" name="{{fieldname}}" ng-model="{%if form_name %}{{form_name}}.{% endif %}{{field.render_kw['ng-model']}}" placeholder="{{field.render_kw['placeholder']}}"  {% if 'required' in field.flags %}required{% endif %}>
+    <span class="help-block" ng-show="{%if form_name %}{{form_name}}.{% endif %}{{fieldname}}.$invalid">Valid Email Address Required</span>
+{% endmacro %}
+
+
+{#
+
+#The following should do the same thing:
+
+ng-disabled="{% for field in form %} {{joiner("||")}} {{field.name}}.$invalid {% endfor %}"
+
+ng-disabled="{% for field in form %} {{field.name}}.$invalid {{ "||" if not loop.last }} {% endfor %}"
+
+ng-disabled=="{{form_name}}.$invalid"
+#}
+
+{% macro form_with_help(form,form_name,ng_click=None) %}
+
+  <form name={{form_name}} >
+
+	{% for field in form %}
+	    {#{{showField(field)}}#}
+	    {# {{ field_with_help(field) }} #}
+	    {#{{ng_field_with_help(field,form_name) }}#}
+	    {#{{field.render_ng(form_name) | safe}}#}
+	    {{field(form_name) | safe}}
+			<br>
+	{% endfor %}
+	<br>
+  <button ng-disabled="{{form_name}}.$invalid" {%if ng_click %} ng-click="{{ng_click}}" {% endif %} type="submit" id="{{form_name}}.submit">Login</button>
+
+  </form>
+
+{% endmacro %}
+
+
+

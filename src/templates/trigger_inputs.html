@@ -14,14 +14,10 @@
 <h2>Drop and Recreate Tables </h2>
     <div>
         <div id="c1">
-        <form action='/triggers/' method='get' target='_self'>
-            <button type="submit" name ='submit' value='drop_tabs' onclick="alert('Dropping all tabs!')">Drop Tabs GET</button>
-        </form>
+         {{forms.simpleButton(action='/triggers/',method='get',fieldvalue='drop_tabs',button_text='Drop Tabs (GET)',onclickAlert='DROPPING ALL TABS!')}}
         </div>
         <div id="c2">
-        <form action='/triggers/' method='post' target='_self'>
-            <button type="submit" name ='submit' value='drop_tabs' onclick="alert('Dropping all tabs!')">Drop Tabs POST</button>
-        </form>
+        {{forms.simpleButton(action='/triggers/',fieldvalue='drop_tabs',button_text='Drop Tabs (POST)',onclickAlert='DROPPING ALL TABS!')}}
         </div>
         <div id="c3">
         <form role="form" ng-click="clearScope()" ng-submit="dropTabs()">

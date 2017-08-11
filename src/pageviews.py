@@ -27,8 +27,15 @@ from GT_manager import create_generic_parameters
 from app import app,request,abort
 from database import db
 
+import wtforms_ext
 
+@app.route('/view_carpooler/',methods=['POST'])
+def view_carpooler():
+	data = str(json.loads(request.data.decode()))
+	form = str(request.form)
+	return "Success viewing carpooler: data: " + data + ", form: " + form + " (FLASK)",200
 
+emailForm=wtforms_ext.EmailForm(ng_click='getCarpoolerInfo()')
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -37,21 +44,26 @@ def index():
 	if request.method == "POST":
 		# get url that the user has entered
 		try:
-			url = request.form['url']
-			r = requests.get(url)
-			print(r.text)
-			results = {"hey":"dude","who":"are","you":"?"}
+			# url = request.form['url']
+			pass
 		except:
 			errors.append(
 				"Unable to get URL. Please make sure it's valid and try again."
 			)
-	return render_template('index.html', errors=errors, results=results)
+	return render_template('index.html', emailForm=emailForm,errors=errors, results=results)
+
+
+@app.route('/form_views/',methods=['POST'])
+def render_forms_1():
+	return render_template('form_sequence.html')
 
 @app.route('/view_pool/<int:number>/',methods=['GET'])
 def call_view_pool(number):
 	poolDict=view_pool_formal(number)
 	poolRep = '<br>'.join(['{0}: {1}'.format(key, value) for (key, value) in poolDict.items()])
 	return poolRep,200
+
+
 
 @app.route('/view_pool/',methods=['POST'])
 def post_call_view_pool():

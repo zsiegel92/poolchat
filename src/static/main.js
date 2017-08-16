@@ -4,7 +4,9 @@
 
   angular.module('TriggerPane', [])
 
-
+  .config(['$httpProvider', function($httpProvider) {
+  $httpProvider.defaults.withCredentials = true;
+	}])
 
 	.controller('TriggerController', ['$scope', '$log', '$http', '$timeout',
 	  function($scope, $log, $http, $timeout) {
@@ -59,7 +61,6 @@
 		        if(response.status === 202) {
 		        	$scope.resultText = "Trying hard to add to database (JS). " + response.data + " (Flask)."
 		          $log.log(response.data, response.status);
-		          $log.log("SOME JS SHIT");
 		        } else if (response.status === 200){
 		          $log.log(response.data);
 		          var resultText = JSON.stringify(response.data);
@@ -74,6 +75,10 @@
 		        // continue to call the poller() function every 2 seconds
 		        // until the timeout is cancelled
 		        timeout = $timeout(poller, 2000);
+		      })
+		      .catch(function(response){
+		      	$scope.resultText = "Job failed! (JS). " + response.data + " (Flask)."
+		          $log.log(response.data, response.status);
 		      });
 		  };
 		  poller();
@@ -123,14 +128,32 @@
 	    var submission = $scope.submit;
 
 	    // fire the API request
-	    $http.get('/dropTabs').
+	    $http.post('/dropTabs').
 	      then(function(response) {
 	        $log.log(response.data);
 	        $scope.resultText="Dropped table successfullly using angular! " + String(response.data) + "(server output)"
+
+					if(response.status === 302) {
+	        	$scope.resultText = "Please log in before sending this request (JS).";
+	          $log.log(response.data, response.status);
+	        } else if (response.status === 200){
+	         	$scope.resultText = "Successfully dropped tabs (JS). " + String(response.data) + " (FLASK)";
+	          $log.log(response.data, response.status);
+	        }
+
+
+
+
+
+
+
+
+
 	      }).
 	      catch(function(response) {
 	        $log.log(response.data);
-	        $scope.resultText="error in dropTabs"
+
+	        $scope.resultText="error in dropTabs (JS). " + String(response.data) + " (Python)."
 	      });
 	  };
 

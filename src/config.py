@@ -28,6 +28,7 @@ class ProductionConfig(Config):
 	EMAIL = os.environ['EMAIL']
 	EMAIL_PASSWORD = os.environ['EMAIL_PASSWORD']
 	SEND_FILE_MAX_AGE_DEFAULT = 1200#seconds
+	URL_BASE='https://poolchat.herokuapp.com/'
 
 #NOTE: I can change this to:
 
@@ -58,6 +59,7 @@ class DevelopmentConfig(Config):
 	EMAIL = str(os.environ.get('EMAIL'))
 	EMAIL_PASSWORD = str(os.environ.get('EMAIL_PASSWORD'))
 	SEND_FILE_MAX_AGE_DEFAULT = 0#seconds
+	URL_BASE='https://poolchat.ngrok.io'
 
 class TestingConfig(Config):
 	TESTING = True

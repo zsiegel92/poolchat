@@ -8,6 +8,8 @@ from fieldTrees import fields,poolfields,findPool,tripfields,modesFirst
 #from decision_trees import poolertree as fields
 import sys
 
+from uuid import uuid1,UUID
+
 
 
 
@@ -16,7 +18,11 @@ import sys
 #FOR NOW: It's as though every carpooler can have multiple pools, but all those pools have the exact same characteristics for the carpooler xD
 
 #NOTE: inputting names as lowercase makes them case-insensitive to SQLAlchemy (including even one uppercase character turns off this feature). So the lowercase class names refer to my classes whose names are uppercase! Confusing!
-
+def random_uuid():
+	rand = str(uuid1())
+	while Carpooler.query.filter_by(session_id=rand).first() is not None:
+		rand = str(uuid1())
+	return rand
 
 
 print('Hello from MODELS.PY!', file=sys.stderr)
@@ -32,13 +38,19 @@ class Carpooler(db.Model):
 	__tablename__ = 'carpooler'
 
 #    NOT SURE if sqlalchemy column definitions HAVE TO occur outside __init__.
-	id = db.Column(db.Integer, primary_key=True)
+	id = db.Column(db.Integer, primary_key=True,autoincrement=True)
+
+	session_id = db.Column(db.String(length=36),default=random_uuid,unique=True)
+	# session_id=db.Column(db.Integer,unique=True)
+
+	password = db.Column(db.String())
 
 	# Note: pools[0] is the current pool!
 	# Note: EVERY member OWNS their pools!
-	pools = db.relationship("Trip",back_populates = 'member')
+	pools = db.relationship("Trip",back_populates ='member')
 	# owned_pools = db.relationship("pool",back_populates = 'owners')
 	current_pool_id = db.Column(db.Integer, db.ForeignKey('pool.id'))
+
 
 	fbId = db.Column(db.String()) #facebook id
 
@@ -57,8 +69,7 @@ class Carpooler(db.Model):
 	menu = db.Column(db.String())
 	mode = db.Column(db.String())
 
-
-	def __init__(self, fbId,**kwargs):
+	def __init__(self, fbId="",**kwargs):
 		super().__init__()
 		self.fbId = fbId #facebook id of user
 		self.fieldstate = "name"
@@ -71,8 +82,18 @@ class Carpooler(db.Model):
 				setattr(self,arg,kwargs[arg])
 
 
+	def is_authenticated(self):
+		return True
+	def is_active(self):
+		return True
+	def is_anonymous(self):
+		return False
 
+	def get_id(self):
+		return self.session_id
 
+	def to_copy_dict(self):
+		return {"password":self.password,"fbId":self.fbId,"firstname":self.firstname,"lastname":self.lastname,"name":self.name,"email":self.email,"session_id":self.session_id}
 	# @Return: nodeOb
 	# Can update fields directly, or can update based on current fieldstate with input.
 	# based on some field of fields[self.fieldstate] (aka self.quickhead()), such as "is_field", we should either do this, or do something else! Like, maybe, it could be "multi_field". Seems like an "intake_format" nodeOb field is necessary!
@@ -374,6 +395,11 @@ class Carpooler(db.Model):
 		todict['tripstring']=self.describe_trips()
 		return todict
 
+	def to_dict_formal(self):
+		print('in Carpooler.to_dict_formal',file=sys.stderr)
+		todict = json.loads(self.selfFormalRep, object_pairs_hook=OrderedDict)
+		todict['Trips']=self.describe_trips()
+		return todict
 
 	# @Return: String description of carpooler
 	def __repr__(self):
@@ -474,8 +500,10 @@ class Pool(db.Model):
 class Trip(db.Model):
 	__tablename__ = 'trips'
 
-	carpooler_id = db.Column(db.Integer, db.ForeignKey('carpooler.id'), primary_key=True)
-	pool_id = db.Column(db.Integer, db.ForeignKey('pool.id'), primary_key=True)
+	carpooler_id = db.Column(db.Integer, db.ForeignKey('carpooler.id'),primary_key=True)
+	pool_id = db.Column(db.Integer, db.ForeignKey('pool.id'),primary_key=True)
+	# , primary_key=True
+	# __table_args__ = (db.ForeignKeyConstraint([pool_id],[Pool.id]), {})
 
 	member = db.relationship("Carpooler", back_populates="pools")
 	pool = db.relationship("Pool", back_populates="members")

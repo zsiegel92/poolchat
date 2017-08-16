@@ -1,0 +1,19 @@
+{% from "_formhelpers.html" import render_field %}
+{% import 'forms_macros.html' as forms %}
+<!DOCTYPE html>
+<html >
+<head></head>
+<body>
+<form method=post>
+  <dl>
+    {{ render_field(form.username) }}
+    {{ render_field(form.email) }}
+    {{ render_field(form.password) }}
+    {{ render_field(form.confirm) }}
+    {{ render_field(form.accept_tos) }}
+  </dl>
+  <p><input type=submit value=Register>
+</form>
+{{forms.simpleButton(action='/login/',method='get',fieldvalue='login',button_text='Go LOG IN')}}
+</body>
+</html>

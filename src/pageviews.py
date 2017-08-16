@@ -3,6 +3,9 @@ import requests
 import copy
 import random
 from flask import render_template,url_for,jsonify,json,make_response
+from flask_login import current_user, login_user, logout_user,login_required
+from sqlalchemy.orm.session import make_transient
+
 
 from collections import OrderedDict
 import numpy as np
@@ -28,44 +31,32 @@ from app import app,request,abort
 from database import db
 
 import wtforms_ext
-
-@app.route('/view_carpooler/',methods=['POST'])
-def view_carpooler():
-	data = str(json.loads(request.data.decode()))
-	form = str(request.form)
-	return "Success viewing carpooler: data: " + data + ", form: " + form + " (FLASK)",200
-
 emailForm=wtforms_ext.EmailForm(ng_click='getCarpoolerInfo()')
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
-	errors = []
-	results = {}
-	if request.method == "POST":
-		# get url that the user has entered
-		try:
-			# url = request.form['url']
-			pass
-		except:
-			errors.append(
-				"Unable to get URL. Please make sure it's valid and try again."
-			)
-	return render_template('index.html', emailForm=emailForm,errors=errors, results=results)
 
-
-@app.route('/form_views/',methods=['POST'])
-def render_forms_1():
-	return render_template('form_sequence.html')
-
-@app.route('/view_pool/<int:number>/',methods=['GET'])
-def call_view_pool(number):
-	poolDict=view_pool_formal(number)
-	poolRep = '<br>'.join(['{0}: {1}'.format(key, value) for (key, value) in poolDict.items()])
-	return poolRep,200
-
-
+@app.route('/view_carpooler/',methods=['POST'])
+@login_required
+def view_carpooler():
+	# data = json.loads(request.data.decode())
+	# data=request.get_json(force=True)
+	data= request.form
+	form=wtforms_ext.EmailForm(data)
+	if form.validate():
+		email=form.emailField.data
+		carpooler = Carpooler.query.filter_by(email=email).first()
+		if carpooler is not None:
+			return jsonify(carpooler.to_dict_formal()),200
+		else:
+			carpooler = Carpooler()
+			db.session.add(carpooler)
+			carpooler.externalUpdate(email=email)
+			db.session.commit()
+			return jsonify(carpooler.to_dict()),201
+	else:
+		return "Data invalid - errors: " + str(form.errors) +" (FLASK)",500
 
 @app.route('/view_pool/',methods=['POST'])
+@login_required
 def post_call_view_pool():
 	# pool_id = request.args.get('pool_id',None)
 	data = json.loads(request.data.decode())
@@ -74,24 +65,80 @@ def post_call_view_pool():
 	poolDict=view_pool_formal(pool_id)
 	return jsonify(poolDict),200
 
+@app.route('/view_pool/<int:number>/',methods=['GET'])
+@login_required
+def call_view_pool(number):
+	poolDict=view_pool_formal(number)
+	poolRep = '<br>'.join(['{0}: {1}'.format(key, value) for (key, value) in poolDict.items()])
+	return poolRep,200
+
+
+# @app.route('/', methods=['GET', 'POST'])
+# @login_required
+# def index():
+# 	errors = []
+# 	results = {}
+# 	if request.method == "POST":
+# 		# get url that the user has entered
+# 		try:
+# 			# url = request.form['url']
+# 			pass
+# 		except:
+# 			errors.append(
+# 				"Unable to get URL. Please make sure it's valid and try again."
+# 			)
+# 	return render_template('index.html', emailForm=emailForm,errors=errors, results=results)
+@app.route('/', methods=['GET', 'POST'])
+def index():
+	return app.send_static_file('index.html')
+
+@app.route('/form_views/',methods=['POST'])
+@login_required
+def render_forms_1():
+	return render_template('form_sequence.html')
+
 
 
 #TODO: Flip through users in db, message them their table has been dropped :)
-@app.route('/dropTabs', methods=["GET"])
+@app.route('/dropTabs', methods=["GET","POST"])
+@login_required
 def drop_table():
 	print("Dropping all tables")
+	rando=random.randint(1,10)
 	try:
-		db.drop_all()
-		db.create_all()
-		db.session.commit()
-		rando=random.randint(1,10)
+		if current_user.is_anonymous():
+
+			id = "anonymousId"
+			return "must log in to drop tables.",302
+		else:
+
+			carpooler = Carpooler.query.filter_by(id=current_user.id).first()
+			copy_dict=carpooler.to_copy_dict()
+			logout_user()
+			# db.session.expunge(carpooler)  # expunge the object from session
+			# make_transient(carpooler)  # http://docs.sqlalchemy.org/en/rel_1_1/orm/session_api.html#sqlalchemy.orm.session.make_transient
+			# db.session.commit()
+			# print("committed once")
+			db.session.close_all()
+			print("closed sessions")
+			# db.reflect()
+			# print("reflected")
+			db.drop_all()
+			db.create_all()
+			db.session.commit()
+			carpooler = Carpooler(**copy_dict)
+			login_user(carpooler)
+			db.session.add(carpooler)
+			db.session.commit()
+			return "Tables dropped (except for you)!",200
 	except Exception as exc:
 		return "Exception on table drop:\n" + str(exc),500
 	else:
-		return "Dropped and re-created all tables! Random integer: " + str(rando), 200
+		return "Dropped and re-created all tables! Random integer: " + str(rando)+ " (your id is " + str(id) + ")", 200
 
 
 @app.route('/triggers/',methods=['GET',"POST"])
+@login_required
 def load_triggers():
 	# <form action="/populate_generic/" method="post" target="_blank">
  #              Number of Generic Participants: <input type="int" name="n"><br>
@@ -119,6 +166,7 @@ def load_triggers():
 
 
 @app.route('/q_populate/',methods=['GET',"POST"])
+@login_required
 def q_populate():
 	# <form action="/populate_generic/" method="post" target="_blank">
  #              Number of Generic Participants: <input type="int" name="n"><br>
@@ -142,9 +190,8 @@ def q_populate():
 	numberPools=min(n,numberPools)
 	if n is not None:
 		n=int(n)
-		db.drop_all()
-		db.create_all()
-		db.session.commit()
+		drop_table()
+
 		job = q.enqueue_call(func=populate_generic,kwargs = {'n':n,'randGen': randGen,'numberPools':numberPools},result_ttl=5000)
 		print("job.get_id() = " + str(job.get_id())) #job.result will store output of populate_generic(n), which is "output_list" in the non-enqueued version above
 		return job.get_id()
@@ -153,6 +200,7 @@ def q_populate():
 
 
 @app.route("/results/", methods=['POST'])
+@login_required
 def post_get_results():
 	try:
 		data = json.loads(request.data.decode())
@@ -165,6 +213,7 @@ def post_get_results():
 
 
 @app.route("/results/<job_key>", methods=['GET'])
+@login_required
 def get_results(job_key):
 	try:
 		job = Job.fetch(job_key, connection=conn)
@@ -178,9 +227,13 @@ def get_results(job_key):
 		# return resultString[0:-1],200
 		output = OrderedDict(("Carpooler_"+str(ind),{'Carpooler':carpooler['Carpooler'],'Pool':carpooler['Pool'],'Trip':carpooler['Trip']}) for ind,carpooler in enumerate(result))
 		return jsonify(output),200
-	else:
+	elif job.is_queued:
 		# print("PROBLEM IS HERE?!")
-		return "Still working on it!", 202
+		return "Job queued!", 202
+	elif job.is_started:
+		return "Job being processed AT THIS MOMENT!", 202
+	elif job.is_failed:
+		return "Job failed!",500
 
 #NOTE: All POOL creators are ONLY IN THAT SINGLE POOL
 def populate_generic(n,numberPools=2,randGen = False):
@@ -191,8 +244,10 @@ def populate_generic(n,numberPools=2,randGen = False):
 		for fullDict in dicts:
 			print("oneDict = " + str(fullDict))
 			fbId=fullDict['fbId']
-			carpooler = Carpooler(fbId=fbId)
+			carpooler = Carpooler()
 			db.session.add(carpooler)
+			db.session.commit()
+			carpooler.fbId=fbId
 			carpooler.externalUpdate(setForMode='fields',**fullDict['Carpooler'])
 			db.session.commit()
 
@@ -201,14 +256,9 @@ def populate_generic(n,numberPools=2,randGen = False):
 					# pool_id = pool__id
 					pool = Pool.query.filter_by(id=pool_id).first()
 					if pool is not None:
-						print("pool.to_dict(): " + str(pool.to_dict()))
-						print("carpooler.id: " + str(carpooler.id))
-						print("pool.id: " + str(pool.id))
 						trip = None
 						try:
 							trip = Trip.query.filter_by(carpooler_id=carpooler.id,pool_id=pool.id).first()
-							print("Successfully queried for trip!")
-							print("Successful trip queried is: " + str(trip))
 						except Exception as exc:
 							print("trip is " + str(trip))
 							print("Exception:")

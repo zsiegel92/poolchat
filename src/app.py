@@ -3,6 +3,9 @@ import os
 from flask import Flask, request, abort, json
 # from database import db
 from app_factory import create_app
+from login import login_manager
+from database import db
+
 # from flask_sqlalchemy import SQLAlchemy #INTERACTIONS MOVEMENT!
 # from rq import Queue #INTERACTIONS MOVEMENT!
 # from rq.job import Job  #FOR Redis jobs #INTERACTIONS MOVEMENT!
@@ -14,10 +17,6 @@ from app_factory import create_app
 # app.config.from_object(os.environ['APP_SETTINGS'])
 # db.init_app(app)
 app = create_app(__name__)
-
-
-
-
 
 
 
@@ -51,9 +50,15 @@ import triggerviews
 import GTviews
 
 import unusedViews
+
+import loginViews
 # from interactions import db
 #Webhook views can be placed here
 #Interactions can be placed here
+
+
+
+
 
 
 

@@ -5,10 +5,93 @@
 				<!-- <p>{{ forms.textarea('comment') }}</p> -->
 {% endmacro %}
 
-{% macro conditionalSpan(elementName) %}
+
+{% macro conditionalSpanNgVar(elementName) %}
  <span ng-if="{{elementName}}">{{angularVariable(elementName)}} </span>
 {% endmacro %}
 
 {% macro angularVariable(varName) %}
 {{"{{"}} {{varName}} {{"}}"}}
 {% endmacro %}
+
+
+{% macro view_pool(poolName)%}
+<div ng-if="{{poolName}}">
+    <div ng-show="{{poolName}}">
+        <h2>Queried Pool:</h2>
+        <div ng-if="!isString({{poolName}})">
+            <ul>
+                <li ng-repeat="(kw,value) in {{poolName}}">
+
+                    <span ng-if="!hasChildren(value)">
+                        {% raw %}
+                        {{kw}} : {{value}}
+                        {% endraw %}
+                    </span>
+                    <span ng-if="hasChildren(value)">
+                        {%raw%} {{kw}} {% endraw %} - every carpooler traveling here:
+                        <ol>
+                            <li ng-repeat="trip in value">
+                                <ul>
+                                    <li ng-repeat="(tripKey,tripVal) in trip">
+                                       {% raw %}
+                                       {{tripKey}} : {{tripVal}}
+                                       {% endraw %}
+                                    </li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </span>
+                </li>
+            </ul>
+        </div>
+        <div ng-if="isString({{poolName}})">
+            {{ angularVariable(poolName) }}
+        </div>
+        <br>
+    </div>
+</div>
+
+{% endmacro %}
+
+
+
+
+
+
+
+
+
+
+{% macro view_carpooler(name) %}
+<div ng-if="{{name}}">
+    <div ng-show="{{name}}">
+        <h2>Queried Carpooler:</h2>
+        <div ng-if="!isString({{name}})">
+            <ul>
+                <li ng-repeat="(kw,value) in {{name}}">
+                	{% raw %}
+                    <span ng-if="!hasChildren(value)">
+                        {{kw}} : {{value}}
+                    </span>
+                    <span ng-if="hasChildren(value)">
+                        {{kw}} dict of things:
+                        <ol>
+                            <li ng-repeat="sub_thing in value">
+                            	{{sub_thing}}
+                            </li>
+                        </ol>
+                    </span>
+                	{% endraw %}
+                </li>
+            </ul>
+        </div>
+        <div ng-if="isString({{name}})">
+            {% raw %} {{name}} {% endraw %}
+        </div>
+        <br>
+    </div>
+</div>
+
+{% endmacro %}
+

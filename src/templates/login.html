@@ -1,0 +1,26 @@
+{% from "_formhelpers.html" import render_field %}
+{% import 'forms_macros.html' as forms %}
+<!DOCTYPE html>
+<html >
+<head></head>
+<body>
+<form method=post >
+  <dl>
+  	{% for field in form %}
+  		{{render_field(field)}}
+  	{% endfor %}
+    {# {{ render_field(form.email) }}
+    {{ render_field(form.password) }}
+    {{ render_field(form.remember_me) }} #}
+  </dl>
+  <p><input type='submit' value=Login></p>
+</form>
+
+
+<form method='get' target='_self' action='/register/'>
+<button>REGISTER</button>
+</form>
+
+<p>{{message}}</p>
+</body>
+</html>

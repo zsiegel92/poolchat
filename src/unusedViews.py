@@ -1,5 +1,5 @@
 from interactions import quick_rules,pester,text_rules,process_referral#Note: have to import webhookviews at bottom of app
-
+from flask_login import current_user, login_user, logout_user,login_required
 
 #IMPORTS FOR TESTING:
 from interactions import getStarted#NOTE These are NOT needed for app - only for drop_populate and testing!

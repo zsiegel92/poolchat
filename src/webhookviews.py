@@ -1,6 +1,7 @@
 #Note: have to import webhookviews at bottom of app.py
 from interactions import quick_rules,text_rules,process_referral,postback_rules
 from app import app,request,abort
+from flask_login import current_user, login_user, logout_user,login_required
 
 
 # webhook for facebook to initialize the bot

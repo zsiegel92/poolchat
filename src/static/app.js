@@ -5,6 +5,7 @@ myApp.config(function ($routeProvider,$httpProvider) {
   $routeProvider
     .when('/', {
       access: {restricted: true},
+      controller: 'logoutController',
       templateUrl: 'static/partials/home.html'
     })
     .when('/login', {
@@ -29,6 +30,11 @@ myApp.config(function ($routeProvider,$httpProvider) {
       template: '<h1>This is page two!</h1>',
       access: {restricted: false}
     })
+    // .when('/triggers', {
+    //   templateUrl: 'static/partials/triggers.html',
+    //   controller: 'triggerController',
+    //   access: {restricted: true}
+    // })
     .otherwise({
       redirectTo: '/'
     });
@@ -39,7 +45,9 @@ myApp.run(function ($rootScope, $location, $route, AuthService) {
     function (event, next, current) {
       AuthService.getUserStatus()
       .then(function(){
-        if (next.access.restricted && !AuthService.isLoggedIn()){
+        var logged_in = AuthService.isLoggedIn();
+        $rootScope.logged_in = logged_in;
+        if (next.access.restricted && !logged_in){
           $location.path('/login');
           $route.reload();
         }

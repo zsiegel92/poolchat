@@ -88,6 +88,7 @@ def call_view_pool(number):
 # 				"Unable to get URL. Please make sure it's valid and try again."
 # 			)
 # 	return render_template('index.html', emailForm=emailForm,errors=errors, results=results)
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
 	return app.send_static_file('index.html')

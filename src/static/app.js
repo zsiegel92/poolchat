@@ -76,12 +76,17 @@ myApp.config(function ($routeProvider,$httpProvider) {
     })
     .when('/viewPool/:poolId?', {
       templateUrl: 'static/partials/viewPool.html',
-      controller: 'makePoolController',
+      controller: 'viewPoolController',
       access: {restricted: true}
     })
     .when('/makePool', {
       templateUrl: 'static/partials/makePool.html',
       controller: 'makePoolController',
+      access: {restricted: true}
+    })
+    .when('/makeTeam', {
+      templateUrl: 'static/partials/makeTeam.html',
+      controller: 'makeTeamController',
       access: {restricted: true}
     })
     .otherwise({

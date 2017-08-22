@@ -10,9 +10,6 @@ Make sure $scope, $route, $routeParams are injected in controller -->
             </form>
 
             <h2>Your Carpools </h1>
-            <div ng-if="resultText">
-                {{resultText}}
-            </div>
 
             <div ng-if="pool_id_message">
                 {{pool_id_message}}
@@ -25,36 +22,39 @@ Make sure $scope, $route, $routeParams are injected in controller -->
 
 
         <div class='col' style="float:right; width:50%">
-            <div ng-if="viewPool">
-                <div ng-show="viewPool">
-                    <h2>Queried Pool:</h2>
-                    <div ng-if="!isString(viewPool)">
-                        <ul>
-                            <li ng-repeat="(kw,value) in viewPool">
-
-                                <span ng-if="!hasChildren(value)">
-                                    {{kw}} : {{value}}
-                                </span>
-                                <span ng-if="hasChildren(value)">
-                                    {%raw%} {{kw}} {% endraw %} - every carpooler traveling here:
-                                    <ol>
-                                        <li ng-repeat="trip in value">
-                                            <ul>
-                                                <li ng-repeat="(tripKey,tripVal) in trip">
-                                                   {{tripKey}} : {{tripVal}}
-                                                </li>
-                                            </ul>
-                                        </li>
-                                    </ol>
-                                </span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div ng-if="isString(viewPool)">
-                        {{ viewPool }}
-                    </div>
-                    <br>
+            <div ng-show="viewPool">
+                <h2>Queried Pool:</h2>
+                <h3> Query Status: </h3>
+                <div ng-if="resultText">
+                    {{resultText}}
                 </div>
+                <h3> Pool Info:</h3>
+                <div ng-if="!isString(viewPool)">
+                    <ul>
+                        <li ng-repeat="(kw,value) in viewPool">
+
+                            <span ng-if="!hasChildren(value)">
+                                {{kw}} : {{value}}
+                            </span>
+                            <span ng-if="hasChildren(value)">
+                                {%raw%} {{kw}} {% endraw %} - every carpooler traveling here:
+                                <ol>
+                                    <li ng-repeat="trip in value">
+                                        <ul>
+                                            <li ng-repeat="(tripKey,tripVal) in trip">
+                                               {{tripKey}} : {{tripVal}}
+                                            </li>
+                                        </ul>
+                                    </li>
+                                </ol>
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+                <div ng-if="isString(viewPool)">
+                    {{ viewPool }}
+                </div>
+                <br>
             </div>
             <div ng-if="!viewPool">
             <h1>NO QUERY RESPONSE YET!</h1>

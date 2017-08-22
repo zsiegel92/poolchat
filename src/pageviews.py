@@ -5,7 +5,8 @@ import random
 from flask import render_template,url_for,jsonify,json,make_response
 from flask_login import current_user, login_user, logout_user,login_required
 from sqlalchemy.orm.session import make_transient
-
+from dateutil.parser import parse
+from datetime import datetime
 
 from collections import OrderedDict
 import numpy as np
@@ -20,7 +21,7 @@ import pickle
 
 from helpers import findRelativeDelta
 from interactions import newPool
-from models import  Carpooler,Pool, Trip,ensure_carpooler_notNone
+from models import  Carpooler,Pool, Trip,ensure_carpooler_notNone,Team
 from groupThere.GroupThere import GroupThere
 
 
@@ -63,7 +64,21 @@ def post_call_view_pool():
 	pool_id = data.get("pool_id",None)
 	print("POOL ID IS " + str(pool_id))
 	poolDict=view_pool_formal(pool_id)
-	return jsonify(poolDict),200
+
+	pool=Pool.query.filter_by(id=pool_id).first()
+
+	if pool is None:
+		poolDict={}
+		status=204
+	elif current_user not in [trip.member for trip in pool.members]:
+		# status=401 #Not Authorized!
+		status=206 #partial content
+		poolDict={"Affiliated Teams":[team.name for team in pool.teams],"Members":[trip.member.name for trip in pool.members],"Name":pool.poolName,"Date":str(pool.eventDate) +" "+ str(pool.eventTime),"Lateness Window":pool.latenessWindow,"Address":pool.eventAddress,"Contact (phone)":pool.eventContact,"Email":pool.eventEmail,"Host Organization":pool.eventHostOrg,"Signature":pool.signature,"Fire Notice":pool.fireNotice}
+	else:
+		status=200
+		poolDict = {"Affiliated Teams":[team.name for team in pool.teams],"Members":[trip.member.name for trip in pool.members],"Name":pool.poolName,"Date":str(pool.eventDate) +" " + str(pool.eventTime),"Lateness Window":pool.latenessWindow,"Address":pool.eventAddress,"Contact (phone)":pool.eventContact,"Email":pool.eventEmail,"Host Organization":pool.eventHostOrg,"Signature":pool.signature,"Fire Notice":pool.fireNotice}
+
+	return jsonify(poolDict),status
 
 @app.route('/view_pool/<int:number>/',methods=['GET'])
 @login_required
@@ -193,6 +208,7 @@ def load_triggers():
 	return render_template('trigger_base.html',output_list=output_list,request_vars=request_vars)
 
 @app.route('/api/create_pool/',methods=['POST'])
+@login_required
 def api_create_pool():
 	pool=Pool()
 	trip = Trip()
@@ -204,17 +220,68 @@ def api_create_pool():
 	db.session.commit()
 
 	print("request.values: " + str(request.values))
-	print("request.args: " + str(request.args))
-
-	teams=request.values.get("teams")
 
 	pool.poolName=request.values.get("name")
 	pool.eventAddress=request.values.get("address")
 	pool.eventEmail=request.values.get("email")
-	pool.eventDate = request.values.get("date")
+
+	pool.fireNotice = int(request.values.get("fireNotice"))
+	pool.latenessWindow = int(request.values.get("latenessWindow"))
+
+
+	eventDateTime = parse(request.values.get("dateTimeText"))
+
+
+	pool.eventDateTime = eventDateTime
+
+	pool.eventDate = pool.eventDateTime.strftime("%d/%m/%y")
+	pool.eventTime = pool.eventDateTime.strftime("%I:%M %p")
+
+	print("Adding event at " + str(pool.eventDate) + " at " + str(pool.eventTime))
+	# >>> d.strftime("%d/%m/%y")
+	# '11/03/02'
+	# >>> d.strftime("%A %d. %B %Y")
+	# 'Monday 11. March 2002'
+	# See http://strftime.org/
+
 	db.session.commit()
 
+	message = "Pool added to database"
+
+	# team_names=request.values.get("teams")
+	team_ids = json.loads(request.values.get("team_ids"))
+
+	for team_id in team_ids:
+		team = Team.query.filter_by(id=team_id).first()
+		if current_user in team.members:
+			team.pools.append(pool)
+			message+="\nTeam affiliations confirmed."
+		else:
+			message+="User not a member of " + str(team.name)
+
+		db.session.commit()
+
+
+
 	return "Pool added to database.", 200
+
+@app.route('/api/get_email/',methods=['POST'])
+@login_required
+def api_get_email():
+	return getattr(current_user,'email',''),200
+
+@app.route('/api/create_team/',methods=['POST'])
+@login_required
+def api_create_team():
+	print("request.values: " + str(request.values))
+	team=Team()
+	team.name = request.values.get("name")
+	team.email=request.values.get("email")
+	db.session.add(team)
+	db.session.commit()
+	team.members.append(current_user)
+	db.session.commit()
+	return "Team added to database.", 200
 
 @app.route('/q_populate/',methods=['GET',"POST"])
 @login_required

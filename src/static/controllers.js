@@ -74,6 +74,65 @@ angular.module('myApp').controller('logoutController',
 
 
 
+angular.module('myApp').controller('makeTeamController',
+  ['$scope', '$location','$log', '$http','$filter','AuthService',
+  function ($scope, $location, $log, $http,$filter,AuthService) {
+
+    $scope.disabled = false;
+    var getEmail= function(){
+      $scope.disabled=true;
+      $http.post('/api/get_email/')
+                .then(function(response) {
+                  $scope.disabled = false;
+                  $log.log("User Email:");
+                  $log.log(response.data);
+                  $scope.teamForm.ngEmail=response.data;
+                }).
+                catch(function(response) {
+                  $scope.disabled = false;
+                  $log.log(response.data);
+                  $scope.resultText="error registering pool.";
+                });
+
+
+
+    };
+
+
+    $scope.register = function() {
+
+        $scope.disabled = true;
+
+        $log.log("Registering Team:");
+        $log.log(                {
+                      name:$scope.teamForm.ngName,
+                      email:$scope.teamForm.ngEmail,
+                    });
+        $http.post('/api/create_team/',
+                  $.param(
+                    {
+                      name:$scope.teamForm.ngName,
+                      email:$scope.teamForm.ngEmail,
+                    }
+                  ),
+                  {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+
+          .then(function(response) {
+            $scope.disabled = false;
+            $log.log("Registration response:");
+            $log.log(response.data);
+            $scope.resultText=response.data;
+          }).
+          catch(function(response) {
+            $scope.disabled = false;
+            $log.log(response.data);
+            $scope.resultText="error registering pool.";
+          });
+      };
+    getEmail();
+
+}]);
+
 
 angular.module('myApp').controller('makePoolController',
   ['$scope', '$location','$log', '$http','$filter','AuthService',
@@ -92,6 +151,23 @@ angular.module('myApp').controller('makePoolController',
       return date
     };
 
+    var getEmail= function(){
+      $scope.disabled=true;
+      $http.post('/api/get_email/')
+                .then(function(response) {
+                  $scope.disabled = false;
+                  $log.log("User Email:");
+                  $log.log(response.data);
+                  $scope.poolForm.ngEmail=response.data;
+                }).
+                catch(function(response) {
+                  $scope.disabled = false;
+                  $log.log(response.data);
+                  $scope.resultText="error registering pool.";
+                });
+    };
+
+
     $scope.disabled = false;
 
     $scope.now =new Date();
@@ -103,10 +179,11 @@ angular.module('myApp').controller('makePoolController',
 
 
     $scope.teams = ['team1', 'team2', 'team3'];
-
+    $scope.team_ids=[1,2,3];
 
     // Selected teams
     $scope.teamSelection = [];
+    $scope.teamSelection_ids=[];
     $scope.teamForms=[];
 
     // $scope.poolForm.ngDate = new Date();
@@ -118,11 +195,13 @@ angular.module('myApp').controller('makePoolController',
       // Is currently selected
       if (idx > -1) {
         $scope.teamSelection.splice(idx, 1);
+        $scope.teamSelection_ids.splice(idx,1);
       }
 
       // Is newly selected
       else {
         $scope.teamSelection.push(teamName);
+        $scope.teamSelection_ids.push($scope.team_ids[$scope.teams.indexOf(teamName)]);
       }
     };
 
@@ -134,11 +213,13 @@ angular.module('myApp').controller('makePoolController',
 
       // fire the API request
       // returns: {'team_names':team_names,'team_ids':team_ids,'message':message,}
-      $http.post('/api/get_teams/').then(function(response) {
+      $http.post('/api/get_teams/')
+        .then(function(response) {
           $log.log("Teams for user:");
           $log.log(response.data);
           $scope.resultText=response.data.message;
           $scope.teams=response.data.team_names;
+          $scope.team_ids = response.data.team_ids;
         }).
         catch(function(response) {
           $log.log(response.data);
@@ -165,6 +246,7 @@ angular.module('myApp').controller('makePoolController',
                   email:$scope.poolForm.ngEmail,
                   fireNotice:$scope.poolForm.ngFireNotice,
                   latenessWindow:$scope.poolForm.ngLatenessWindow,
+                  team_ids:angular.toJson($scope.teamSelection_ids),
                   teams:$scope.teamSelection,
                   teams2:$scope.poolForm.selectedTeams
                 });
@@ -177,8 +259,7 @@ angular.module('myApp').controller('makePoolController',
                   email:$scope.poolForm.ngEmail,
                   fireNotice:$scope.poolForm.ngFireNotice,
                   latenessWindow:$scope.poolForm.ngLatenessWindow,
-                  teams:$scope.teamSelection,
-                  teams2:$scope.poolForm.selectedTeams
+                  team_ids:angular.toJson($scope.teamSelection_ids)
                 }
               ),
               {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
@@ -192,12 +273,12 @@ angular.module('myApp').controller('makePoolController',
       }).
       catch(function(response) {
         $scope.disabled = false;
-        $log.log(response.data);
         $scope.resultText="error registering pool.";
       });
   };
 
   $scope.getTeams();
+  getEmail();
 
 }]);
 
@@ -236,6 +317,8 @@ angular.module('myApp').controller('viewPoolController',
   ['$scope', '$location', 'AuthService','$route', '$routeParams','$log','$http',
   function ($scope, $location, AuthService,$route,$routeParams,$log,$http) {
 
+    $scope.viewPool={};
+
     $scope.getPoolIds = function() {
       $log.log("Getting pool ids");
       $http.post('api/get_pool_ids')
@@ -256,12 +339,27 @@ angular.module('myApp').controller('viewPoolController',
       // get the number of generic participants from the input
       var pool_id = $scope.pool_id;
       // fire the API request
-      $http.post('/view_pool/',{'pool_id':pool_id}).then(function(response) {
+      $http.post('/view_pool/',{'pool_id':pool_id})
+        .then(function(response) {
           $log.log("Logging pool info. Pool id:")
           $log.log(pool_id)
           $log.log(response.data);
-          $scope.resultText="Successfully queried for pool info!";
-          $scope.viewPool=response.data;
+          if (response.status==200){
+            $scope.resultText="You are a member of this carpool!";
+            $scope.viewPool=response.data;
+          }
+          else if (response.status==204){
+            $scope.resultText="No such carpooling event.";
+            $scope.viewPool={};
+          }
+          else if (response.status == 206){
+            $scope.resultText="You are not a member of this carpool.";
+            $scope.viewPool=response.data;
+          }
+          else {
+
+          }
+
         }).
         catch(function(response) {
           $log.log(response.data);
@@ -310,6 +408,25 @@ angular.module('myApp').controller('triggerController',
     };
 
 }]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

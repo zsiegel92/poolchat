@@ -8,7 +8,7 @@ from fieldTrees import fields,poolfields,findPool,tripfields,modesFirst
 #from decision_trees import poolertree as fields
 import sys
 
-from uuid import uuid1,UUID
+from uuid import uuid1
 
 
 
@@ -34,6 +34,16 @@ def safeformat(str, **kwargs):
 		replacements = SafeDict(**kwargs)
 		return str.format_map(replacements)
 
+
+team_membership=db.Table('team_membership',
+							 db.Column('carpooler_id', db.Integer,db.ForeignKey('carpooler.id'), nullable=False),
+							 db.Column('team_id',db.Integer,db.ForeignKey('teams.id'),nullable=False),
+							 db.PrimaryKeyConstraint('carpooler_id', 'team_id') )
+team_affiliation=db.Table('team_affiliation',
+							 db.Column('pool_id', db.Integer,db.ForeignKey('pool.id'), nullable=False),
+							 db.Column('team_id',db.Integer,db.ForeignKey('teams.id'),nullable=False),
+							 db.PrimaryKeyConstraint('pool_id', 'team_id') )
+
 class Carpooler(db.Model):
 	__tablename__ = 'carpooler'
 
@@ -51,6 +61,7 @@ class Carpooler(db.Model):
 	# owned_pools = db.relationship("pool",back_populates = 'owners')
 	current_pool_id = db.Column(db.Integer, db.ForeignKey('pool.id'))
 
+	teams = db.relationship('Team',secondary=team_membership,back_populates="members")#carpooler's teams
 
 	fbId = db.Column(db.String()) #facebook id
 
@@ -415,6 +426,9 @@ class Pool(db.Model):
 	# owners = db.relationship("carpooler",back_populates="owned_pools")
 	members = db.relationship("Trip",back_populates="pool") #JSON dump
 
+	teams = db.relationship('Team',secondary=team_affiliation,back_populates="pools")#pool's teams
+
+
 	poolName = db.Column(db.String())
 	eventDate = db.Column(db.String())
 	eventTime = db.Column(db.String())#db.Column(db.Time) #Time of event encoded as int?
@@ -492,10 +506,29 @@ class Pool(db.Model):
 		return '<id {}>'.format(self.id)
 
 
-
 		#participants = participants
 		#distMatrix = distMatrix
 
+# class Team_Membership(db.Model):
+# 	__tablename__='team_membership'
+# 	carpooler_id = db.Column(db.Integer, db.ForeignKey('carpooler.id'),primary_key=True)
+# 	member = db.relationship("Carpooler",back_populates="teams")
+# 	team = db.relationship("Team",back_populates="members")
+
+# class Team_Affiliation(db.Model):
+# 	__tablename__='team_affiliation'
+# 	pool_id = db.Column(db.Integer, db.ForeignKey('pool.id'),primary_key=True)
+	# pools = db.relationship("Pool",order_by="Pool.id",back_populates="teams")#
+
+
+class Team(db.Model):
+	__tablename__='teams'
+
+	id = db.Column(db.Integer, primary_key=True) #id of team
+	name = db.Column(db.String())
+	email = db.Column(db.String())
+	members = db.relationship("Carpooler",secondary=team_membership,back_populates="teams") #team members
+	pools= db.relationship("Pool",secondary=team_affiliation,back_populates="teams")#team pools
 
 class Trip(db.Model):
 	__tablename__ = 'trips'
@@ -505,8 +538,10 @@ class Trip(db.Model):
 	# , primary_key=True
 	# __table_args__ = (db.ForeignKeyConstraint([pool_id],[Pool.id]), {})
 
-	member = db.relationship("Carpooler", back_populates="pools")
+	member = db.relationship("Carpooler", back_populates="pools") #trip member
 	pool = db.relationship("Pool", back_populates="members")
+	# team = db.relationship("Team")
+
 
 	address = db.Column(db.String())
 	num_seats = db.Column(db.Integer)

@@ -1,0 +1,183 @@
+<div class="container">
+  <div class="row">
+    <div class='col' style="float:left; width:50%;">
+
+      <h1>Register</h1>
+      <div ng-show="error" class="alert alert-danger">{{errorMessage}}</div>
+      <form class="form" name="poolForm" ng-model="poolForm" ng-submit="register()">
+
+        <div class="form-group">
+          <label ng-repeat="teamName in teams">
+          <input type="checkbox" name="selectedTeams[$index]" ng-model="poolForm.selectedTeams[$index]" value="{{teamName}}" ng-checked="teamSelection.indexOf(teamName) > -1" ng-click="toggleSelection(teamName)">{{teamName}}</label>
+        </div>
+
+        <!-- RESULT TEXT -->
+        <div ng-if="resultText">
+            {{resultText}}
+        </div>
+
+
+<!-- NAME -->
+        <div class="form-group">
+          <label>Event Name</label>
+          <input type="text" class="form-control" name="name" ng-model="poolForm.ngName" required>
+         <span class="error" ng-show="poolForm.name.$error.required">
+          Required!</span>
+          </div>
+
+<!-- CONTACT EMAIL -->
+        <div class="form-group">
+          <label>Event Email</label>
+          <input type="email" class="form-control" name="email" placeholder="email@domain.ext" ng-pattern="/^[_a-z0-9]+(\.[_a-z0-9]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/"  ng-model="poolForm.ngEmail" required>
+
+          <span class="error" ng-show="poolForm.email.$error.required">
+          Required!</span>
+          <span class="error" ng-show="poolForm.email.$error.email">Valid Email Required!</span>
+          <br>
+          <span class="error" ng-show="poolForm.email.$error.pattern">Email should match &ltemail &gt@&ltdomain&gt.&ltext&gt</span>
+        </div>
+
+<!-- ADDRESS -->
+        <div class="form-group">
+          <label>Event Address</label>
+          <input type="text" class="form-control" name="address" ng-model="poolForm.ngAddress" required>
+        </div>
+        <span class="error" ng-show="poolForm.address.$error.required">
+          Required!</span>
+
+<!-- DATE -->
+        <div class="form-group">
+          <label>Event Date</label>
+           <input type="date"
+             ng-model="initial.ngDate"
+             class='form-control'
+             name='date'
+             value="tomorrow"
+             min="{{1 | relativedate}}"
+             max="{{365 | relativedate}}"
+             ng-required="!poolForm.date.$pristine">
+
+<!--             <span class="error" ng-show="poolForm.date.$error">
+            Not a valid date!</span> -->
+            <span class="error" ng-show="poolForm.date.$error.max">
+            Date cannot be more than 1 year hence!</span>
+            <span class="error" ng-show="poolForm.date.$error.min">
+            Date must be in the future!</span>
+            <span class="error" ng-show="poolForm.date.$error.required">
+            Must enter a date!</span>
+            <span class="error" ng-show="poolForm.date.$error.date">
+            Must be a valid date!</span>
+        </div>
+<!-- TIME -->
+        <label>Event Time</label>
+        <input type="time"
+               ng-model="initial.ngTime"
+               name="poolForm.time"
+               placeholder="HH:mm:ss"
+               value="14:30:00"
+               required="true">
+
+
+
+<!-- FIRE NOTICE -->
+        <div class="form-group">
+          <label>Notice for Email (number of hours before event that instructions will be sent out)</label>
+          <br>
+          <span>Instructions will be sent out
+
+          <select ng-model="poolForm.ngFireNotice" name="fireNotice" ng-init="poolForm.ngFireNotice=6;" convert-to-number>
+            <option value="6">6 hours</option>
+            <option value="12">12 hours</option>
+            <option value="18">18 hours</option>
+          </select>
+          hours before your event.</span>
+
+
+
+
+        </div>
+
+<!-- LatenessWindow -->
+        <div class="form-group">
+          <label>Participants can arrive a bit late...</label>
+            <br>
+            <span>
+            <span ng-show="poolForm.ngLatenessWindow>0"> Participants **who are not organizers** can arrive </span>
+
+            <span ng-show="poolForm.ngLatenessWindow==0"> Neither participants nor organizers can arrive late. </span>
+            <br>
+            <select ng-model="poolForm.ngLatenessWindow" name="latenessWindow" ng-init="poolForm.ngLatenessWindow=30;" convert-to-number>
+              <option value="60">1 hour</option>
+              <option value="45">45 minutes</option>
+              <option value="30">30 minutes</option>
+              <option value="15">15 minutes</option>
+              <option value="0">Nobody can arrive late</option>
+            </select>
+
+            <span ng-show="poolForm.ngLatenessWindow>0">
+            minutes after the event (which starts at {{initial.ngTime | date:'hh:mma'}}).</span>
+            <span ng-show="poolForm.ngLatenessWindow==0">
+            before the event at {{initial.ngTime | date:'hh:mma'}}.</span>
+
+            </span>
+
+        </div>
+
+<!-- SIGNATURE -->
+
+
+
+
+
+
+
+
+        <div>
+          <button type="submit" class="btn btn-default" ng-disabled="poolForm.$invalid || disabled">Register</button>
+        </div>
+
+
+      </form>
+
+    </div><!-- COLUMN -->
+
+    <div class='col' style="float:right; width:50%;">
+    <h2>Information</h2>
+
+      <div ng-show="resultText" >{{resultText}} </div>
+
+      <h3> Summary </h3>
+        <ul>
+          <li>
+            <b>Your event will be called:</b> '{{poolForm.ngName}}'
+          </li>
+          <li>
+            <b>Your event will take place on: </b>
+            {{initial.ngDate | date:'mediumDate'}} at
+            {{initial.ngTime | date:'hh:mma'}}.
+          </li>
+          <li>
+            <b>Instructions will be sent out on:</b>
+            {{(-1)*poolForm.ngFireNotice  | relativeFromDate : initial.ngDate:initial.ngTime}}
+             <b>at</b>
+            {{(-1)*poolForm.ngFireNotice  | relativeFromTime : initial.ngTime}}
+          </li>
+          <li>
+            <b>Contact email for your event is: </b>{{poolForm.ngEmail}}
+          </li>
+          <li>
+        <span>
+            <span ng-show="poolForm.ngLatenessWindow>0"> <b>Participants **who are not organizers** can arrive</b> {{poolForm.ngLatenessWindow}} <b> minutes after the event</b>, which starts at {{initial.ngTime | date:'hh:mma'}}.</span>
+
+            <span ng-show="poolForm.ngLatenessWindow==0"> <b>Neither participants nor organizers can arrive late</b>. Everyone must arrive at {{initial.ngTime | date:'hh:mma'}}. </span>
+          </li>
+
+
+        </ul>
+
+
+    </div><!-- COLUMN -->
+  </div>
+</div>
+
+

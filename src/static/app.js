@@ -1,4 +1,43 @@
-var myApp = angular.module('myApp', ['ngRoute']);
+var myApp = angular.module('myApp', ['ngRoute'])
+.directive('convertToNumber', function() {
+  return {
+    require: 'ngModel',
+    link: function(scope, element, attrs, ngModel) {
+      ngModel.$parsers.push(function(val) {
+        return parseInt(val, 10);
+      });
+      ngModel.$formatters.push(function(val) {
+        return '' + val;
+      });
+    }
+  };
+});
+
+myApp.filter('relativedate', ['$filter', function ($filter) {
+  return function (rel, format) {
+    let date = new Date();
+    date.setDate(date.getDate() + rel);
+    return $filter('date')(date, format || 'yyyy-MM-dd')
+  };
+}]);
+
+
+myApp.filter('relativeFromTime', ['$filter', function ($filter) {
+  return function (rel,time, format) {
+    var copy = new Date(time.getTime());
+    copy.setHours(copy.getHours() + rel);
+    return $filter('date')(copy, format || 'hh:mma')
+  };
+}]);
+
+myApp.filter('relativeFromDate', ['$filter', function ($filter) {
+  return function (rel,date,time, format) {
+    var copy = new Date(date.getTime());
+    copy.setHours(time.getHours() + rel);
+    copy.setMinutes(time.getMinutes());
+    return $filter('date')(copy, format || 'mediumDate')
+  };
+}]);
 
 myApp.config(function ($routeProvider,$httpProvider) {
   $httpProvider.defaults.withCredentials = true;
@@ -30,11 +69,21 @@ myApp.config(function ($routeProvider,$httpProvider) {
       template: '<h1>This is page two!</h1>',
       access: {restricted: false}
     })
-    // .when('/triggers', {
-    //   templateUrl: 'static/partials/triggers.html',
-    //   controller: 'triggerController',
-    //   access: {restricted: true}
-    // })
+    .when('/triggers', {
+      templateUrl: 'static/partials/triggers.html',
+      controller: 'triggerController',
+      access: {restricted: true}
+    })
+    .when('/viewPool/:poolId?', {
+      templateUrl: 'static/partials/viewPool.html',
+      controller: 'makePoolController',
+      access: {restricted: true}
+    })
+    .when('/makePool', {
+      templateUrl: 'static/partials/makePool.html',
+      controller: 'makePoolController',
+      access: {restricted: true}
+    })
     .otherwise({
       redirectTo: '/'
     });

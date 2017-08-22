@@ -72,6 +72,34 @@ def call_view_pool(number):
 	poolRep = '<br>'.join(['{0}: {1}'.format(key, value) for (key, value) in poolDict.items()])
 	return poolRep,200
 
+@app.route('/api/get_pool_ids',methods=['POST'])
+@login_required
+def api_get_pools():
+	pool_ids = [trip.pool.id for trip in current_user.pools]
+	names = [trip.pool.poolName for trip in current_user.pools]
+	if names is None:
+		names = []
+	if pool_ids is None:
+		pool_ids = []
+	message = current_user.describe_trips()
+	return jsonify({'ids':pool_ids,'message':message,'names':names}),200
+
+
+#REMOVE 'GET' method to lock from browsers...
+@app.route('/api/get_teams/',methods=['GET','POST'])
+@login_required
+def api_get_teams():
+	team_names = [team.name for team in current_user.teams]
+	team_ids = [team.id for team in current_user.teams]
+
+	if (team_ids is None) or (len(team_ids)==0):
+		team_ids = []
+		team_names = []
+		message= "You have no teams."
+	else:
+		message = "Here are your teams"
+
+	return jsonify({'team_names':team_names,'team_ids':team_ids,'message':message,}),200
 
 # @app.route('/', methods=['GET', 'POST'])
 # @login_required
@@ -164,7 +192,29 @@ def load_triggers():
 		output_list = ["Request_Type = "+ str(request.method),"submit = " + str(submit),"n = " + str(n)]
 	return render_template('trigger_base.html',output_list=output_list,request_vars=request_vars)
 
+@app.route('/api/create_pool/',methods=['POST'])
+def api_create_pool():
+	pool=Pool()
+	trip = Trip()
+	trip.pool=pool
+	current_user.pools.append(trip)
+	current_user.current_pool_id=pool.id
+	db.session.add(pool)
+	db.session.add(trip)
+	db.session.commit()
 
+	print("request.values: " + str(request.values))
+	print("request.args: " + str(request.args))
+
+	teams=request.values.get("teams")
+
+	pool.poolName=request.values.get("name")
+	pool.eventAddress=request.values.get("address")
+	pool.eventEmail=request.values.get("email")
+	pool.eventDate = request.values.get("date")
+	db.session.commit()
+
+	return "Pool added to database.", 200
 
 @app.route('/q_populate/',methods=['GET',"POST"])
 @login_required

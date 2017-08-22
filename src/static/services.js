@@ -26,7 +26,7 @@ angular.module('myApp').factory('AuthService',
 
       // create a new instance of deferred
       var deferred = $q.defer();
-      $log.log("Trying to log in with email " + email + " and p-word " + password);
+      $log.log("Trying to log in with email " + email + " and p-word xxxx");
       $http.post('/api/login',
                 $.param({email: email, password: password,remember_me: remember_me}),
                 {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})

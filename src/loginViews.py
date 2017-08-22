@@ -49,7 +49,7 @@ def register():
 		form = RegistrationForm(request.form)
 	if request.method == 'POST' and form.validate():
 		try:
-			carpooler = Carpooler(fname=form.username.data, email=form.email.data,password=form.password.data)
+			carpooler = Carpooler(name=form.username.data, email=form.email.data,password=form.password.data)
 		except:
 			from werkzeug.datastructures import MultiDict
 			formb= RegistrationForm(formdata=MultiDict([('email',request.form['email']),('username',request.form['username']),('password',''),('confirm',''),('accept_tos',False)]))

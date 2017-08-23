@@ -4,7 +4,10 @@
   <meta charset="UTF-8">
   <title>GroupThere</title>
   <!-- styles -->
-  <link href="/static/lib/bootstrap/css/bootstrap.css" rel="stylesheet" media="screen">
+
+  <!-- <link href="/static/lib/bootstrap/css/bootstrap.css" rel="stylesheet" media="screen"> -->
+
+  <link href="{{ url_for('static', filename='lib/bootstrap/css/bootstrap.css') }}" rel="stylesheet" media="screen">
 
   <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous"> -->
   <!-- <link href="static/lib/bootstrap/css/bootstrap.css" rel="stylesheet" media="screen"> -->
@@ -80,21 +83,35 @@
  -->
 
     <!-- scripts from /static/lib MINIFIED -->
-<!--     <script src="static/lib/jQuery/jquery-3.2.1.min.js" type="text/javascript"></script>
+   <!--
+    <script src="static/lib/jQuery/jquery-3.2.1.min.js" type="text/javascript"></script>
     <script src="static/lib/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
     <script src="static/lib/Angular/angular.min.js" type="text/javascript"></script>
-    <script src="static/lib/Angular/angular-route.min.js" type="text/javascript"></script> -->
+    <script src="static/lib/Angular/angular-route.min.js" type="text/javascript"></script>
+ -->
+
 
     <!-- scripts from /static/lib NOT MINIFIED -->
-    <script src="/static/lib/jQuery/jquery-3.2.1.js" type="text/javascript"></script>
-    <!-- <script src="static/lib/popperjs/popper.js" type="text/javascript"></script> -->
+<!--     <script src="/static/lib/jQuery/jquery-3.2.1.js" type="text/javascript"></script>
     <script src="/static/lib/bootstrap/js/bootstrap.js" type="text/javascript"></script>
     <script src="/static/lib/Angular/angular.js" type="text/javascript"></script>
     <script src="/static/lib/Angular/angular-route.js" type="text/javascript"></script>
-    <!-- scripts from /static -->
-
     <script src="/static/app.js" type="text/javascript"></script>
     <script src="/static/services.js" type="text/javascript"></script>
-    <script src="/static/controllers.js" type="text/javascript"></script>
+    <script src="/static/controllers.js" type="text/javascript"></script> -->
+
+
+
+    <!-- scripts from /static/lib w TEMPLATED ADDRESSES -->
+
+    <script src="{{ url_for('static', filename='lib/jQuery/jquery-3.2.1.js') }}" type="text/javascript"></script>
+
+    <script src="{{ url_for('static', filename='lib/bootstrap/js/bootstrap.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='lib/Angular/angular.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='lib/Angular/angular-route.js') }}" type="text/javascript"></script>
+
+    <script src="{{ url_for('static', filename='app.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='services.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='controllers.js') }}" type="text/javascript"></script>
   </body>
 </html>

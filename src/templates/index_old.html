@@ -1,0 +1,51 @@
+{% import 'forms_macros.html' as forms %}
+{% import 'display_macros.html' as displays %}
+<!DOCTYPE html>
+<html ng-app="IndexPane">
+  <head>
+    <title>GroupThere</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <style>
+      .container {
+        max-width: 1000px;
+      }
+    </style>
+  </head>
+  <body ng-controller="IndexController">
+    <div class="container">
+      <div class="row">
+        <div class='col' style="float:left; width:50%;">
+{#           <h1>Triggers</h1>
+          <br>
+          <form role="form" method="get" action="/triggers/" target="_self">
+            <button type="submit" class="btn btn-default">Go to triggers pane!</button>
+          </form> #}
+
+          <h1> Sign In </h1>
+{#             <h2> Purely Macro-Generated</h2>
+            {{forms.emailField(element_name='email_input',ng_submit='getCarpoolerInfo()',placeholder="Please enter your email address")}} #}
+
+
+            <h2> WTForms Macro-Generated</h2>
+            {{forms.form_with_help(emailForm,'emailForm','getCarpoolerInfo()')}}
+
+
+        </div>
+        <div class='col' style="float:right; width:50%;">
+          <h1> Outputs</h1>
+              <br>
+              {{displays.conditionalSpanNgVar('resultText')}}
+              <br>
+
+              {{displays.view_carpooler('viewPooler') }}
+        </div>
+      </div>
+    </div>
+    <br><br>
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+        <script src="{{ url_for('static', filename='index.js') }}"></script>
+  </body>
+</html>

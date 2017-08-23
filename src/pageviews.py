@@ -2,7 +2,7 @@ from page_interactions import view_pool,view_pool_formal,populate_group_test
 import requests
 import copy
 import random
-from flask import render_template,url_for,jsonify,json,make_response
+from flask import render_template,url_for,jsonify,json,make_response,send_from_directory
 from flask_login import current_user, login_user, logout_user,login_required
 from sqlalchemy.orm.session import make_transient
 from dateutil.parser import parse
@@ -157,7 +157,8 @@ def api_get_foreign_teams():
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-	return app.send_static_file('index.html')
+	# return app.send_static_file('index.html')
+	return render_template('index.html')
 
 @app.route('/form_views/',methods=['POST'])
 @login_required
@@ -498,3 +499,8 @@ def api_confirm_address():
 	except Exception as exc:
 		print(exc)
 		return "Error",400
+
+@app.route('/static/<path:path>')
+def send_js(path):
+	print("Serving static file")
+	return send_from_directory('', path)

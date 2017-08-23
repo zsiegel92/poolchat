@@ -28,9 +28,9 @@ class ngEmailField(wtforms.StringField):
 		extraArgs= dict_to_tagstring(kwargs)
 		render_kw=dict_to_tagstring(self.render_kw)
 
-		rend = f'<input {render_kw} name="{fieldname}" {extraArgs} {required}>'
-		rend_help= f'<span class="help-block" ng-show="{form_name}.{fieldname}.$invalid">Valid Email Address Required</span>'
-		return f'{self.label()}\n {rend}\n {rend_help}'
+		rend = '<input {render_kw} name="{fieldname}" {extraArgs} {required}>'.format(render_kw=render_kw,fieldname=fieldname,extraArgs=extraArgs,required=required)
+		rend_help= '<span class="help-block" ng-show="{form_name}.{fieldname}.$invalid">Valid Email Address Required</span>'.format(form_name=form_name,fieldname=fieldname)
+		return '{self.label()}\n {rend}\n {rend_help}'.format(rend=rend,rend_help=rend_help)
 
 	def __call__(self,*args,**kwargs):
 		return self.render_ng(*args,**kwargs)

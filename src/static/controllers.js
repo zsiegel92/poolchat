@@ -50,6 +50,9 @@ angular.module('myApp').controller('navController',
     $scope.triggers = function() {
       $location.path('/triggers');
     };
+    $scope.register = function() {
+      $location.path('/register');
+    };
     // TODO: create "view my pools" button
     $scope.viewPool = function() {
       $location.path('/viewPool/');
@@ -107,12 +110,14 @@ angular.module('myApp').controller('makeTeamController',
         $log.log(                {
                       name:$scope.teamForm.ngName,
                       email:$scope.teamForm.ngEmail,
+                      codeword:$scope.teamForm.ngPassword
                     });
         $http.post('/api/create_team/',
                   $.param(
                     {
                       name:$scope.teamForm.ngName,
                       email:$scope.teamForm.ngEmail,
+                      codeword:$scope.teamForm.ngPassword
                     }
                   ),
                   {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
@@ -125,8 +130,15 @@ angular.module('myApp').controller('makeTeamController',
           }).
           catch(function(response) {
             $scope.disabled = false;
-            $log.log(response.data);
-            $scope.resultText="error registering pool.";
+            if (response.status==409){
+              $scope.resultText="Team with that name already exists!";
+              $log.log(response.data);
+            }
+            else{
+              $log.log(response.data);
+              $scope.resultText="Error registering pool.";
+            }
+
           });
       };
     getEmail();
@@ -169,13 +181,15 @@ angular.module('myApp').controller('makePoolController',
 
 
     $scope.disabled = false;
+    $scope.address_confirmed=false;
 
     $scope.now =new Date();
-    $scope.tomorrow = relativeDateTime(1);
+    $scope.minNumberDays=3;
+    $scope.minDate = relativeDateTime($scope.minNumberDays);
     $scope.nextYear=relativeDateTime(365);
 
     // $scope.poolForm.ngTime=new Date(1970, 0, 1, 14, 57, 0);
-    $scope.initial={ngTime:new Date(1970, 0, 1, 19, 30, 0),ngDate:$scope.tomorrow};
+    $scope.initial={ngTime:new Date(1970, 0, 1, 19, 30, 0),ngDate:$scope.minDate};
 
 
     $scope.teams = ['team1', 'team2', 'team3'];
@@ -226,6 +240,37 @@ angular.module('myApp').controller('makePoolController',
           $scope.resultText="error obtaining teams.";
         });
     };
+    $scope.confirmAddress = function() {
+      $scope.disabled = true;
+      $log.log("Confirming Address");
+
+      // get the number of generic participants from the input
+
+      // fire the API request
+      // returns: {'team_names':team_names,'team_ids':team_ids,'message':message,}
+      $http.post('/api/confirm_address/',
+              $.param(
+                {
+                  address:$scope.poolForm.ngAddress
+                }
+              ),
+              {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+        .then(function(response) {
+          $scope.disabled = false;
+          $log.log("Confirmed address!");
+          $log.log(response.data);
+          $scope.resultText="Confirmed address!";
+          $scope.poolForm.ngAddress=response.data.formatted_address;
+          $scope.image_url=response.data.image_url;
+          $scope.address_confirmed=true;
+        }).
+        catch(function(response) {
+          $scope.disabled = false;
+          $log.log(response.data);
+          $scope.resultText="error confirming address.";
+        });
+    };
+
 
 
 
@@ -284,18 +329,18 @@ angular.module('myApp').controller('makePoolController',
 
 
 angular.module('myApp').controller('registerController',
-  ['$scope', '$location', 'AuthService',
-  function ($scope, $location, AuthService) {
+  ['$scope', '$location', '$log','AuthService',
+  function ($scope, $location,$log, AuthService) {
 
     $scope.register = function () {
 
       // initial values
       $scope.error = false;
       $scope.disabled = true;
+      // $log.log([$scope.registerForm.ngFirst,$scope.registerForm.ngLast,$scope.registerForm.ngEmail,$scope.registerForm.ngPassword,$scope.registerForm.ngConfirm_password,$scope.registerForm.ngAccept_tos]);
 
       // call register from service
-      AuthService.register($scope.registerForm.email,
-                           $scope.registerForm.password)
+      AuthService.register($scope.registerForm.ngFirst,$scope.registerForm.ngLast,$scope.registerForm.ngEmail,$scope.registerForm.ngPassword,$scope.registerForm.ngConfirm_password,$scope.registerForm.ngAccept_tos)
         // handle success
         .then(function () {
           $location.path('/login');
@@ -313,6 +358,8 @@ angular.module('myApp').controller('registerController',
     };
 
 }]);
+
+
 angular.module('myApp').controller('viewPoolController',
   ['$scope', '$location', 'AuthService','$route', '$routeParams','$log','$http',
   function ($scope, $location, AuthService,$route,$routeParams,$log,$http) {
@@ -416,6 +463,81 @@ angular.module('myApp').controller('triggerController',
 
 
 
+
+
+angular.module('myApp').controller('joinTeamController',
+  ['$scope', '$location','$log', '$http','$filter','AuthService',
+  function ($scope, $location, $log, $http,$filter,AuthService) {
+
+
+
+    $scope.disabled = false;
+
+
+    $scope.teams = ['team1', 'team2', 'team3'];
+    $scope.team_ids=[1,2,3];
+
+
+    $scope.getTeams = function() {
+
+      $log.log("Getting user's teams");
+
+      // get the number of generic participants from the input
+
+      // fire the API request
+      // returns: {'team_names':team_names,'team_ids':team_ids,'message':message,}
+      $http.post('/api/get_foreign_teams/')
+        .then(function(response) {
+          $log.log("Foreign Teams:");
+          $log.log(response.data);
+          $scope.resultText=response.data.message;
+          $scope.foreignTeams=response.data.foreign_team_names;
+          $scope.foreignTeam_ids = response.data.foreign_team_ids;
+        }).
+        catch(function(response) {
+          $log.log(response.data);
+          $scope.resultText="error obtaining teams.";
+        });
+    };
+
+
+  $scope.join = function() {
+    $scope.disabled = true;
+
+    $log.log("joining team " + $scope.joinForm.ngTeam);
+    $log.log("codeword: " + $scope.joinForm.ngCodeword);
+
+    $http.post('/api/join_team/',
+              $.param(
+                {
+                  teamname:$scope.joinForm.ngTeam,
+                  codeword:$scope.joinForm.ngCodeword
+                }
+              ),
+              {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+
+      .then(function(response) {
+        $scope.disabled = false;
+        $log.log("Joined team!");
+        $log.log(response.data);
+        $scope.resultText=response.data;
+        $scope.getTeams();
+      }).
+      catch(function(response) {
+        $scope.disabled = false;
+        if (response.status==401){
+          $scope.resultText="Wrong codeword.";
+        }
+        else{
+          $scope.resultText="Database error";
+        }
+
+      });
+  };
+
+  $scope.getTeams();
+
+}]);
 
 
 

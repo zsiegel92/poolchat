@@ -525,10 +525,11 @@ class Team(db.Model):
 	__tablename__='teams'
 
 	id = db.Column(db.Integer, primary_key=True) #id of team
-	name = db.Column(db.String())
+	name = db.Column(db.String(),unique=True)
 	email = db.Column(db.String())
 	members = db.relationship("Carpooler",secondary=team_membership,back_populates="teams") #team members
 	pools= db.relationship("Pool",secondary=team_affiliation,back_populates="teams")#team pools
+	password=db.Column(db.String())
 
 class Trip(db.Model):
 	__tablename__ = 'trips'

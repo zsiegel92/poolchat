@@ -6,6 +6,8 @@
       <div ng-show="error" class="alert alert-danger">{{errorMessage}}</div>
       <form class="form" name="poolForm" ng-model="poolForm" ng-submit="register()">
 
+        <h2>Affiliated Teams</h2>
+        <b>Which teams are affiliated with this event?</b>
         <div class="form-group">
           <label ng-repeat="teamName in teams">
           <input type="checkbox" name="selectedTeams[$index]" ng-model="poolForm.selectedTeams[$index]" value="{{teamName}}" ng-checked="teamSelection.indexOf(teamName) > -1" ng-click="toggleSelection(teamName)">{{teamName}}</label>
@@ -17,6 +19,7 @@
         </div>
 
 
+        <h2>Event Information</h2>
 <!-- NAME -->
         <div class="form-group">
           <label>Event Name</label>
@@ -40,10 +43,15 @@
 <!-- ADDRESS -->
         <div class="form-group">
           <label>Event Address</label>
-          <input type="text" class="form-control" name="address" ng-model="poolForm.ngAddress" required>
+          <input type="text" class="form-control" name="address" ng-model="poolForm.ngAddress" ng-change="address_confirmed=false;" required>
         </div>
         <span class="error" ng-show="poolForm.address.$error.required">
           Required!</span>
+        <div>
+          <button ng-click='confirmAddress()' class="btn btn-default" ng-disabled="!poolForm.ngAddress || disabled">Confirm Address</button>
+          <span ng-show="!address_confirmed"> <b>You must confirm address before proceeding.</b></span>
+
+        </div>
 
 <!-- DATE -->
         <div class="form-group">
@@ -52,21 +60,21 @@
              ng-model="initial.ngDate"
              class='form-control'
              name='date'
-             value="tomorrow"
-             min="{{1 | relativedate}}"
+             value="minDate"
+             min="{{minNumberDays | relativedate}}"
              max="{{365 | relativedate}}"
              ng-required="!poolForm.date.$pristine">
 
 <!--             <span class="error" ng-show="poolForm.date.$error">
             Not a valid date!</span> -->
             <span class="error" ng-show="poolForm.date.$error.max">
-            Date cannot be more than 1 year hence!</span>
+            <b>Date cannot be more than 1 year hence!</b></span>
             <span class="error" ng-show="poolForm.date.$error.min">
-            Date must be in the future!</span>
+            <b>Date must be at least {{minNumberDays}} in the future!</b></span>
             <span class="error" ng-show="poolForm.date.$error.required">
-            Must enter a date!</span>
+            <b>Must enter a date!</b></span>
             <span class="error" ng-show="poolForm.date.$error.date">
-            Must be a valid date!</span>
+            <b>Must be a valid date!</b></span>
         </div>
 <!-- TIME -->
         <label>Event Time</label>
@@ -133,7 +141,7 @@
 
 
         <div>
-          <button type="submit" class="btn btn-default" ng-disabled="poolForm.$invalid || disabled">Register</button>
+          <button type="submit" class="btn btn-default" ng-disabled="poolForm.$invalid || disabled || !address_confirmed">Register</button>
         </div>
 
 
@@ -149,8 +157,15 @@
       <h3> Summary </h3>
         <ul>
           <li>
+            <b>Your event will be held at:</b> {{poolForm.ngAddress}}
+            <div ng-if="image_url">
+              <img ng-src="{{image_url}}" alt="Confirmed Address" style="width:400px;height:400px;">
+            </div>
+          </li>
+          <li>
             <b>Your event will be called:</b> '{{poolForm.ngName}}'
           </li>
+          <div ng-if="initial.ngDate && initial.ngTime">
           <li>
             <b>Your event will take place on: </b>
             {{initial.ngDate | date:'mediumDate'}} at
@@ -162,11 +177,11 @@
              <b>at</b>
             {{(-1)*poolForm.ngFireNotice  | relativeFromTime : initial.ngTime}}
           </li>
+          </div>
           <li>
             <b>Contact email for your event is: </b>{{poolForm.ngEmail}}
           </li>
           <li>
-        <span>
             <span ng-show="poolForm.ngLatenessWindow>0"> <b>Participants **who are not organizers** can arrive</b> {{poolForm.ngLatenessWindow}} <b> minutes after the event</b>, which starts at {{initial.ngTime | date:'hh:mma'}}.</span>
 
             <span ng-show="poolForm.ngLatenessWindow==0"> <b>Neither participants nor organizers can arrive late</b>. Everyone must arrive at {{initial.ngTime | date:'hh:mma'}}. </span>

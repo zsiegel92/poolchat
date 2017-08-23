@@ -76,13 +76,13 @@ angular.module('myApp').factory('AuthService',
 
     }
 
-    function register(email, password) {
+    function register(first,last,email, password,confirm,accept_tos) {
 
+// ,firstname,lastname,accept_tos
       // create a new instance of deferred
       var deferred = $q.defer();
-
       // send a post request to the server
-      $http.post('/api/register', {email: email, password: password})
+      $http.post('/api/register', $.param({firstName: first, lastName: last, email: email, password: password,confirm: confirm, accept_tos: accept_tos}),{headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
         // handle success
         .then(function (response) {
           if(response.status === 200 && response.data.result){
@@ -93,6 +93,7 @@ angular.module('myApp').factory('AuthService',
         })
         // handle error
         .catch(function (response) {
+          $log.log(response.data);
           deferred.reject();
         });
 

@@ -55,7 +55,7 @@ class LoginForm(wtforms.Form):
 	)
 
 class RegistrationForm(wtforms.Form):
-	username = StringField('Name', [validators.Length(min=4, max=25)])
+	username = StringField('Name', [validators.Length(min=2, max=25)])
 	email = StringField('Email Address', [validators.Length(min=6, max=35),validators.Required("Please enter your email address."), validators.Email("Please enter your email address.")])
 	password = PasswordField('New Password', [validators.Length(min=4, max=25),
 		validators.DataRequired(),
@@ -64,6 +64,17 @@ class RegistrationForm(wtforms.Form):
 	confirm = PasswordField('Repeat Password')
 	accept_tos = BooleanField('I accept the TOS', [validators.DataRequired()])
 
+
+class ngRegistrationForm(wtforms.Form):
+	firstName = StringField('First Name', [validators.Length(min=4, max=25)])
+	lastName = StringField('Last Name', [validators.Length(min=4, max=25)])
+	email = StringField('Email Address', [validators.Length(min=6, max=35),validators.Required("Please enter your email address."), validators.Email("Please enter your email address.")])
+	password = PasswordField('New Password', [validators.Length(min=4, max=25),
+		validators.DataRequired(),
+		validators.EqualTo('confirm', message='Passwords must match')
+	])
+	confirm = PasswordField('Repeat Password')
+	accept_tos = BooleanField('I accept the TOS', [validators.DataRequired()])
 
 
 

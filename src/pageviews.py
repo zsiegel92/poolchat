@@ -11,6 +11,8 @@ from datetime import datetime
 from collections import OrderedDict
 import numpy as np
 import sys
+import os
+import config
 
 from datetime import datetime
 from rq import Queue
@@ -100,8 +102,8 @@ def api_get_pools():
 	return jsonify({'ids':pool_ids,'message':message,'names':names}),200
 
 
-#REMOVE 'GET' method to lock from browsers...
-@app.route('/api/get_teams/',methods=['GET','POST'])
+
+@app.route('/api/get_teams/',methods=['POST'])
 @login_required
 def api_get_teams():
 	team_names = [team.name for team in current_user.teams]
@@ -112,10 +114,31 @@ def api_get_teams():
 		team_names = []
 		message= "You have no teams."
 	else:
-		message = "Here are your teams"
+		message = "You are a part of the following teams: " + ", ".join(team_names) + "."
 
 	return jsonify({'team_names':team_names,'team_ids':team_ids,'message':message,}),200
 
+
+@app.route('/api/get_foreign_teams/',methods=['POST'])
+@login_required
+def api_get_foreign_teams():
+	allTeams = Team.query.all()
+
+	team_names = [team.name for team in current_user.teams]
+	team_ids = [team.id for team in current_user.teams]
+
+	foreign_team_names = [team.name for team in allTeams if team.name not in team_names]
+	foreign_team_ids = [team.id for team in allTeams if team.name not in team_names]
+	print("foreign_team_ids: " + str(foreign_team_ids))
+	print("foreign_team_names: " + str(foreign_team_names))
+	if (foreign_team_ids is None) or (len(foreign_team_ids)==0):
+		foreign_team_ids = []
+		foreign_team_names = []
+		message= "You are part of EVERY team in the GroupThere database!"
+	else:
+		message = "You can join the following teams: " + ", ".join(foreign_team_names) + "."
+
+	return jsonify({'foreign_team_names':foreign_team_names,'foreign_team_ids':foreign_team_ids,'message':message,}),200
 # @app.route('/', methods=['GET', 'POST'])
 # @login_required
 # def index():
@@ -161,12 +184,14 @@ def drop_table():
 			logout_user()
 			# db.session.expunge(carpooler)  # expunge the object from session
 			# make_transient(carpooler)  # http://docs.sqlalchemy.org/en/rel_1_1/orm/session_api.html#sqlalchemy.orm.session.make_transient
-			# db.session.commit()
-			# print("committed once")
+			db.session.commit()
+			print("committed once")
 			db.session.close_all()
 			print("closed sessions")
-			# db.reflect()
-			# print("reflected")
+			db.reflect()
+			print("reflected")
+			db.session.close()
+			print("closed session")
 			db.drop_all()
 			db.create_all()
 			db.session.commit()
@@ -274,14 +299,47 @@ def api_get_email():
 @login_required
 def api_create_team():
 	print("request.values: " + str(request.values))
-	team=Team()
-	team.name = request.values.get("name")
-	team.email=request.values.get("email")
-	db.session.add(team)
-	db.session.commit()
-	team.members.append(current_user)
-	db.session.commit()
-	return "Team added to database.", 200
+
+	name =request.values.get("name")
+	email=request.values.get("email")
+	codeword=request.values.get("codeword")
+	redundant_team = Team.query.filter_by(name=name).first()
+	if redundant_team is None:
+		team=Team()
+		team.name = name
+		team.email=email
+		team.password=codeword
+		db.session.add(team)
+		db.session.add(team)
+		db.session.commit()
+		team.members.append(current_user)
+		db.session.commit()
+		return "Team added to database.", 200
+	else:
+		return "Team already in database.", 409
+
+@app.route('/api/join_team/',methods=['POST'])
+@login_required
+def api_join_team():
+	print("request.values: " + str(request.values))
+
+	teamname =request.values.get("teamname")
+	codeword=request.values.get("codeword")
+	team = Team.query.filter_by(name=teamname).first()
+	if team is not None:
+		if team.password==codeword:
+			team.members.append(current_user)
+			db.session.commit()
+			return "Added to team.", 200
+		else:
+			return "Wrong codeword",401
+
+	else:
+		return "Team not found.", 400
+
+
+
+
 
 @app.route('/q_populate/',methods=['GET',"POST"])
 @login_required
@@ -407,3 +465,36 @@ def populate_generic(n,numberPools=2,randGen = False):
 				carpooler.externalUpdate(setForMode='tripfields',**fullDict['Trip'])
 				db.session.commit()
 		return dicts
+
+@app.route('/api/confirm_address/',methods=['POST'])
+@login_required
+def api_confirm_address():
+	try:
+		address=request.values.get('address')
+		GMAPS_GEOCODE_API_TOKEN =getattr(config,os.environ['APP_SETTINGS'].split('.')[1]).GEOCODE_API_KEY #INTERACTIONS MOVEMENT
+		# GMAPS_GEOCODE_API_TOKEN = app.config['GMAPS_GEOCODE_API_TOKEN']
+
+		geocode_url = "https://maps.googleapis.com/maps/api/geocode/json"
+		querystring = {"address":address,"key":GMAPS_GEOCODE_API_TOKEN}
+		response = requests.request("GET", geocode_url, params=querystring)
+		response=response.json()
+
+		formatted_address =response['results'][0]['formatted_address']
+		lat = response['results'][0]['geometry']['location']['lat']
+		lon = response['results'][0]['geometry']['location']['lng']
+
+
+		# GMAPS_STATIC_API_TOKEN = app.config['GMAPS_STATIC_API_TOKEN']
+		GMAPS_STATIC_API_TOKEN =getattr(config,os.environ['APP_SETTINGS'].split('.')[1]).GMAPS_STATIC_API_TOKEN #INTERACTIONS MOVEMENT
+		marker_attributes="color:red|{lat},{lon}".format(lat=lat,lon=lon)
+		static_maps_base_url = "https://maps.googleapis.com/maps/api/staticmap"
+		querystring = {"center":str(lat)+","+str(lon),"zoom":"14","size":"400x400","markers":marker_attributes,"key":GMAPS_STATIC_API_TOKEN}
+		response = requests.request("GET", static_maps_base_url, params=querystring,stream=True)
+		full_url= response.url
+		del response
+		# img = response.content
+		return jsonify({'formatted_address':formatted_address,'image_url':full_url}),200
+		# messenger.send_image(sender_id,full_url)
+	except Exception as exc:
+		print(exc)
+		return "Error",400

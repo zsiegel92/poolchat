@@ -3,7 +3,7 @@ import flask
 
 from urllib.parse import urlparse, urljoin
 
-from wtforms_ext import LoginForm, RegistrationForm,EmailForm
+from wtforms_ext import LoginForm, RegistrationForm,ngRegistrationForm,EmailForm
 
 from rq import Queue
 from rq.job import Job
@@ -62,17 +62,21 @@ def register():
 
 @app.route('/api/register', methods=['POST'])
 def api_register():
-	form = RegistrationForm(request.form)
+	form = ngRegistrationForm(request.form)
+	print(form.data)
 	if form.validate():
 		try:
-			carpooler = Carpooler(fname=form.username.data, email=form.email.data,password=form.password.data)
+			carpooler = Carpooler(firstname=form.firstName.data, lastname=form.lastName.data,name= str(form.firstName.data) + str(form.lastName.data), email=form.email.data,password=form.password.data)
 			db.session.add(carpooler)
 			db.session.commit()
 			return jsonify({'result':app.config['URL_BASE'] + str(url_for('login'))}),200
 		except:
-			return jsonify({'result':'User email already in use!'}),409
+			return jsonify({'result':'User email already in use, or database error!'}),409
 
 	return jsonify({'result':'Form does not validate! Errors: ' + str(form.errors)}),422
+
+
+
 ##TODO: login.html should have a form that displays all errors. No angular.
 #Form fields: email,password,remember_me
 @app.route('/api/login', methods=['POST'])

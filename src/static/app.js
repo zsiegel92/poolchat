@@ -12,6 +12,61 @@ var myApp = angular.module('myApp', ['ngRoute'])
     }
   };
 });
+// myApp.directive("passwordConfirm", function() {
+//     "use strict";
+//     return {
+//         require : "ngModel",
+//         restrict : "A",
+//         scope : {
+//             //We will be checking that our input is equals to this expression
+//             passwordConfirm : '&'
+//         },
+//         link : function(scope, element, attrs, ctrl) {
+//             //The actual validation
+//             function passwordConfirmValidator(modelValue, viewValue) {
+//                 return modelValue == scope.passwordConfirm();
+//             }
+//             //Register the validaton when this input changes
+//             ctrl.$validators.passwordConfirm = passwordConfirmValidator;
+//             //Also validate when the expression changes
+//             scope.$watch(scope.passwordConfirm, ctrl.$validate);
+//         }
+//     };
+// });
+
+
+
+// myApp.directive("passwordVerify", function() {
+//    return {
+//       require: "ngModel",
+//       scope: {
+//         passwordVerify: '='
+//       },
+//       link: function(scope, element, attrs, ctrl) {
+//         scope.$watch(function() {
+//             var combined;
+
+//             if (scope.passwordVerify || ctrl.$viewValue) {
+//                combined = scope.passwordVerify + '_' + ctrl.$viewValue;
+//             }
+//             return combined;
+//         }, function(value) {
+//             if (value) {
+//                 ctrl.$parsers.unshift(function(viewValue) {
+//                     var origin = scope.passwordVerify;
+//                     if (origin !== viewValue) {
+//                         ctrl.$setValidity("passwordVerify", false);
+//                         return undefined;
+//                     } else {
+//                         ctrl.$setValidity("passwordVerify", true);
+//                         return viewValue;
+//                     }
+//                 });
+//             }
+//         });
+//      }
+//    };
+// });
 
 myApp.filter('relativedate', ['$filter', function ($filter) {
   return function (rel, format) {
@@ -87,6 +142,11 @@ myApp.config(function ($routeProvider,$httpProvider) {
     .when('/makeTeam', {
       templateUrl: 'static/partials/makeTeam.html',
       controller: 'makeTeamController',
+      access: {restricted: true}
+    })
+    .when('/joinTeam', {
+      templateUrl: 'static/partials/join_team.html',
+      controller: 'joinTeamController',
       access: {restricted: true}
     })
     .otherwise({

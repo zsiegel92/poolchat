@@ -15,14 +15,29 @@ from groupThere.GroupThere import GroupThere
 @app.route('/drop_only', methods=["GET"])
 @login_required
 def drop_table_only():
+	print("Dropping all tables")
 	try:
-		db.drop_all()
-		# db.session.commit()
+		if current_user.is_anonymous():
+			return "must log in to drop tables.",302
+		else:
+			logout_user()
+			# db.session.expunge(carpooler)  # expunge the object from session
+			# make_transient(carpooler)  # http://docs.sqlalchemy.org/en/rel_1_1/orm/session_api.html#sqlalchemy.orm.session.make_transient
+			db.session.commit()
+			print("committed once")
+			db.session.close_all()
+			print("closed sessions")
+			db.reflect()
+			print("reflected")
+			db.session.close()
+			print("closed session")
+			db.drop_all()
+			db.session.commit()
+			return "Tables dropped!",200
 	except Exception as exc:
-		return "Exception on table drop:\n" + str(exc)
+		return "Exception on table drop:\n" + str(exc),500
 	else:
-		return "Dropped and DID NOT re-create all tables!", 200
-
+		return "Dropped and re-created all tables!", 200
 
 @app.route('/drop_ping', methods=["GET"])
 @login_required

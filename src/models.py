@@ -531,6 +531,8 @@ class Team(db.Model):
 	pools= db.relationship("Pool",secondary=team_affiliation,back_populates="teams")#team pools
 	password=db.Column(db.String())
 
+	city = db.Column(db.String())
+
 class Trip(db.Model):
 	__tablename__ = 'trips'
 

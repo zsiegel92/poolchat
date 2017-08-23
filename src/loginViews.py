@@ -70,8 +70,8 @@ def api_register():
 			db.session.add(carpooler)
 			db.session.commit()
 			return jsonify({'result':app.config['URL_BASE'] + str(url_for('login'))}),200
-		except:
-			return jsonify({'result':'User email already in use, or database error!'}),409
+		except Exception as exc:
+			return jsonify({'result':'User email already in use, or database error! ' + str(exc)}),409
 
 	return jsonify({'result':'Form does not validate! Errors: ' + str(form.errors)}),422
 

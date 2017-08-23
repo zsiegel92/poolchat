@@ -1,6 +1,7 @@
 from GT_interactions import doGroupThere,post_optimization_update,get_all_pool_ids,email_aPool
 
 from flask import jsonify,json
+from flask_login import current_user, login_user, logout_user,login_required
 
 import numpy as np
 
@@ -35,6 +36,7 @@ def flatten(L):
 
 
 @app.route('/q_groupthere/', methods=['GET','POST'])
+@login_required
 def q_groupthere(pool_id=None):
 	print('in q_groupthere')
 	if request:
@@ -49,6 +51,7 @@ def q_groupthere(pool_id=None):
 
 
 @app.route('/q_repeat_groupthere/', methods=['GET','POST'])
+@login_required
 def q_repeat_groupthere():
 	print('in q_repeat_groupthere')
 	job = q.enqueue_call(func=GroupThere,result_ttl=5000)
@@ -63,6 +66,7 @@ def q_repeat_groupthere():
 
 
 @app.route("/GTresults/", methods=['POST'])
+@login_required
 def post_GT_results():
 	try:
 		data = json.loads(request.data.decode())
@@ -76,6 +80,7 @@ def post_GT_results():
 
 
 @app.route("/GTresults/<job_key>", methods=['GET'])
+@login_required
 def GT_results(job_key):
 	print("in GT_results")
 	try:
@@ -116,6 +121,7 @@ def GT_results(job_key):
 
 
 @app.route("/email_all/", methods=['GET','POST'])
+@login_required
 def email_all_carpoolers(pool_id=None):
 	# emailer = Emailer(queue=q)
 	if request:

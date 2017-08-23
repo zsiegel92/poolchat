@@ -13,6 +13,7 @@ from groupThere.GroupThere import GroupThere
 
 #TODO: Flip through users in db, message them their table has been dropped :)
 @app.route('/drop_only', methods=["GET"])
+@login_required
 def drop_table_only():
 	try:
 		db.drop_all()
@@ -24,6 +25,7 @@ def drop_table_only():
 
 
 @app.route('/drop_ping', methods=["GET"])
+@login_required
 def drop_and_ping():
 	try:
 		db.drop_all()
@@ -38,6 +40,7 @@ def drop_and_ping():
 
 
 @app.route('/pester', methods=["GET"])
+@login_required
 def pester_view():
 	try:
 		sender_id = '1512768535401609'
@@ -49,6 +52,7 @@ def pester_view():
 
 
 @app.route('/ping_getStarted', methods=["GET"])
+@login_required
 def ping_getStarted():
 	try:
 		fbId = '1512768535401609'
@@ -59,6 +63,7 @@ def ping_getStarted():
 		return "Got started!", 200
 
 @app.route('/ping_text', methods=["GET"])
+@login_required
 def ping_text():
 	try:
 		fbId = '1512768535401609'
@@ -70,6 +75,7 @@ def ping_text():
 
 
 @app.route('/drop_populate', methods=["GET"])
+@login_required
 def drop_populate():
 	try:
 		db.drop_all()

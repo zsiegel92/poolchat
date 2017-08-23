@@ -18,6 +18,7 @@ from groupThere.GroupThere import GroupThere
 
 
 @app.route('/populate_group/',methods=['GET'])
+@login_required
 def populate_group():
 	populate_group_test()
 	return 200
@@ -56,6 +57,7 @@ def populate_group():
 
 
 @app.route('/do_groupthere/', methods=['GET'])
+@login_required
 def do_groupthere():
 	params = GroupThere()
 	for ass in params.solution['assignments']:
@@ -73,6 +75,7 @@ def do_groupthere():
 # 	fbId = int(request.form['fbId'])
 
 @app.route('/testing/<int:fbId>', methods=["GET"])
+@login_required
 def testing(fbId):
 	fbId = str(fbId)
 	# db.drop_all()

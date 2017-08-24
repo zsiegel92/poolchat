@@ -65,13 +65,16 @@ def api_register():
 	form = ngRegistrationForm(request.form)
 	print(form.data)
 	if form.validate():
-		try:
-			carpooler = Carpooler(firstname=form.firstName.data, lastname=form.lastName.data,name= str(form.firstName.data) + str(form.lastName.data), email=form.email.data,password=form.password.data)
-			db.session.add(carpooler)
-			db.session.commit()
-			return jsonify({'result':app.config['URL_BASE'] + str(url_for('login'))}),200
-		except Exception as exc:
-			return jsonify({'result':'User email already in use, or database error! ' + str(exc)}),409
+		if Carpooler.query.filter_by(email=form.email.data).first() is None:
+			try:
+				carpooler = Carpooler(firstname=form.firstName.data, lastname=form.lastName.data,name= str(form.firstName.data) + " " + str(form.lastName.data), email=form.email.data,password=form.password.data)
+				db.session.add(carpooler)
+				db.session.commit()
+				return jsonify({'result':app.config['URL_BASE'] + str(url_for('login'))}),200
+			except Exception as exc:
+				return jsonify({'result':'Database error! ' + str(exc)}),400
+		else:
+			return jsonify({'result':'User email already in use!'}),409
 
 	return jsonify({'result':'Form does not validate! Errors: ' + str(form.errors)}),422
 

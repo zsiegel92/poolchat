@@ -500,7 +500,38 @@ def api_confirm_address():
 		print(exc)
 		return "Error",400
 
-@app.route('/static/<path:path>')
-def send_js(path):
-	print("Serving static file")
-	return send_from_directory('', path)
+# @app.route('/static/<path:path>')
+# def send_js(path):
+# 	print("Serving static file")
+# 	return send_from_directory('', path)
+
+
+@app.route('/get_db_metadata')
+@login_required
+def get_db_metadata():
+	metadata1=str(vars(app.extensions['migrate'].db.metadata))
+	metadata2 = str(vars(db.metadata))
+	metadata=metadata2
+	return metadata,200
+
+@app.route('/get_db_metadata2')
+@login_required
+def get_db_metadata2():
+	metadata1=str(vars(app.extensions['migrate'].db.metadata))
+	metadata2 = str(vars(db.metadata))
+	metadata=metadata1
+	return metadata,200
+
+
+@app.route('/clear_metadata')
+@login_required
+def clear_data():
+	meta = db.metadata
+	for table in reversed(meta.sorted_tables):
+		print('Clear table %s' % table)
+		db.session.execute(table.delete())
+	db.session.commit()
+	metadata = str(vars(db.metadata))
+	return metadata,200
+
+

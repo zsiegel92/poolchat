@@ -5,6 +5,7 @@ from flask import Flask, request, abort, json
 from app_factory import create_app
 from login import login_manager
 from database import db
+import models
 
 # from flask_sqlalchemy import SQLAlchemy #INTERACTIONS MOVEMENT!
 # from rq import Queue #INTERACTIONS MOVEMENT!
@@ -17,7 +18,7 @@ from database import db
 # app.config.from_object(os.environ['APP_SETTINGS'])
 # db.init_app(app)
 app = create_app(__name__)
-
+app.config.from_object(os.environ['APP_SETTINGS'])
 
 
 #NOTE: SQLALCHEMY_TRACK_MODIFICATIONS prints model object fields when they are edited!

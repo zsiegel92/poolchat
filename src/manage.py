@@ -1,9 +1,9 @@
 import os
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
+from models import Carpooler, Pool, Trip, Team,team_membership,team_affiliation
 from app import app, db
 
-app.config.from_object(os.environ['APP_SETTINGS'])
 
 migrate = Migrate(app, db)
 manager = Manager(app)

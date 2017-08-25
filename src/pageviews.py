@@ -89,17 +89,34 @@ def call_view_pool(number):
 	poolRep = '<br>'.join(['{0}: {1}'.format(key, value) for (key, value) in poolDict.items()])
 	return poolRep,200
 
-@app.route('/api/get_pool_ids',methods=['POST'])
+@app.route('/api/get_pool_info_for_user',methods=['POST'])
 @login_required
-def api_get_pools():
-	pool_ids = [trip.pool.id for trip in current_user.pools]
-	names = [trip.pool.poolName for trip in current_user.pools]
-	if names is None:
-		names = []
-	if pool_ids is None:
-		pool_ids = []
-	message = current_user.describe_trips()
-	return jsonify({'ids':pool_ids,'message':message,'names':names}),200
+def api_get_pool_info_for_user():
+	# team.to_dict(self) returns {'id':self.id,'email':self.email,'name':self.name}
+	teams = [team.to_dict() for team in current_user.teams]
+
+	joined_pool_ids = [trip.pool.id for trip in current_user.pools]
+
+	team_pool_ids = list(set([pool.id for team in current_user.teams for pool in team.pools])) #uniquified
+
+	unjoined_pool_ids = list(set(team_pool_ids).difference(joined_pool_ids))
+
+
+	joined_pools =[{'id':trip.pool.id,'name':trip.pool.poolName,'date':trip.pool.eventDate,'time':trip.pool.eventTime,'address':trip.pool.eventAddress,'email':trip.pool.eventEmail,'fireNotice':trip.pool.fireNotice} for trip in current_user.pools]
+	unjoined_pools=[{'id':pool.id,'name':pool.poolName,'date':pool.eventDate,'time':pool.eventTime,'address':pool.eventAddress,'email':pool.eventEmail,'fireNotice':pool.fireNotice} for team in current_user.teams for pool in team.pools if pool.id in unjoined_pool_ids]
+
+	seen_ids = []
+	unique_unjoined=[]
+	for pool in unjoined_pools:
+		if pool['id']in seen_ids:
+			pass
+		else:
+			seen_ids.append(pool['id'])
+			unique_unjoined.append(pool)
+
+	eligible_pools=unique_unjoined
+
+	return jsonify({'teams':teams,'joined_pools':joined_pools,'eligible_pools':eligible_pools}),200
 
 
 
@@ -236,60 +253,65 @@ def load_triggers():
 @app.route('/api/create_pool/',methods=['POST'])
 @login_required
 def api_create_pool():
-	pool=Pool()
-	trip = Trip()
-	trip.pool=pool
-	current_user.pools.append(trip)
-	current_user.current_pool_id=pool.id
-	db.session.add(pool)
-	db.session.add(trip)
-	db.session.commit()
-
 	print("request.values: " + str(request.values))
 
-	pool.poolName=request.values.get("name")
-	pool.eventAddress=request.values.get("address")
-	pool.eventEmail=request.values.get("email")
+	poolName = request.values.get("name")
 
-	pool.fireNotice = int(request.values.get("fireNotice"))
-	pool.latenessWindow = int(request.values.get("latenessWindow"))
+	redundant_pool = Pool.query.filter_by(poolName=poolName).first()
+	if redundant_pool is None:
 
+		eventAddress= request.values.get("address")
+		eventEmail=request.values.get("email")
+		fireNotice= int(request.values.get("fireNotice"))
+		latenessWindow= int(request.values.get("latenessWindow"))
+		eventDateTime=parse(request.values.get("dateTimeText"))
+		team_ids = json.loads(request.values.get("team_ids"))
 
-	eventDateTime = parse(request.values.get("dateTimeText"))
-
-
-	pool.eventDateTime = eventDateTime
-
-	pool.eventDate = pool.eventDateTime.strftime("%d/%m/%y")
-	pool.eventTime = pool.eventDateTime.strftime("%I:%M %p")
-
-	print("Adding event at " + str(pool.eventDate) + " at " + str(pool.eventTime))
-	# >>> d.strftime("%d/%m/%y")
-	# '11/03/02'
-	# >>> d.strftime("%A %d. %B %Y")
-	# 'Monday 11. March 2002'
-	# See http://strftime.org/
-
-	db.session.commit()
-
-	message = "Pool added to database"
-
-	# team_names=request.values.get("teams")
-	team_ids = json.loads(request.values.get("team_ids"))
-
-	for team_id in team_ids:
-		team = Team.query.filter_by(id=team_id).first()
-		if current_user in team.members:
-			team.pools.append(pool)
-			message+="\nTeam affiliations confirmed."
-		else:
-			message+="User not a member of " + str(team.name)
-
+		pool=Pool()
+		trip = Trip()
+		trip.pool=pool
+		current_user.pools.append(trip)
+		current_user.current_pool_id=pool.id
+		db.session.add(pool)
+		db.session.add(trip)
 		db.session.commit()
 
 
+		pool.poolName=poolName
+		pool.eventAddress=eventAddress
+		pool.eventEmail=eventEmail
+		pool.fireNotice = fireNotice
+		pool.latenessWindow = latenessWindow
+		pool.eventDateTime = eventDateTime
+		pool.eventDate = eventDateTime.strftime("%d/%m/%y")
+		pool.eventTime = eventDateTime.strftime("%I:%M %p")
 
-	return "Pool added to database.", 200
+		print("Adding event at " + str(pool.eventDate) + " at " + str(pool.eventTime))
+		# >>> d.strftime("%d/%m/%y")
+		# '11/03/02'
+		# >>> d.strftime("%A %d. %B %Y")
+		# 'Monday 11. March 2002'
+		# See http://strftime.org/
+
+		db.session.commit()
+
+		message = "Pool added to database"
+
+		# team_names=request.values.get("teams")
+
+		for team_id in team_ids:
+			team = Team.query.filter_by(id=team_id).first()
+			if current_user in team.members:
+				team.pools.append(pool)
+				message+="\nTeam affiliations confirmed."
+			else:
+				message+="User not a member of " + str(team.name)
+
+			db.session.commit()
+
+		return "Pool added to database.", 200
+	else:
+		return "Pool already in database",409
 
 @app.route('/api/get_email/',methods=['POST'])
 @login_required

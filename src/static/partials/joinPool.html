@@ -1,0 +1,33 @@
+<!-- access poolId with $routeParams.poolId
+Make sure $scope, $route, $routeParams are injected in controller -->
+<div class="container">
+    <div class="row">
+        <div class='col' style="float:left; width:50%;">
+        <!-- button that calls backto_view -->
+        <a ng-click='backto_view()' class="btn btn-default">Join a different event...</a>
+
+
+
+        </div><!-- Column -->
+        <div class='col' style="float:right; width:50%">
+            <h2>Event Information </h2>
+            <div ng-if="image_url">
+                <img ng-src="{{image_url}}" alt="Event Address" style="width:400px;height:400px;">
+            </div>
+            <ul>
+                <li> Event Name: {{pool.name}} </li>
+                <li> Event Address: {{pool.address}}</li>
+                <li> Event Date: {{pool.date}} </li>
+                <li> Event Time: {{pool.time}} </li>
+                <li> Event Contact Email: {{pool.email}} </li>
+                <li> Notice given for carpooling instructions: {{pool.notice}} hours</li>
+            </ul>
+
+        </div> <!-- COLUMN -->
+    </div>
+</div>
+
+
+<!-- TODO: -->
+<!-- Put form and submit button that simply sets $scope.pool_id and calls $scope.getPoolInfo(). viewPool will be updated automatically by binding -->
+<!-- Put button linking to this view on other pages -->

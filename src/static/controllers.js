@@ -136,7 +136,7 @@ angular.module('myApp').controller('makeTeamController',
             }
             else{
               $log.log(response.data);
-              $scope.resultText="Error registering pool.";
+              $scope.resultText="Error registering team.";
             }
 
           });
@@ -318,7 +318,14 @@ angular.module('myApp').controller('makePoolController',
       }).
       catch(function(response) {
         $scope.disabled = false;
-        $scope.resultText="error registering pool.";
+        if (response.status==409){
+          $scope.resultText="Pool with that name already exists!";
+          $log.log(response.data);
+        }
+        else{
+          $log.log(response.data);
+          $scope.resultText="Error registering Pool.";
+        }
       });
   };
 
@@ -361,74 +368,82 @@ angular.module('myApp').controller('registerController',
 
 
 angular.module('myApp').controller('viewPoolController',
-  ['$scope', '$location', 'AuthService','$route', '$routeParams','$log','$http',
-  function ($scope, $location, AuthService,$route,$routeParams,$log,$http) {
+  ['$scope', '$location', 'AuthService','$route', '$routeParams','$log','$http','$window',
+  function ($scope, $location, AuthService,$route,$routeParams,$log,$http,$window) {
 
-    $scope.viewPool={};
-
-    $scope.getPoolIds = function() {
-      $log.log("Getting pool ids");
-      $http.post('api/get_pool_ids')
+    $scope.getPoolInfoForUser = function() {
+      $log.log("Getting pool info");
+      $http.post('api/get_pool_info_for_user')
         .then(function(response){
-          $scope.pool_ids = response.data.ids;
-          $scope.pool_names = response.data.names;
-          $scope.pool_id_message = response.data.message;
+          $scope.teams = response.data.teams;
+          $scope.joined_pools = response.data.joined_pools;
+          $scope.eligible_pools = response.data.eligible_pools;
+          if ($scope.eligible_pools.length >0){
+            $log.log("There is an eligible pool!");
+            $scope.joinForm.ngPool=0;
+          }
+          else{
+            $log.log("There are no eligible pools!");
+          }
+          $log.log("Successfully queried for teams, joined_pools, and eligible_pools!");
+          $log.log(response.data);
        })
         .catch(function(response) {
-          $log.log("Error in getPoolIds calling api/get_pool_ids API");
+          $log.log("Error in getPoolInfo calling api/get_pool_info API");
         });
     };
 
-    $scope.getPoolInfo = function() {
+  $scope.getPoolInfoForUser();
 
-      $log.log("Getting pool info");
-
-      // get the number of generic participants from the input
-      var pool_id = $scope.pool_id;
-      // fire the API request
-      $http.post('/view_pool/',{'pool_id':pool_id})
-        .then(function(response) {
-          $log.log("Logging pool info. Pool id:")
-          $log.log(pool_id)
-          $log.log(response.data);
-          if (response.status==200){
-            $scope.resultText="You are a member of this carpool!";
-            $scope.viewPool=response.data;
-          }
-          else if (response.status==204){
-            $scope.resultText="No such carpooling event.";
-            $scope.viewPool={};
-          }
-          else if (response.status == 206){
-            $scope.resultText="You are not a member of this carpool.";
-            $scope.viewPool=response.data;
-          }
-          else {
-
-          }
-
-        }).
-        catch(function(response) {
-          $log.log(response.data);
-          $scope.resultText="error"
-        });
-    };
-
-  $scope.getPoolIds();
-
-  if (!$routeParams.poolId){
-    if ($scope.pool_ids && ($scope.pool_ids.length >0)){
-      $scope.pool_id = $scope.pool_ids[0];
-      $scope.getPoolInfo();
-    }
-  }
-  else{
-    $scope.pool_id = $routeParams.poolId;
-    $scope.getPoolInfo();
-  }
+  //route: '/joinPool/:id/name/:name/address/:address/date/:date/time/:time/email/:email/notice/:notice'
+  $scope.goto_join = function(){
+    var pool = $scope.eligible_pools[$scope.joinForm.ngPool];
+    var f= $window.encodeURIComponent;
+    var pth = '/joinPool/' + f(pool.id) +'/name/'+ f(pool.name) + '/address/' + f(pool.address) + '/date/' + f(pool.date) + '/time/' + f(pool.time) + '/email/' + f(pool.email) + '/notice/' + f(pool.fireNotice);
+    $log.log(pth);
+    // $log.log($window.encodeURIComponent(pth));
+    // $location.path($window.encodeURIComponent(pth));
+    $location.path(pth);
+  };
 
 }]);
 
+angular.module('myApp').controller('joinPoolController',['$scope', '$location', 'AuthService','$route', '$routeParams','$log','$http','$window',
+  function ($scope, $location, AuthService,$route,$routeParams,$log,$http,$window) {
+
+    var f = $window.decodeURIComponent;
+
+    $scope.pool = {'id':f($routeParams.id),'name':f($routeParams.name),'address':f($routeParams.address),'date':f($routeParams.date),'time':f($routeParams.time),'email':f($routeParams.email),'notice':f($routeParams.notice)};
+
+    $scope.backto_view = function(){
+      $location.path('/viewPool');
+    };
+
+    function render_map(){
+      $scope.disabled = true;
+
+      $http.post('/api/confirm_address/',
+              $.param(
+                {
+                  address:$scope.pool.address
+                }
+              ),
+              {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+        .then(function(response) {
+          $scope.disabled = false;
+          $scope.image_url=response.data.image_url;
+        }).
+        catch(function(response) {
+          $scope.disabled = false;
+          $log.log(response.data);
+        });
+    };
+
+    render_map();
+
+
+
+}]);
 
 angular.module('myApp').controller('triggerController',
   ['$scope', '$location', 'AuthService',

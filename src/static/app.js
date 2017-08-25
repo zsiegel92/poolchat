@@ -129,7 +129,7 @@ myApp.config(function ($routeProvider,$httpProvider) {
       controller: 'triggerController',
       access: {restricted: true}
     })
-    .when('/viewPool/:poolId?', {
+    .when('/viewPool/', {
       templateUrl: 'static/partials/viewPool.html',
       controller: 'viewPoolController',
       access: {restricted: true}
@@ -147,6 +147,11 @@ myApp.config(function ($routeProvider,$httpProvider) {
     .when('/joinTeam', {
       templateUrl: 'static/partials/join_team.html',
       controller: 'joinTeamController',
+      access: {restricted: true}
+    })
+    .when('/joinPool/:id/name/:name/address/:address/date/:date/time/:time/email/:email/notice/:notice', {
+      templateUrl: 'static/partials/joinPool.html',
+      controller: 'joinPoolController',
       access: {restricted: true}
     })
     .otherwise({

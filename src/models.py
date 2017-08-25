@@ -44,6 +44,10 @@ team_affiliation=db.Table('team_affiliation',
 							 db.Column('team_id',db.Integer,db.ForeignKey('teams.id'),nullable=False),
 							 db.PrimaryKeyConstraint('pool_id', 'team_id') )
 
+
+	##Module: models.py
+	#
+
 class Carpooler(db.Model):
 	__tablename__ = 'carpooler'
 
@@ -532,6 +536,9 @@ class Team(db.Model):
 	password=db.Column(db.String())
 
 	city = db.Column(db.String())
+
+	def to_dict(self):
+		return {'id':self.id,'email':self.email,'name':self.name}
 
 class Trip(db.Model):
 	__tablename__ = 'trips'

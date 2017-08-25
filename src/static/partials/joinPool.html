@@ -26,7 +26,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
             <span class="error" ng-show="tripForm.address.$error.required">
               Required!</span>
             <div>
-              <button ng-click='confirmAddress()' class="btn btn-default" ng-disabled="!tripForm.ngAddress || disabled || address_confirmed"><span ng-if="!address_confirmed">Confirm Address</span> <span ng-if="address_confirmed">Address Confirmed</span></button>
+              <button ng-click='confirmAddress()' class="btn btn-default" ng-disabled="!tripForm.ngAddress || disabled || address_confirmed"><span ng-if="!address_confirmed">Confirm Address</span> <span ng-if="address_confirmed">Address Confirmed (edit if necessary)</span></button>
               <span ng-show="!address_confirmed"> <b>You must confirm address before proceeding.</b></span>
 
             </div>
@@ -132,12 +132,13 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                 <h4> Event Location </h4>
                 <img ng-src="{{pool_info.image_url}}" alt="Event Address" style="width:400px;height:400px;">
             </div>
-            <h4>Other Event Information:</h4>
+            <h4>Event Information:</h4>
             <ul>
                 <li> Event Name: {{pool.name}} </li>
                 <li> Event Address: <span ng-if="!pool_info"> {{pool.address}} </span><span ng-if="pool_info"> EXTRA CONFIRMED {{pool_info.formatted_address}} </span></li>
                 <li> Event Date: {{pool.date}} </li>
                 <li> Event Time: {{pool.time}} </li>
+                <li> Event DateTime: {{pool.dateTime | date:'medium'}} </li>
                 <li> Event Contact Email: {{pool.email}} </li>
                 <li> Non-Organizers can arrive up to {{pool.latenessWindow}} minutes after {{pool.time}}</li>
                 <li> Notice given for carpooling instructions: {{pool.notice}} hours</li>

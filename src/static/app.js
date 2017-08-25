@@ -72,7 +72,7 @@ myApp.filter('relativedate', ['$filter', function ($filter) {
   return function (rel, format) {
     let date = new Date();
     date.setDate(date.getDate() + rel);
-    return $filter('date')(date, format || 'yyyy-MM-dd')
+    return $filter('date')(date, format || 'MM-dd-yyyy')
   };
 }]);
 
@@ -149,7 +149,7 @@ myApp.config(function ($routeProvider,$httpProvider) {
       controller: 'joinTeamController',
       access: {restricted: true}
     })
-    .when('/joinPool/:id/name/:name/address/:address/date/:date/time/:time/email/:email/notice/:notice/latenessWindow/:latenessWindow/carpooler/cpname/:cpname/cpfirst/:cpfirst/cplast/:cplast/cpemail/:cpemail', {
+    .when('/joinPool/:id/name/:name/address/:address/date/:date/time/:time/dateTime/:dateTime/email/:email/notice/:notice/latenessWindow/:latenessWindow/carpooler/cpname/:cpname/cpfirst/:cpfirst/cplast/:cplast/cpemail/:cpemail', {
       templateUrl: 'static/partials/joinPool.html',
       controller: 'joinPoolController',
       access: {restricted: true}

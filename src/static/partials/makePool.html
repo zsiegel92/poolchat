@@ -48,7 +48,7 @@
         <span class="error" ng-show="poolForm.address.$error.required">
           Required!</span>
         <div>
-          <button ng-click='confirmAddress()' class="btn btn-default" ng-disabled="!poolForm.ngAddress || disabled || address_confirmed"><span ng-if="!address_confirmed">Confirm Address</span> <span ng-if="address_confirmed">Address Confirmed</span></button>
+          <button ng-click='confirmAddress()' class="btn btn-default" ng-disabled="!poolForm.ngAddress || disabled || address_confirmed"><span ng-if="!address_confirmed">Confirm Address</span> <span ng-if="address_confirmed">Address Confirmed (edit if necessary)</span></button>
           <span ng-show="!address_confirmed"> <b>You must confirm address before proceeding.</b></span>
 
         </div>

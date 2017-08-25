@@ -26,6 +26,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                         <li> Event Address: {{pool.address}} </li>
                         <li> Event Date: {{pool.date}} </li>
                         <li> Event Time: {{pool.time}} </li>
+                        <li> Event DateTime: {{pool.dateTime}} </li>
                         <li> Event Contact Email: {{pool.email}} </li>
                         <li> Non-Organizers can arrive up to {{pool.latenessWindow}} minutes after {{pool.time}}</li>
                         <li> Carpooling instructions will be sent out {{pool.fireNotice}} hours before {{pool.time}} on {{pool.date}}</li>
@@ -56,6 +57,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                     <li> Event Address: {{eligible_pools[joinForm.ngPool].address}} </li>
                     <li> Event Date: {{eligible_pools[joinForm.ngPool].date}} </li>
                     <li> Event Time: {{eligible_pools[joinForm.ngPool].time}} </li>
+                    <li> Event DateTime: {{eligible_pools[joinForm.ngPool].dateTime | date:'medium' }} </li>
                     <li> Event Contact Email: {{eligible_pools[joinForm.ngPool].email}} </li>
                     <li> Non-Organizers can arrive up to {{eligible_pools[joinForm.ngPool].latenessWindow}} minutes after {{eligible_pools[joinForm.ngPool].time}}</li>
                     <li> Carpooling instructions will be sent out {{eligible_pools[joinForm.ngPool].fireNotice}}  hours before {{eligible_pools[joinForm.ngPool].time}} on {{eligible_pools[joinForm.ngPool].date}}</li>

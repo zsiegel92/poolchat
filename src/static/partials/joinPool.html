@@ -6,20 +6,140 @@ Make sure $scope, $route, $routeParams are injected in controller -->
         <!-- button that calls backto_view -->
         <a ng-click='backto_view()' class="btn btn-default">Join a different event...</a>
 
+    <!--
+        address = db.Column(db.String())
+        num_seats = db.Column(db.Integer)
+        preWindow = db.Column(db.Integer)
+        on_time = db.Column(db.Integer)
+        must_drive = db.Column(db.Integer) -->
+
+          <form class="form" name="tripForm" ng-model="tripForm" ng-submit="joinTrip()">
+
+
+            <h2>Event Information</h2>
+
+    <!-- ADDRESS -->
+            <div class="form-group">
+              <label>I will be driving to the event from...</label>
+              <input type="text" class="form-control" name="address" ng-model="tripForm.ngAddress" ng-change="address_confirmed=false;" required>
+            </div>
+            <span class="error" ng-show="tripForm.address.$error.required">
+              Required!</span>
+            <div>
+              <button ng-click='confirmAddress()' class="btn btn-default" ng-disabled="!tripForm.ngAddress || disabled || address_confirmed"><span ng-if="!address_confirmed">Confirm Address</span> <span ng-if="address_confirmed">Address Confirmed</span></button>
+              <span ng-show="!address_confirmed"> <b>You must confirm address before proceeding.</b></span>
+
+            </div>
+
+    <!-- TIME -->
+            <label>I can leave as early as...</label>
+            <input type="time"
+                   ng-model="tripForm.ngTime"
+                   name="tripForm.time"
+                   placeholder="HH:mm:ss"
+                   value="14:30:00"
+                   required="true">
+
+
+
+    <!-- NUMBER SEATS -->
+            <div class="form-group">
+              <label>Do you have a car? How many seats does it have?</label>
+              <br>
+              <select ng-model="tripForm.ngNumSeats" name="numSeats" ng-init="tripForm.ngNumSeats=0" convert-to-number>
+                <option value="0">I don't have a car</option>
+                <option value="1">I have a vehicle with 1 seat (only me)</option>
+                <option value="3">I have 2 seats</option>
+                <option value="4">I have 3 seats</option>
+                <option value="5">I have 4 seats</option>
+              </select>
+
+            </div>
+
+    <!-- MUST_DRIVE -->
+            <div ng-show="tripForm.ngNumSeats>0" ng-init="tripForm.ngMust_drive=false;">
+               <label>
+                <input type="radio" ng-model="tripForm.ngMust_drive" value="true">
+                I HAVE TO drive! I cannot catch a ride.
+              </label><br/>
+              <label>
+                <input type="radio" ng-model="tripForm.ngMust_drive" value="false">
+                I can drive OR catch a ride.
+              </label><br/>
+            </div>
+    <!-- ON_TIME -->
+        <h4>Do you have to arrive on time?</h4>
+        <div class="form-group" ng-inig="tripForm.ngOn_time=false;">
+          <label>
+           <input type="radio" ng-model="tripForm.ngOn_time" value="true">
+            I HAVE TO arrive by {{pool.time}} because I am an organizer of the event.
+          </label><br/>
+          <label>
+           <input type="radio" ng-model="tripForm.ngOn_time" value="false">
+            I can arrive up to {{pool.latenessWindow}} after {{pool.time}}.
+          </label><br/>
+        </div>
+
+
+
+
+
+
+            <div>
+              <button type="submit" class="btn btn-default" ng-disabled="poolForm.$invalid || disabled || !address_confirmed">Register</button>
+            </div>
+
+
+          </form>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         </div><!-- Column -->
         <div class='col' style="float:right; width:50%">
-            <h2>Event Information </h2>
-            <div ng-if="image_url">
-                <img ng-src="{{image_url}}" alt="Event Address" style="width:400px;height:400px;">
+
+
+            <h2> Your Travel Plans </h2>
+
+            <div ng-if="trip_image_url">
+            <h4> Your Origin </h4>
+                <img ng-src="{{trip_image_url}}" alt="Trip Origin" style="width:400px;height:400px;">
             </div>
+
+<!--
+    address = db.Column(db.String())
+    num_seats = db.Column(db.Integer)
+    preWindow = db.Column(db.Integer)
+    on_time = db.Column(db.Integer)
+    must_drive = db.Column(db.Integer) -->
+
+
+            <h2>Event: </h2>
+            <div ng-if="pool_info">
+                <h4> Event Location </h4>
+                <img ng-src="{{pool_info.image_url}}" alt="Event Address" style="width:400px;height:400px;">
+            </div>
+            <h4>Other Event Information:</h4>
             <ul>
                 <li> Event Name: {{pool.name}} </li>
-                <li> Event Address: {{pool.address}}</li>
+                <li> Event Address: <span ng-if="!pool_info"> {{pool.address}} </span><span ng-if="pool_info"> EXTRA CONFIRMED {{pool_info.formatted_address}} </span></li>
                 <li> Event Date: {{pool.date}} </li>
                 <li> Event Time: {{pool.time}} </li>
                 <li> Event Contact Email: {{pool.email}} </li>
+                <li> Non-Organizers can arrive up to {{pool.latenessWindow}} minutes after {{pool.time}}</li>
                 <li> Notice given for carpooling instructions: {{pool.notice}} hours</li>
             </ul>
 

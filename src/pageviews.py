@@ -102,8 +102,10 @@ def api_get_pool_info_for_user():
 	unjoined_pool_ids = list(set(team_pool_ids).difference(joined_pool_ids))
 
 
-	joined_pools =[{'id':trip.pool.id,'name':trip.pool.poolName,'date':trip.pool.eventDate,'time':trip.pool.eventTime,'address':trip.pool.eventAddress,'email':trip.pool.eventEmail,'fireNotice':trip.pool.fireNotice} for trip in current_user.pools]
-	unjoined_pools=[{'id':pool.id,'name':pool.poolName,'date':pool.eventDate,'time':pool.eventTime,'address':pool.eventAddress,'email':pool.eventEmail,'fireNotice':pool.fireNotice} for team in current_user.teams for pool in team.pools if pool.id in unjoined_pool_ids]
+	joined_pools =[{'id':trip.pool.id,'name':trip.pool.poolName,'date':trip.pool.eventDate,'time':trip.pool.eventTime,'address':trip.pool.eventAddress,'email':trip.pool.eventEmail,'fireNotice':trip.pool.fireNotice,'latenessWindow':trip.pool.latenessWindow} for trip in current_user.pools]
+	unjoined_pools=[{'id':pool.id,'name':pool.poolName,'date':pool.eventDate,'time':pool.eventTime,'address':pool.eventAddress,'email':pool.eventEmail,'fireNotice':pool.fireNotice,'latenessWindow':pool.latenessWindow} for team in current_user.teams for pool in team.pools if pool.id in unjoined_pool_ids]
+
+	carpooler={'name':current_user.name,'first':current_user.firstname,'last':current_user.lastname,'email':current_user.email}
 
 	seen_ids = []
 	unique_unjoined=[]
@@ -116,7 +118,7 @@ def api_get_pool_info_for_user():
 
 	eligible_pools=unique_unjoined
 
-	return jsonify({'teams':teams,'joined_pools':joined_pools,'eligible_pools':eligible_pools}),200
+	return jsonify({'teams':teams,'joined_pools':joined_pools,'eligible_pools':eligible_pools,'carpooler':carpooler}),200
 
 
 

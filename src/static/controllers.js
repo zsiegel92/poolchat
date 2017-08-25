@@ -37,9 +37,6 @@ angular.module('myApp').controller('navController',
         return page === currentRoute ? 'active' : '';
     };
 
-
-
-
     $scope.logout = function () {
       // call logout from service
       AuthService.logout()
@@ -71,7 +68,7 @@ angular.module('myApp').controller('logoutController',
           $location.path('/login');
         });
     };
-    logout();
+    $scope.logout();
 
 }]);
 
@@ -378,6 +375,8 @@ angular.module('myApp').controller('viewPoolController',
           $scope.teams = response.data.teams;
           $scope.joined_pools = response.data.joined_pools;
           $scope.eligible_pools = response.data.eligible_pools;
+          $scope.carpooler = response.data.carpooler;
+
           if ($scope.eligible_pools.length >0){
             $log.log("There is an eligible pool!");
             $scope.joinForm.ngPool=0;
@@ -395,11 +394,13 @@ angular.module('myApp').controller('viewPoolController',
 
   $scope.getPoolInfoForUser();
 
-  //route: '/joinPool/:id/name/:name/address/:address/date/:date/time/:time/email/:email/notice/:notice'
+  //route: '/joinPool/:id/name/:name/address/:address/date/:date/time/:time/email/:email/notice/:notice/latenessWindow/:latenessWindow'
   $scope.goto_join = function(){
     var pool = $scope.eligible_pools[$scope.joinForm.ngPool];
+    var cp = $scope.carpooler;
+
     var f= $window.encodeURIComponent;
-    var pth = '/joinPool/' + f(pool.id) +'/name/'+ f(pool.name) + '/address/' + f(pool.address) + '/date/' + f(pool.date) + '/time/' + f(pool.time) + '/email/' + f(pool.email) + '/notice/' + f(pool.fireNotice);
+    var pth = '/joinPool/' + f(pool.id) +'/name/'+ f(pool.name) + '/address/' + f(pool.address) + '/date/' + f(pool.date) + '/time/' + f(pool.time) + '/email/' + f(pool.email) + '/notice/' + f(pool.fireNotice) + "/latenessWindow/" + f(pool.latenessWindow) +"/carpooler/cpname/" + f(cp.name) + '/cpfirst/' + f(cp.first) + '/cplast/' + f(cp.last) + '/cpemail/' + f(cp.email);
     $log.log(pth);
     // $log.log($window.encodeURIComponent(pth));
     // $location.path($window.encodeURIComponent(pth));
@@ -408,40 +409,58 @@ angular.module('myApp').controller('viewPoolController',
 
 }]);
 
-angular.module('myApp').controller('joinPoolController',['$scope', '$location', 'AuthService','$route', '$routeParams','$log','$http','$window',
-  function ($scope, $location, AuthService,$route,$routeParams,$log,$http,$window) {
+angular.module('myApp').controller('joinPoolController',['$scope', '$location', 'AuthService','$route', '$routeParams','$log','$http','$window','$q',
+  function ($scope, $location, AuthService,$route,$routeParams,$log,$http,$window,$q) {
 
     var f = $window.decodeURIComponent;
+    var r = $routeParams;
+    $scope.address_confirmed=false;
+    $scope.disabled=false;
 
-    $scope.pool = {'id':f($routeParams.id),'name':f($routeParams.name),'address':f($routeParams.address),'date':f($routeParams.date),'time':f($routeParams.time),'email':f($routeParams.email),'notice':f($routeParams.notice)};
+    $scope.pool = {'id':f(r.id),'name':f(r.name),'address':f(r.address),'date':f(r.date),'time':f(r.time),'email':f(r.email),'notice':f(r.notice),'latenessWindow':f(r.latenessWindow)};
+    $scope.carpooler = {'name':f(r.cpname),'first':f(r.cpfirst),'last':f(r.cplast),'email':f(r.cpemail)};
 
     $scope.backto_view = function(){
       $location.path('/viewPool');
     };
 
-    function render_map(){
+    // Returns: {'formatted_address':fa,'image_url':iu}
+    var conf_address = function(address){
       $scope.disabled = true;
 
-      $http.post('/api/confirm_address/',
-              $.param(
-                {
-                  address:$scope.pool.address
-                }
-              ),
-              {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+      return $http.post('/api/confirm_address/',
+            $.param(
+              {
+                address:address
+              }
+            ),
+            {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
         .then(function(response) {
           $scope.disabled = false;
-          $scope.image_url=response.data.image_url;
+
+          $log.log({'image_url':response.data.image_url,'formatted_address':response.data.formatted_address});
+
+            return {'image_url':response.data.image_url,'formatted_address':response.data.formatted_address};
+            // return response.data;
+
         }).
         catch(function(response) {
           $scope.disabled = false;
           $log.log(response.data);
+          return "error";
         });
     };
+    conf_address($scope.pool.address).then((response)=>{
+     $scope.pool_info = response;
+   });
 
-    render_map();
-
-
+   $scope.confirmAddress = function(){
+    conf_address($scope.tripForm.ngAddress).then((response)=>{
+          $scope.address_confirmed=true;
+          $scope.tripForm.ngAddress=response.formatted_address;
+          $scope.trip_image_url=response.image_url;
+    });
+   };
 
 }]);
 

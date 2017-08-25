@@ -99,7 +99,7 @@ myApp.config(function ($routeProvider,$httpProvider) {
   $routeProvider
     .when('/', {
       access: {restricted: true},
-      controller: 'logoutController',
+      controller: 'navController',
       templateUrl: 'static/partials/home.html'
     })
     .when('/login', {
@@ -149,7 +149,7 @@ myApp.config(function ($routeProvider,$httpProvider) {
       controller: 'joinTeamController',
       access: {restricted: true}
     })
-    .when('/joinPool/:id/name/:name/address/:address/date/:date/time/:time/email/:email/notice/:notice', {
+    .when('/joinPool/:id/name/:name/address/:address/date/:date/time/:time/email/:email/notice/:notice/latenessWindow/:latenessWindow/carpooler/cpname/:cpname/cpfirst/:cpfirst/cplast/:cplast/cpemail/:cpemail', {
       templateUrl: 'static/partials/joinPool.html',
       controller: 'joinPoolController',
       access: {restricted: true}
@@ -166,7 +166,7 @@ myApp.run(function ($rootScope, $location, $route, AuthService) {
       .then(function(){
         var logged_in = AuthService.isLoggedIn();
         $rootScope.logged_in = logged_in;
-        if (next.access.restricted && !logged_in){
+        if (!logged_in && next.access.restricted){
           $location.path('/login');
           $route.reload();
         }

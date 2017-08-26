@@ -1,5 +1,5 @@
 import wtforms
-from wtforms import Form, BooleanField, StringField, PasswordField, validators
+from wtforms import Form, BooleanField, StringField, PasswordField, IntegerField, validators
 
 
 def dict_to_tagstring(dic):
@@ -82,7 +82,36 @@ class ngRegistrationForm(wtforms.Form):
 
 def test_EmailForm():
 	from werkzeug.datastructures import MultiDict
-	a= wtforms_ext.EmailForm(formdata=MultiDict([('emailField','zsiegel@gmail.com')]),ng_click="makeResponse()")
+	a= EmailForm(formdata=MultiDict([('emailField','zsiegel@gmail.com')]),ng_click="makeResponse()")
 	print(a.data)
 	print(a.validate())
 	print(a.errors)
+
+# Documentation at:
+# (form): https://github.com/wtforms/wtforms/blob/60abf4fbb9fc5231f6525a2062e40fd88be240dc/wtforms/form.py
+# (field): https://github.com/wtforms/wtforms/blob/086d0bf7d6d73ab9a05e30b861adee627916a71c/wtforms/fields/core.py
+class nonpopulating_IntegerField(IntegerField):
+	def populate_obj(self,obj,name):
+		pass
+class castAsInteger_BooleanField(BooleanField):
+	def populate_obj(self,obj,name):
+		setattr(obj,name,int(self.data))
+
+class tripForm(wtforms.Form):
+	address= StringField('Address',[validators.InputRequired("Please enter address")])
+	num_seats = IntegerField('Number of Seats', validators=[validators.InputRequired("Please select how many seats you have (0 if no car)"), validators.number_range(min=0,max=5, message='Must input between 0 and 5 seats.')])
+	preWindow = IntegerField('Number of minutes before the event that you are available', validators=[validators.InputRequired(), wtforms.validators.number_range(min=0, message='Must be positive.')])
+	on_time = castAsInteger_BooleanField('Do you have to arrive on time?', [validators.InputRequired()])
+	must_drive = castAsInteger_BooleanField("Do you have to drive (is it not possible to catch a ride)?",[validators.InputRequired()])
+	pool_id = nonpopulating_IntegerField('Pool ID',validators=[validators.InputRequired()])
+
+
+
+
+
+
+
+
+
+
+

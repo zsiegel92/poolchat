@@ -26,12 +26,16 @@ from interactions import newPool
 from models import  Carpooler,Pool, Trip,ensure_carpooler_notNone,Team
 from groupThere.GroupThere import GroupThere
 
-
 from GT_manager import create_generic_parameters
 
 
 from app import app,request,abort
 from database import db
+from emailer import Emailer
+emailer=Emailer(q)
+#usage:
+# emailer.email(toAddress,message="",subject="")
+# emailer.self_email(message=message,subject=subject)
 
 import wtforms_ext
 emailForm=wtforms_ext.EmailForm(ng_click='getCarpoolerInfo()')
@@ -138,6 +142,67 @@ def api_get_teams():
 	return jsonify({'team_names':team_names,'team_ids':team_ids,'message':message,}),200
 
 
+
+#TODO:
+#instantiate team with id team_id,
+#ensure that current_user in team.members,
+#add user with id user_id,
+#email user with id user_id with an approval message, plus the codeword.
+#TODO:
+#build a "reject" that emails user with id user_id
+@app.route('/api/approve_team/teamId/<int:team_id>/userId/<int:user_id>',methods=['POST'])
+@login_required
+def api_approve_team(team_id,user_id):
+	print("in api_approve_team")
+	team = Team.query.filter_by(id=team_id).first()
+	if team is None:
+		return "No such team!",401
+	if current_user not in team.members:
+		return "You are not a member of this team, and as such cannot approve a request to join it!",401
+	carpooler = Carpooler.query.filter_by(id=user_id).first()
+	if carpooler is None:
+		return "No such user!",401
+
+	team.members.append(carpooler)
+	db.session.commit()
+	subject="(GroupThere) Approved to join team {team_name}".format(team_name=team.name)
+	url_base = app.config['URL_BASE']#ends in /
+	link = url_base + '?#!/joinTeam'
+	message = "Hi {new_name},\nYou have been added to the GroupThere team {team_name} by the member {organizer_name} ({organizer_email})! Congratulations!\nAnyone can join this team using the codeword '{codeword}', so go ahead and invite others to this team by sending them to {link} ! \n\nBest Wishes,\nGroupThere".format(new_name=carpooler.name,organizer_name=current_user.name,team_name=team.name, organizer_email=current_user.email,codeword=team.password,link=link)
+
+	emailer.email(carpooler.email,message=message,subject=subject)
+
+	return_message = "User {user_name} added to team {team_name}. They have been notified via an email to {user_email}, which also lets them know that the team's codeword is {codeword}.".format(user_name=carpooler.name,team_name=team.name,user_email=carpooler.email,codeword=team.password)
+	return jsonify({'message':return_message,'email':{'from':emailer.get_email(),'to':carpooler.email,'body':message,'subject':subject}}),200
+
+#TODO: Frontend route '?#!/approve_member/{new_user_id}/{team_id}' should include a link to
+#'/api/approve_team/teamId/{team_id}/userId/{new_user_id}'
+@app.route('/api/request_team_codeword/teamId/<int:team_id>',methods=['POST'])
+@login_required
+def api_request_team_codeword(team_id):
+	print("User with id " + str(current_user.id) + " requesting access to team with id " + str(team_id))
+	team = Team.query.filter_by(id=team_id).first()
+	if team is None:
+		print("ERROR WITH REQUEST_TEAM_CODEWORD - NO SUCH TEAM")
+		return "No such team",401
+	else:
+		# text_message =5
+		toAddress=team.email
+		subject = "GroupThere user " + str(current_user.name) + " wants to join your team " + str(team.name) + "!"
+
+		url_base = app.config['URL_BASE']#ends in /
+		link = url_base + '?#!/approve_member/{new_user_id}/{team_id}'.format(new_user_id=current_user.id,team_id=team.id)
+		text_message = 'Hello, organizer of {team_name},\n GroupThere user {user_name} wants to join your team {team_name}. To approve, please visit this link: {link}'.format(team_name=team.name,user_name=current_user.name,link=link)
+		html_body = "Hello, organizer of {team_name},<br> GroupThere user {user_name} wants to join your team {team_name}.<br>To approve, please <a href='{link}'>click here</a>. <br>To contact {user_name}, you can email them at {user_email}, and feel free to give them the codeword {codeword}, which will allow them to add themself.".format(team_name=team.name,user_name=current_user.name,link=link,user_email = current_user.email,codeword = team.password)
+
+		# emailer.email(toAddress,message=text_message,subject=subject)
+		emailer.send_html_body(toAddress,html_body=html_body,subject=subject,text_message=text_message)
+		# send_html_body(self,toAddress,html_body,subject="",text_message=""):
+		return "A request has been sent to the owner of team {team_name}! Alternatively, ask anyone you know who is a member of this team to visit {link}".format(team_name=team.name, link=link),200
+
+
+
+
 @app.route('/api/get_foreign_teams/',methods=['POST'])
 @login_required
 def api_get_foreign_teams():
@@ -145,11 +210,17 @@ def api_get_foreign_teams():
 
 	team_names = [team.name for team in current_user.teams]
 	team_ids = [team.id for team in current_user.teams]
+	team_emails = [team.email for team in current_user.teams]
 
-	foreign_team_names = [team.name for team in allTeams if team.name not in team_names]
-	foreign_team_ids = [team.id for team in allTeams if team.name not in team_names]
+	foreign_team_names = [team.name for team in allTeams if team.id not in team_ids]
+	foreign_team_ids = [team.id for team in allTeams if team.id not in team_ids]
+
+	team_ids = [team.id for team in current_user.teams]
+	team_objects = [{'name':team.name,'id':team.id,'email':team.email} for team in current_user.teams]
+	foreign_team_ids = [team.id for team in allTeams if team.id not in team_ids]
+	foreign_team_objects=[{'name':team.name,'id':team.id} for team in allTeams if team.id not in team_ids]
+
 	print("foreign_team_ids: " + str(foreign_team_ids))
-	print("foreign_team_names: " + str(foreign_team_names))
 	if (foreign_team_ids is None) or (len(foreign_team_ids)==0):
 		foreign_team_ids = []
 		foreign_team_names = []
@@ -157,7 +228,8 @@ def api_get_foreign_teams():
 	else:
 		message = "You can join the following teams: " + ", ".join(foreign_team_names) + "."
 
-	return jsonify({'foreign_team_names':foreign_team_names,'foreign_team_ids':foreign_team_ids,'message':message,}),200
+	# return jsonify({'foreign_team_names':foreign_team_names,'foreign_team_ids':foreign_team_ids,'team_names':team_names,'team_ids':team_ids,'message':message,'team_emails':team_emails,'my_id':current_user.id}),200
+	return jsonify({'teams':team_objects,'foreign_teams':foreign_team_objects,'my_id':current_user.id,'message':message}),200
 # @app.route('/', methods=['GET', 'POST'])
 # @login_required
 # def index():
@@ -272,12 +344,7 @@ def api_create_pool():
 		team_ids = json.loads(request.values.get("team_ids"))
 
 		pool=Pool()
-		trip = Trip()
-		trip.pool=pool
-		current_user.pools.append(trip)
-		current_user.current_pool_id=pool.id
 		db.session.add(pool)
-		db.session.add(trip)
 		db.session.commit()
 
 
@@ -290,7 +357,6 @@ def api_create_pool():
 		pool.eventDate = eventDateTime.strftime("%d/%m/%y")
 		pool.eventTime = eventDateTime.strftime("%I:%M %p")
 
-		print("Adding event at " + str(pool.eventDate) + " at " + str(pool.eventTime))
 		# >>> d.strftime("%d/%m/%y")
 		# '11/03/02'
 		# >>> d.strftime("%A %d. %B %Y")
@@ -307,12 +373,12 @@ def api_create_pool():
 			team = Team.query.filter_by(id=team_id).first()
 			if current_user in team.members:
 				team.pools.append(pool)
-				message+="\nTeam affiliations confirmed."
+				message+="\nTeam affiliations confirmed for team " + str(team.name)
 			else:
 				message+="User not a member of " + str(team.name)
 
 			db.session.commit()
-
+		print(message)
 		return "Pool added to database.", 200
 	else:
 		return "Pool already in database",409
@@ -321,6 +387,65 @@ def api_create_pool():
 @login_required
 def api_get_email():
 	return getattr(current_user,'email',''),200
+
+
+@app.route('/api/create_trip/',methods=['POST'])
+@login_required
+def api_create_trip():
+	tripform = wtforms_ext.tripForm(request.form)
+
+	if tripform.validate():
+		# address=tripform.address.data
+		# num_seats=tripform.num_seats.data
+		# preWindow = tripform.preWindow.data
+		# on_time=tripform.on_time.data
+		# must_drive=tripform.must_drive.data
+		pool_id=tripform.pool_id.data
+
+
+		pool=Pool.query.filter_by(id=pool_id).first()
+		if pool is None:
+			return "No such event!",400
+		elif current_user in [trip.member for trip in pool.members]:
+			#TODO: update trip?
+			return "You are already part of this event!",409
+		else:
+			try:
+				trip = Trip()
+				trip.pool=pool
+				trip.member=current_user
+				# current_user.pools.append(trip)
+
+				db.session.add(trip)
+				db.session.commit()
+
+				db.session.commit()
+
+
+				print("STARTING TO ADD FIELDS")
+
+				# print("address: " + str(address))
+				# print("num_seats: " + str(num_seats))
+				# print("on_time: " + str(on_time))
+				# print("preWindow: " + str(preWindow))
+				# print("must_drive: " + str(must_drive))
+
+				tripform.populate_obj(trip)
+
+				# trip.address = str(address)
+				# trip.num_seats=int(num_seats)
+				# trip.on_time = int(on_time)
+				# trip.preWindow = preWindow
+				# trip.must_drive = int(must_drive)
+
+
+				db.session.commit()
+				return "Added trip to database!",200
+			except Exception as exc:
+				print(exc)
+				return str(exc),400
+	else:
+		return "Input invalid - errors: " + str(tripform.errors) +" (FLASK)",500
 
 @app.route('/api/create_team/',methods=['POST'])
 @login_required

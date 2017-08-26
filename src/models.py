@@ -538,7 +538,7 @@ class Team(db.Model):
 	city = db.Column(db.String())
 
 	def to_dict(self):
-		return {'id':self.id,'email':self.email,'name':self.name}
+		return {'id':self.id,'email':self.email,'name':self.name,'codeword':self.password}
 
 class Trip(db.Model):
 	__tablename__ = 'trips'

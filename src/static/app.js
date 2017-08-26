@@ -149,6 +149,11 @@ myApp.config(function ($routeProvider,$httpProvider) {
       controller: 'joinTeamController',
       access: {restricted: true}
     })
+    .when('/approve_member/:new_user_id/:team_id', {
+      templateUrl: 'static/partials/approveTeamJoin.html',
+      controller: 'approveTeamJoinController',
+      access: {restricted: true}
+    })
     .when('/joinPool/:id/name/:name/address/:address/date/:date/time/:time/dateTime/:dateTime/email/:email/notice/:notice/latenessWindow/:latenessWindow/carpooler/cpname/:cpname/cpfirst/:cpfirst/cplast/:cplast/cpemail/:cpemail', {
       templateUrl: 'static/partials/joinPool.html',
       controller: 'joinPoolController',
@@ -166,7 +171,7 @@ myApp.run(function ($rootScope, $location, $route, AuthService) {
       .then(function(){
         var logged_in = AuthService.isLoggedIn();
         $rootScope.logged_in = logged_in;
-        if (!logged_in && next.access.restricted){
+        if (!logged_in && next && next.access.restricted){
           $location.path('/login');
           $route.reload();
         }

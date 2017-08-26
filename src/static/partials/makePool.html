@@ -10,13 +10,15 @@
         <b>Which teams are affiliated with this event?</b>
         <div class="form-group">
           <label ng-repeat="teamName in teams">
-          <input type="checkbox" name="selectedTeams[$index]" ng-model="poolForm.selectedTeams[$index]" value="{{teamName}}" ng-checked="teamSelection.indexOf(teamName) > -1" ng-click="toggleSelection(teamName)">{{teamName}}</label>
+          <input type="checkbox" name="selectedTeams[$index]" ng-model="poolForm.selectedTeams[$index]" ng-init="true" value="{{teamName}}" ng-checked="teamSelection.indexOf(teamName) > -1" ng-click="toggleSelection(teamName)">{{teamName}}</label>
         </div>
+          <ul ng-show="teamSelection.length > 0">
+            <li ng-repeat="teamName in teamSelection"> Members of team <b>{{teamName}}</b> will be able to join this event!</li>
+          </ul>
 
-        <!-- RESULT TEXT -->
-        <div ng-if="resultText">
-            {{resultText}}
-        </div>
+          <span ng-show="teamSelection.length ==0 && teams.length >0 "> <b> NOBODY will be able to join this event! Select some teams to include. Note that every event must be affiliated with at least one team, and you will not be able to create this event without checking a box.</b> </span>
+          <span ng-show="teams.length == 0 "> <b> You are not a member of any teams, so you cannot make events! <a href='#!/joinTeam'>Click here to join a team.</a></b> </span>
+
 
 
         <h2>Event Information</h2>
@@ -60,10 +62,11 @@
              ng-model="initial.ngDate"
              class='form-control'
              name='date'
-             value="minDate"
+             ng-init="initial.ngDate=minDate;"
              min="{{minNumberDays | relativedate}}"
              max="{{365 | relativedate}}"
              ng-required="!poolForm.date.$pristine">
+             <!-- value="{{minDate | date: 'yyyy-MM-dd'}}" -->
 
 <!--             <span class="error" ng-show="poolForm.date.$error">
             Not a valid date!</span> -->
@@ -134,15 +137,14 @@
 <!-- SIGNATURE -->
 
 
-
-
-
-
-
-
+<!-- BUTTON -->
+<!-- BUTTON -->
         <div>
-          <button type="submit" class="btn btn-default" ng-disabled="poolForm.$invalid || disabled || !address_confirmed">Register</button>
+          <button type="submit" class="btn btn-default" ng-disabled="poolForm.$invalid || disabled || !address_confirmed || teamSelection.length ==0">Register</button>
         </div>
+
+
+<span ng-show="poolForm.$invalid || !address_confirmed || teamSelection.length ==0"> <b>This registration form is not complete! Ensure you have confirmed the address and affiliated at least one team.</b></span>
 
 
       </form>
@@ -195,4 +197,20 @@
   </div>
 </div>
 
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
 

@@ -16,7 +16,15 @@ Make sure $scope, $route, $routeParams are injected in controller -->
               </select>
 
               <button type="submit" ng-click="" ng-init="" class="btn btn-default" ng-disabled="joinForm.$invalid || disabled || (eligible_pools.length < 1)">Join Pool!</button>
-              <span ng-show="eligible_pools.length<1"> There are no available events! Feel free to make one yourself ;) </span>
+
+              <div ng-show="eligible_pools.length<1">
+                <br>
+                There are no available events!
+                <br>
+                <a href='#!/makePool'>Click here to make one yourself ;) </a>
+              </div>
+              <span ng-show="eligible_pools.length>0"> <br> <a href='#!/makePool'>Click here to make a new event!</a></span>
+              <span> <br> <b><a href='#!/joinTeam'>Click here to join a team and access their events!</a></b> </span>
             </form>
             <h2> Events You Have Already Joined </h2>
             <ol>
@@ -40,6 +48,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                     <ul>
                         <li> Team Name: {{team.name}} </li>
                         <li> Team Contact Email: {{team.email}} </li>
+                        <li> Team Codeword: {{team.codeword}} </li>
                     </ul>
                 </li>
             </ol>

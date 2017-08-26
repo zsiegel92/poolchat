@@ -197,6 +197,7 @@ angular.module('myApp').controller('makePoolController',
     $scope.teamSelection_ids=[];
     $scope.teamForms=[];
 
+
     // $scope.poolForm.ngDate = new Date();
 
     // Toggle selection for a given fruit by name
@@ -231,6 +232,13 @@ angular.module('myApp').controller('makePoolController',
           $scope.resultText=response.data.message;
           $scope.teams=response.data.team_names;
           $scope.team_ids = response.data.team_ids;
+
+          $scope.teamSelection = $scope.teams.slice();
+          $scope.teamSelection_ids = $scope.team_ids.slice();
+          $scope.poolForm.selectedTeams = {};
+          for (i=0; i< $scope.teams.length;i++){
+            $scope.poolForm.selectedTeams[String(i)]=true;
+          }
         }).
         catch(function(response) {
           $log.log(response.data);
@@ -410,8 +418,8 @@ angular.module('myApp').controller('viewPoolController',
 
 }]);
 
-angular.module('myApp').controller('joinPoolController',['$scope', '$location', 'AuthService','$route', '$routeParams','$log','$http','$window','$q',
-  function ($scope, $location, AuthService,$route,$routeParams,$log,$http,$window,$q) {
+angular.module('myApp').controller('joinPoolController',['$scope', '$location', 'AuthService','$route', '$routeParams','$log','$http','$filter','$window','$q',
+  function ($scope, $location, AuthService,$route,$routeParams,$log,$http,$filter,$window,$q){
 
     var f = $window.decodeURIComponent;
     var r = $routeParams;
@@ -420,6 +428,16 @@ angular.module('myApp').controller('joinPoolController',['$scope', '$location', 
 
     $scope.pool = {'id':f(r.id),'name':f(r.name),'address':f(r.address),'date':f(r.date),'time':f(r.time),'dateTime':f(r.dateTime),'email':f(r.email),'notice':f(r.notice),'latenessWindow':f(r.latenessWindow)};
     $scope.carpooler = {'name':f(r.cpname),'first':f(r.cpfirst),'last':f(r.cplast),'email':f(r.cpemail)};
+    // $scope.zoneOffset = $scope.pool.dateTime.getTimezoneOffset();
+    // var pool_dateTime = new Date(Date.parse($scope.pool.dateTime));
+    // $scope.zoneOffset = pool_dateTime.getTimezoneOffset();
+
+    $scope.preTime = function(baseTimeString,preWindow){
+      let dt = new Date(Date.parse(baseTimeString));
+      let relDt = new Date(dt.getTime() - preWindow*60*1000);
+      return relDt;
+    };
+    $scope.preTimes = [15,20,25,30,35,40,45,50,55,60];
 
     $scope.backto_view = function(){
       $location.path('/viewPool');
@@ -462,6 +480,53 @@ angular.module('myApp').controller('joinPoolController',['$scope', '$location', 
           $scope.trip_image_url=response.image_url;
     });
    };
+
+  $scope.joinTrip = function() {
+
+    $scope.disabled = true;
+
+    $log.log("Registering:");
+    $log.log(                {
+                  address:$scope.tripForm.ngAddress,
+                  num_seats:$scope.tripForm.ngNumSeats,
+                  preWindow:$scope.tripForm.ngPreWindow,
+                  on_time:$scope.tripForm.ngOn_time,
+                  must_drive:$scope.tripForm.ngMust_drive,
+                  pool_id:$scope.pool.id
+                });
+    $http.post('/api/create_trip/',
+              $.param(
+                {
+                  address:$scope.tripForm.ngAddress,
+                  num_seats:$scope.tripForm.ngNumSeats,
+                  preWindow:$scope.tripForm.ngPreWindow,
+                  on_time:$scope.tripForm.ngOn_time,
+                  must_drive:$scope.tripForm.ngMust_drive,
+                  pool_id:$scope.pool.id
+                }
+              ),
+              {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+
+      .then(function(response) {
+        $scope.disabled = false;
+        $log.log("Registration response:");
+        $log.log(response.data);
+        $scope.resultText=response.data;
+
+      }).
+      catch(function(response) {
+        $scope.disabled = false;
+        if (response.status==409){
+          $scope.resultText="Redundant entry!";
+          $log.log(response.data);
+        }
+        else{
+          $log.log(response.data);
+          $scope.errorMessage = response.data;
+          $scope.resultText="Error registering Trip.";
+        }
+      });
+  };
 
 }]);
 
@@ -510,10 +575,11 @@ angular.module('myApp').controller('joinTeamController',
 
 
     $scope.disabled = false;
+    // $scope.baseURL = $location.$$absUrl.replace($location.$$url, '');
+    // $scope.fullURL = $location.$$absUrl;
 
-
-    $scope.teams = ['team1', 'team2', 'team3'];
-    $scope.team_ids=[1,2,3];
+    // $scope.teams = ['team1', 'team2', 'team3'];
+    // $scope.team_ids=[1,2,3];
 
 
     $scope.getTeams = function() {
@@ -529,8 +595,17 @@ angular.module('myApp').controller('joinTeamController',
           $log.log("Foreign Teams:");
           $log.log(response.data);
           $scope.resultText=response.data.message;
-          $scope.foreignTeams=response.data.foreign_team_names;
-          $scope.foreignTeam_ids = response.data.foreign_team_ids;
+          $scope.my_id = response.data.my_id;
+          // $scope.foreignTeams=response.data.foreign_team_names;
+          // $scope.foreignTeam_ids = response.data.foreign_team_ids;
+          // $scope.teams = response.data.team_names;
+          // $scope.team_ids = response.data.team_ids;
+          // $scope.team_emails = response.data.team_emails;
+
+          // teams is list of {'name':,'id':,'email':}
+          // foreignTeams is list of {'name':,'id':}
+          $scope.teams = response.data.teams;
+          $scope.foreignTeams= response.data.foreign_teams;
         }).
         catch(function(response) {
           $log.log(response.data);
@@ -538,6 +613,19 @@ angular.module('myApp').controller('joinTeamController',
         });
     };
 
+  $scope.access_request_feedback={};
+  $scope.request_access = function(team_id){
+    $scope.disabled=true;
+    $http.post('/api/request_team_codeword/teamId/' + String(team_id))
+    .then(function(response){
+      $scope.disabled=false;
+      $scope.access_request_feedback[team_id]=response.data;
+    })
+    .catch(function(response){
+      $scope.disabled=false;
+      $scope.access_request_feedback[team_id]=response.data;
+    });
+  };
 
   $scope.join = function() {
     $scope.disabled = true;
@@ -574,5 +662,42 @@ angular.module('myApp').controller('joinTeamController',
   };
 
   $scope.getTeams();
+
+}]);
+
+
+
+angular.module('myApp').controller('approveTeamJoinController',
+  ['$scope', '$location', 'AuthService','$route', '$routeParams','$log','$http','$window',
+  function ($scope, $location, AuthService,$route,$routeParams,$log,$http,$window) {
+
+    $scope.disabled = false;
+    var dec = $window.decodeURIComponent;
+    var rp = $routeParams;
+    $scope.address_confirmed=false;
+    $scope.disabled=false;
+
+    $scope.new_user_id = dec(rp.new_user_id);
+    $scope.team_id = dec(rp.team_id);
+
+
+  $scope.approve_team = function(){
+    $scope.disabled=true;
+    $http.post('/api/approve_team/teamId/' + String($scope.team_id) + '/userId/' + String($scope.new_user_id))
+    .then(function(response){
+      $scope.disabled=false;
+      $scope.message=response.data.message;
+      $scope.email=response.data.email;
+      // email = {from:,to:,body:,subject:}
+    })
+    .catch(function(response){
+      $scope.disabled=false;
+      $scope.message = response.data.message;
+      $scope.error=response.data;
+    });
+  };
+
+
+  $scope.approve_team();
 
 }]);

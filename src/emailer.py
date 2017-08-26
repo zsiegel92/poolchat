@@ -1,13 +1,29 @@
 import os
 import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+
+#usage:
+# from rq import Queue
+# from rq.job import Job
+# from worker import conn
+# q = Queue(connection=conn)
+# from emailer import Emailer
+#emailer=Emailer(q)
+# emailer.email(toAddress,message="",subject="")
+# emailer.self_email(message=message,subject=subject)
 
 class Emailer:
+
 
 	def __init__(self,queue=None):
 		self.queue=queue
 		self.gmail_user = os.environ['EMAIL']
 		self.gmail_password=os.environ['EMAIL_PASSWORD']
 
+	def get_email(self):
+		return self.gmail_user
 	def self_email(self,message="",subject=""):
 		self.email(self.gmail_user,message,subject)
 
@@ -48,3 +64,43 @@ class Emailer:
 				cls.direct_email(sent_from,sent_from,password,message="ERROR SENDING message to " + str(sent_to) +"!\n" + str(message),subject="ERROR MESSAGE for: " + str(subject),error=True)
 		else:
 			print("Message sent successfully.")
+
+
+	@classmethod
+	def send_from_server(cls,fromAddress,password,toAddress,message):
+			server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+			server.ehlo()
+			server.login(fromAddress, password)
+			server.sendmail(fromAddress, toAddress, message)
+			server.close()
+
+	def send_html_body(self,toAddress,html_body,subject="",text_message=""):
+		print("in Emailer.send_html_body")
+		if toAddress.split("@")[-1]== 'notARealThing.com':
+			subject = subject + " REDIRECTED from " + str(toAddress)
+			toAddress = self.gmail_user
+
+		msg = MIMEMultipart('alternative')
+		msg['Subject']=subject
+		msg['From']=self.gmail_user
+		msg['To']=toAddress
+		html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
+		if text_message=="":
+			text = html_body
+		else:
+			text=text_message
+
+		part1 = MIMEText(text,'plain')
+		part2 = MIMEText(html,'html')
+
+		msg.attach(part1)
+		msg.attach(part2)
+
+		if self.queue is None:
+			self.send_from_server(msg['From'],msg['To'],msg.as_string())
+		else:
+			self.queue.enqueue_call(func=self.send_from_server,args=(msg['From'],msg['To'],msg.as_string(),),result_ttl=5000)
+
+
+
+

@@ -31,14 +31,12 @@ Make sure $scope, $route, $routeParams are injected in controller -->
 
             </div>
 
-    <!-- TIME -->
-            <label>I can leave as early as...</label>
-            <input type="time"
-                   ng-model="tripForm.ngTime"
-                   name="tripForm.time"
-                   placeholder="HH:mm:ss"
-                   value="14:30:00"
-                   required="true">
+    <!-- PREWINDOW -->
+            <select ng-model="tripForm.ngPreWindow" name="preWindow" ng-init="tripForm.ngPreWindow=30" convert-to-number>
+     <!--            <option value="10">I can leave at {{preTime(pool.dateTime,10) | date:'short'}} or just as string {{preTime(pool.dateTime,10)}} </option> -->
+                <option ng-repeat='pre in preTimes' value='{{pre}}'>I can leave {{pre}} minutes ahead, at {{preTime(pool.dateTime,pre) }}</option>
+
+            </select>
 
 
 
@@ -69,7 +67,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
             </div>
     <!-- ON_TIME -->
         <h4>Do you have to arrive on time?</h4>
-        <div class="form-group" ng-inig="tripForm.ngOn_time=false;">
+        <div class="form-group" ng-init="tripForm.ngOn_time=false;">
           <label>
            <input type="radio" ng-model="tripForm.ngOn_time" value="true">
             I HAVE TO arrive by {{pool.time}} because I am an organizer of the event.
@@ -89,22 +87,10 @@ Make sure $scope, $route, $routeParams are injected in controller -->
               <button type="submit" class="btn btn-default" ng-disabled="poolForm.$invalid || disabled || !address_confirmed">Register</button>
             </div>
 
-
+              <div ng-show="errorMessage">
+              Errors: {{errorMessage}}
+              </div>
           </form>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -135,7 +121,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
             <h4>Event Information:</h4>
             <ul>
                 <li> Event Name: {{pool.name}} </li>
-                <li> Event Address: <span ng-if="!pool_info"> {{pool.address}} </span><span ng-if="pool_info"> EXTRA CONFIRMED {{pool_info.formatted_address}} </span></li>
+                <li> Event Address: <span ng-if="!pool_info"> {{pool.address}} </span><span ng-if="pool_info"> {{pool_info.formatted_address}} </span></li>
                 <li> Event Date: {{pool.date}} </li>
                 <li> Event Time: {{pool.time}} </li>
                 <li> Event DateTime: {{pool.dateTime | date:'medium'}} </li>

@@ -24,6 +24,15 @@
     {
       border:1px solid #f00;
     }
+
+    .roundBorder {
+      border: 2px solid black;
+      border-radius: 5px;
+    }
+    .padded {
+      margin: 15px 15px 15px 15px;
+
+    }
   </style>
 
 
@@ -39,8 +48,8 @@
           <li> <a ng-click='logout()' class="btn btn-default">Logout</a> </li>
           <!-- <li ng-class="navClass('triggers')"><a href='#!/triggers'>Triggers</a></li> -->
           <li ng-class="navClass('viewPool')"><a href='#!/viewPool'>Events - Yours and Your Teams'</a></li>
-          <li ng-class="navClass('makePool')"><a href='#!/makePool'>Create New Event</a></li>
           <li ng-class="navClass('joinTeam')"><a href='#!/joinTeam'>Join Team</a></li>
+          <li ng-class="navClass('makePool')"><a href='#!/makePool'>Create New Event</a></li>
           <li ng-class="navClass('makeTeam')"><a href='#!/makeTeam'>Create Team</a></li>
           <!-- <li ng-class="navClass('logout')"><a href='#!/logout'>Log Out</a></li> -->
 
@@ -59,13 +68,12 @@
 
 
 
+<!-- APP GOES HERE: -->
     <div class="container">
       <div ng-view>
 
       </div>
     </div>
-
-
 
 
 

@@ -17,7 +17,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
             <h2> Events You Have Already Joined </h2>
             <ol>
                 <li ng-repeat="pool in joined_pools">
-                    <b>{{pool.name}} {{pool.date}} </b>
+                    <b>{{pool.name}} {{pool.date}} with <span ng-repeat="team in pool.teams">{{team.name}}{{$last ? '': ','}}</span></b>
                     <ul>
                         <li> Event Address: {{pool.address}} </li>
                         <li> Event Date: {{pool.date}} </li>
@@ -56,7 +56,8 @@ Make sure $scope, $route, $routeParams are injected in controller -->
 
             <form ng-show="eligible_pools" role='form' name="joinForm" ng-model="joinForm" ng-submit="goto_join()">
               <select ng-model="joinForm.ngPool" name="pool" class="form-control">
-                  <option ng-repeat="pool in eligible_pools"  value="{{$index}}">{{pool.name}}</option>
+                  <option ng-repeat="pool in eligible_pools"  value="{{$index}}">{{pool.name}} by {{pool.team_names | joinBy:', '}}</option>
+                  <!-- Try: {{team.name.join(', ')}} -->
               </select>
 
               <button type="submit" ng-click="" ng-init="" class="btn btn-default" ng-disabled="joinForm.$invalid || disabled || (eligible_pools.length < 1)">Join Pool!</button>
@@ -65,10 +66,10 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                 <br>
                 There are no available events!
                 <br>
-                <a href='#!/makePool'>Click here to make one yourself ;) </a>
+                <a href='#!/makePool'>Make a new event ;) </a>
               </div>
-              <span ng-show="eligible_pools.length>0"> <br> <a href='#!/makePool'>Click here to make a new event!</a></span>
-              <span> <br> <b><a href='#!/joinTeam'>Click here to join a team and access their events!</a></b> </span>
+              <span ng-show="eligible_pools.length>0"> <br> <a href='#!/makePool'>Make a new event</a></span>
+              <span> <br> <b><a href='#!/joinTeam'>Join a team (and access their events)</a></b> </span>
             </form>
 
 
@@ -80,7 +81,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
             <div ng-show="joinForm.$dirty && joinForm.ngPool && joinForm.ngPool >=0">
                 <h3> Selected Event: </h3>
                 <ul>
-                    <li> Event Name: {{eligible_pools[joinForm.ngPool].name}} </li>
+                    <li> Event Name: {{eligible_pools[joinForm.ngPool].name}} with <span ng-repeat="team in eligible_pools[joinForm.ngPool].teams">{{team.name}}{{$last ? '': ', '}}</span></li>
                     <li> Event Address: {{eligible_pools[joinForm.ngPool].address}} </li>
                     <li> Event Date: {{eligible_pools[joinForm.ngPool].date }} </li>
                     <li> Event Time: {{eligible_pools[joinForm.ngPool].time }} </li>

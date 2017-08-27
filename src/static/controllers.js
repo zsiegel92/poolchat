@@ -250,7 +250,6 @@ angular.module('myApp').controller('makePoolController',
           $scope.message = response.data.makePoolMessage;
           $scope.resultText = response.data.makePoolMessage;
 
-
           $scope.teamSelection = [];
           $scope.teamSelection_ids=[];
           $scope.poolForm.selectedTeams = {};

@@ -109,7 +109,7 @@ def api_login():
 		else:
 			# message = "User not found"
 			# return jsonify({"result":"User not found."}),404
-			return jsonify({'result',False})
+			return jsonify({'result':False})
 	else:
 		# message = "Form doesn't validate. Errors: "  + str(form.errors) +", full data: " + str(form.data)
 		return jsonify({'result': False}) #form doesn't validate

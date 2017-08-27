@@ -8,9 +8,10 @@
 
         <h2>Affiliated Teams</h2>
         <b>Which teams are affiliated with this event?</b>
+
         <div class="form-group">
-          <label ng-repeat="teamName in teams">
-          <input type="checkbox" name="selectedTeams[$index]" ng-model="poolForm.selectedTeams[$index]" ng-init="true" value="{{teamName}}" ng-checked="teamSelection.indexOf(teamName) > -1" ng-click="toggleSelection(teamName)">{{teamName}}</label>
+          <label ng-repeat="team in teams">
+          <input type="checkbox" name="selectedTeams[$index]" ng-model="poolForm.selectedTeams[$index]" ng-init="true" value="{{team.name}}" ng-checked="teamSelection.indexOf(team.name) > -1" ng-click="toggleSelection(team)">{{team.name}}</label>
         </div>
           <ul ng-show="teamSelection.length > 0">
             <li ng-repeat="teamName in teamSelection"> Members of team <b>{{teamName}}</b> will be able to join this event!</li>
@@ -40,6 +41,8 @@
           <span class="error" ng-show="poolForm.email.$error.email">Valid Email Required!</span>
           <br>
           <span class="error" ng-show="poolForm.email.$error.pattern">Email should match &ltemail &gt@&ltdomain&gt.&ltext&gt</span>
+          <span ng-repeat="team in teams"><button ng-click="poolForm.ngEmail=team.email;">Set to {{team.name}}'s email: {{team.email}}</button><br></span>
+          <button ng-click="poolForm.ngEmail=self.email;">Set to your email: {{self.email}}</button>
         </div>
 
 <!-- ADDRESS -->

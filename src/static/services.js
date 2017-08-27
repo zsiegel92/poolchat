@@ -53,6 +53,11 @@ angular.module('myApp').factory('AuthService',
 
     }
 
+
+    function frontend_logout(){
+      user=false;
+    }
+
     function logout() {
 
       // create a new instance of deferred

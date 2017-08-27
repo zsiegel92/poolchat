@@ -126,20 +126,20 @@ def api_get_pool_info_for_user():
 
 
 
-@app.route('/api/get_teams/',methods=['POST'])
-@login_required
-def api_get_teams():
-	team_names = [team.name for team in current_user.teams]
-	team_ids = [team.id for team in current_user.teams]
+# @app.route('/api/get_teams/',methods=['POST'])
+# @login_required
+# def api_get_teams():
+# 	team_names = [team.name for team in current_user.teams]
+# 	team_ids = [team.id for team in current_user.teams]
 
-	if (team_ids is None) or (len(team_ids)==0):
-		team_ids = []
-		team_names = []
-		message= "You have no teams."
-	else:
-		message = "You are a part of the following teams: " + ", ".join(team_names) + "."
+# 	if (team_ids is None) or (len(team_ids)==0):
+# 		team_ids = []
+# 		team_names = []
+# 		message= "You have no teams."
+# 	else:
+# 		message = "You are a part of the following teams: " + ", ".join(team_names) + "."
 
-	return jsonify({'team_names':team_names,'team_ids':team_ids,'message':message,}),200
+# 	return jsonify({'team_names':team_names,'team_ids':team_ids,'message':message,}),200
 
 
 
@@ -202,15 +202,15 @@ def api_request_team_codeword(team_id):
 
 
 
-
-@app.route('/api/get_foreign_teams/',methods=['POST'])
+# @app.route('/api/get_teams/',methods=['POST'])
+# @login_required
+# def api_get_teams():
+@app.route('/api/get_teams/',methods=['POST'])
 @login_required
-def api_get_foreign_teams():
+def api_get_teams():
 	allTeams = Team.query.all()
 
-	team_names = [team.name for team in current_user.teams]
 	team_ids = [team.id for team in current_user.teams]
-	team_emails = [team.email for team in current_user.teams]
 
 	foreign_team_names = [team.name for team in allTeams if team.id not in team_ids]
 	foreign_team_ids = [team.id for team in allTeams if team.id not in team_ids]
@@ -227,9 +227,13 @@ def api_get_foreign_teams():
 		message= "You are part of EVERY team in the GroupThere database!"
 	else:
 		message = "You can join the following teams: " + ", ".join(foreign_team_names) + "."
+	makePoolMessage = "You are a member of the following teams: " + ", ".join([team['name'] for team in team_objects]) + "."
 
-	# return jsonify({'foreign_team_names':foreign_team_names,'foreign_team_ids':foreign_team_ids,'team_names':team_names,'team_ids':team_ids,'message':message,'team_emails':team_emails,'my_id':current_user.id}),200
-	return jsonify({'teams':team_objects,'foreign_teams':foreign_team_objects,'my_id':current_user.id,'message':message}),200
+	selfDict={'id':current_user.id,'name':current_user.name,'email':current_user.email}
+	return jsonify({'teams':team_objects,'foreign_teams':foreign_team_objects,'self':selfDict,'message':message,'makePoolMessage':makePoolMessage}),200
+
+
+
 # @app.route('/', methods=['GET', 'POST'])
 # @login_required
 # def index():
@@ -245,7 +249,6 @@ def api_get_foreign_teams():
 # 				"Unable to get URL. Please make sure it's valid and try again."
 # 			)
 # 	return render_template('index.html', emailForm=emailForm,errors=errors, results=results)
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
 	# return app.send_static_file('index.html')

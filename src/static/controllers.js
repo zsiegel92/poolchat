@@ -28,9 +28,10 @@ angular.module('myApp').controller('loginController',
 
 }]);
 
+
 angular.module('myApp').controller('navController',
-  ['$scope', '$location', 'AuthService',
-  function ($scope, $location, AuthService) {
+  ['$scope', '$location', '$http','AuthService',
+  function ($scope, $location, $http,AuthService) {
 
     $scope.navClass = function (page) {
         var currentRoute = $location.path().substring(1) || 'index';
@@ -38,12 +39,16 @@ angular.module('myApp').controller('navController',
     };
 
     $scope.logout = function () {
-      // call logout from service
-      AuthService.logout()
-        .then(function () {
-          $location.path('/login');
-        });
+      $http.post('/api/logout/').then(function(response){
+        // $log.log(response);
+        $location.path('/login');
+      })
+      .catch(function(response){
+        // $log.log(response);
+        // $location.path('/login');
+      });
     };
+
     $scope.triggers = function() {
       $location.path('/triggers');
     };
@@ -201,8 +206,8 @@ angular.module('myApp').controller('makePoolController',
     // $scope.poolForm.ngDate = new Date();
 
     // Toggle selection for a given fruit by name
-    $scope.toggleSelection = function toggleSelection(teamName) {
-      var idx = $scope.teamSelection.indexOf(teamName);
+    $scope.toggleSelection = function toggleSelection(team) {
+      var idx = $scope.teamSelection.indexOf(team.name);
 
       // Is currently selected
       if (idx > -1) {
@@ -212,8 +217,8 @@ angular.module('myApp').controller('makePoolController',
 
       // Is newly selected
       else {
-        $scope.teamSelection.push(teamName);
-        $scope.teamSelection_ids.push($scope.team_ids[$scope.teams.indexOf(teamName)]);
+        $scope.teamSelection.push(team.name);
+        $scope.teamSelection_ids.push(team.id);
       }
     };
 
@@ -229,15 +234,25 @@ angular.module('myApp').controller('makePoolController',
         .then(function(response) {
           $log.log("Teams for user:");
           $log.log(response.data);
-          $scope.resultText=response.data.message;
-          $scope.teams=response.data.team_names;
-          $scope.team_ids = response.data.team_ids;
+          // $scope.resultText=response.data.message;
+          // $scope.teams=response.data.team_names;
+          // $scope.team_ids = response.data.team_ids;
 
-          $scope.teamSelection = $scope.teams.slice();
-          $scope.teamSelection_ids = $scope.team_ids.slice();
+          // Array containing teams as {name:,id:,email:}
+          $scope.teams=response.data.teams;
+          // object as {id:,email:}
+          $scope.self=response.data.self;
+          $scope.message = response.data.makePoolMessage;
+          $scope.resultText = response.data.makePoolMessage;
+
+
+          $scope.teamSelection = [];
+          $scope.teamSelection_ids=[];
           $scope.poolForm.selectedTeams = {};
           for (i=0; i< $scope.teams.length;i++){
             $scope.poolForm.selectedTeams[String(i)]=true;
+            $scope.teamSelection_ids[i]=$scope.teams[i].id;
+            $scope.teamSelection[i]=$scope.teams[i].name;
           }
         }).
         catch(function(response) {
@@ -283,7 +298,6 @@ angular.module('myApp').controller('makePoolController',
     $scope.initial.ngTime.setDate($scope.initial.ngDate.getDate());
     $scope.initial.ngTime.setMonth($scope.initial.ngDate.getMonth());
     $scope.initial.ngTime.setFullYear($scope.initial.ngDate.getFullYear());
-
     var dateTime=$filter('date')($scope.initial.ngTime,'MM-dd-yyyy HH:mm');
 
 
@@ -316,10 +330,14 @@ angular.module('myApp').controller('makePoolController',
               {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
 
       .then(function(response) {
+        var baseURL = $location.$$absUrl.replace($location.$$url, '');
+    // $scope.fullURL = $location.$$absUrl;
         $scope.disabled = false;
         $log.log("Registration response::");
         $log.log(response.data);
         $scope.resultText=response.data;
+        alert("You have created this event, but you are NOT an atendee until you register! You're on your way there now ("+ baseURL + '/viewPool/)');
+        $location.path('/viewPool');
 
       }).
       catch(function(response) {
@@ -590,12 +608,12 @@ angular.module('myApp').controller('joinTeamController',
 
       // fire the API request
       // returns: {'team_names':team_names,'team_ids':team_ids,'message':message,}
-      $http.post('/api/get_foreign_teams/')
+      $http.post('/api/get_teams/')
         .then(function(response) {
           $log.log("Foreign Teams:");
           $log.log(response.data);
           $scope.resultText=response.data.message;
-          $scope.my_id = response.data.my_id;
+          $scope.my_id = response.data.self.id;
           // $scope.foreignTeams=response.data.foreign_team_names;
           // $scope.foreignTeam_ids = response.data.foreign_team_ids;
           // $scope.teams = response.data.team_names;

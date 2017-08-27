@@ -132,6 +132,8 @@ angular.module('myApp').controller('makeTeamController',
             $log.log("Registration response:");
             $log.log(response.data);
             $scope.resultText=response.data;
+            alert("You have created a team called '" + String($scope.teamForm.ngName) + "' and codeword '" + String($scope.teamForm.ngPassword) + "'. Ready to make your first event?");
+            $location.path('/makePool');
           }).
           catch(function(response) {
             $scope.disabled = false;
@@ -585,10 +587,13 @@ angular.module('myApp').controller('joinPoolController',['$scope', '$location', 
               {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
 
       .then(function(response) {
+        var baseURL = $location.$$absUrl.replace($location.$$url, '');
         $scope.disabled = false;
         $log.log("Registration response:");
         $log.log(response.data);
         $scope.resultText=response.data;
+        alert("Make sure you're ready for your trip on " + $scope.pool.date + " at " + $scope.pool.time + "! Visit " + baseURL + "/viewPool to see the events you're part of!");
+        $location.path('/viewPool');
 
       }).
       catch(function(response) {

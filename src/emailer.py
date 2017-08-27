@@ -97,9 +97,9 @@ class Emailer:
 		msg.attach(part2)
 
 		if self.queue is None:
-			self.send_from_server(msg['From'],msg['To'],msg.as_string())
+			self.send_from_server(msg['From'],self.gmail_password,msg['To'],msg.as_string())
 		else:
-			self.queue.enqueue_call(func=self.send_from_server,args=(msg['From'],msg['To'],msg.as_string(),),result_ttl=5000)
+			self.queue.enqueue_call(func=self.send_from_server,args=(msg['From'],self.gmail_password,msg['To'],msg.as_string(),),result_ttl=5000)
 
 
 

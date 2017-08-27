@@ -3,6 +3,9 @@ angular.module('myApp').controller('loginController',
   ['$scope', '$location', 'AuthService',
   function ($scope, $location, AuthService) {
 
+    $scope.goto_register = function (){
+      $location.path('/register');
+    };
     $scope.login = function () {
 
       // initial values
@@ -395,6 +398,8 @@ angular.module('myApp').controller('viewPoolController',
   ['$scope', '$location', 'AuthService','$route', '$routeParams','$log','$http','$window',
   function ($scope, $location, AuthService,$route,$routeParams,$log,$http,$window) {
 
+    $scope.past_addresses=[];
+
     $scope.getPoolInfoForUser = function() {
       $log.log("Getting pool info");
       $http.post('api/get_pool_info_for_user')
@@ -403,7 +408,7 @@ angular.module('myApp').controller('viewPoolController',
           $scope.joined_pools = response.data.joined_pools;
           $scope.eligible_pools = response.data.eligible_pools;
           $scope.carpooler = response.data.carpooler;
-
+          $scope.rawResponse= response.data;
           if ($scope.eligible_pools.length >0){
             $log.log("There is an eligible pool!");
             $scope.joinForm.ngPool=0;
@@ -411,6 +416,30 @@ angular.module('myApp').controller('viewPoolController',
           else{
             $log.log("There are no eligible pools!");
           }
+          var ad = '';
+          $scope.max_num_seats =0;
+          $scope.ever_must_drive=0;
+          $scope.ever_organizer=0;
+          for (var i = 0; i < $scope.joined_pools.length; i++) {
+            var pool = $scope.joined_pools[i];
+            ad = pool.trip.address;
+            if (ad){
+              if ($scope.past_addresses.indexOf(ad) == -1 && ad !=''){
+                $scope.past_addresses.push(pool.trip.address);
+              }
+            }
+            if (pool.trip.num_seats && pool.trip.num_seats > $scope.max_num_seats){
+                $scope.max_num_seats = $scope.joined_pools[i].trip.num_seats;
+            }
+            if (!$scope.ever_organizer && pool.trip.on_time && pool.trip.on_time==1){
+              $scope.ever_organizer=1;
+            }
+           if (!$scope.ever_must_drive && pool.trip.must_drive && pool.trip.must_drive==1){
+              $scope.ever_must_drive=1;
+            }
+          }
+
+
           $log.log("Successfully queried for teams, joined_pools, and eligible_pools!");
           $log.log(response.data);
        })
@@ -427,7 +456,7 @@ angular.module('myApp').controller('viewPoolController',
     var cp = $scope.carpooler;
 
     var f= $window.encodeURIComponent;
-    var pth = '/joinPool/' + f(pool.id) +'/name/'+ f(pool.name) + '/address/' + f(pool.address) + '/date/' + f(pool.date) + '/time/' + f(pool.time) + '/dateTime/' + f(pool.dateTime) + '/email/' + f(pool.email) + '/notice/' + f(pool.fireNotice) + "/latenessWindow/" + f(pool.latenessWindow) +"/carpooler/cpname/" + f(cp.name) + '/cpfirst/' + f(cp.first) + '/cplast/' + f(cp.last) + '/cpemail/' + f(cp.email);
+    var pth = '/joinPool/' + f(pool.id) +'/name/'+ f(pool.name) + '/address/' + f(pool.address) + '/date/' + f(pool.date) + '/time/' + f(pool.time) + '/dateTime/' + f(pool.dateTime) + '/email/' + f(pool.email) + '/notice/' + f(pool.fireNotice) + "/latenessWindow/" + f(pool.latenessWindow) +"/carpooler/cpname/" + f(cp.name) + '/cpfirst/' + f(cp.first) + '/cplast/' + f(cp.last) + '/cpemail/' + f(cp.email) + '/past_addresses/' + f(JSON.stringify($scope.past_addresses)) + '/max_seats/' + f($scope.max_num_seats) + '/ever_must_drive/' + f($scope.ever_must_drive) + '/ever_organizer/' + f($scope.ever_organizer);
     $log.log(pth);
     // $log.log($window.encodeURIComponent(pth));
     // $location.path($window.encodeURIComponent(pth));
@@ -443,12 +472,42 @@ angular.module('myApp').controller('joinPoolController',['$scope', '$location', 
     var r = $routeParams;
     $scope.address_confirmed=false;
     $scope.disabled=false;
+    $scope.using_preset=false;
+    // $scope.tripForm.ngOn_time = false;
+    // $scope.tripForm.ngMust_drive = false;
+    $scope.tripForm={};
 
     $scope.pool = {'id':f(r.id),'name':f(r.name),'address':f(r.address),'date':f(r.date),'time':f(r.time),'dateTime':f(r.dateTime),'email':f(r.email),'notice':f(r.notice),'latenessWindow':f(r.latenessWindow)};
     $scope.carpooler = {'name':f(r.cpname),'first':f(r.cpfirst),'last':f(r.cplast),'email':f(r.cpemail)};
+    $scope.past_addresses=JSON.parse(f(r.past_addresses));
+    $scope.max_seats = f(r.max_seats);
+    $scope.ever_must_drive = f(r.ever_must_drive);
+    $scope.ever_organizer = f(r.ever_organizer);
+
+    $scope.setDefaults = function(){
+      $scope.tripForm.ngOn_time = String(($scope.ever_organizer==1));
+      $scope.tripForm.ngMust_drive = String(($scope.ever_must_drive==1));
+    };
+
+
+
     // $scope.zoneOffset = $scope.pool.dateTime.getTimezoneOffset();
     // var pool_dateTime = new Date(Date.parse($scope.pool.dateTime));
     // $scope.zoneOffset = pool_dateTime.getTimezoneOffset();
+    $scope.unconfirm = function(){
+      $log.log("unconfirm-ing");
+      $scope.address_confirmed=false;
+    };
+    $scope.un_preset = function(){
+      $log.log("un preset-ing");
+      $scope.address_confirmed=false;
+      $scope.using_preset = false;
+    };
+    $scope.use_preset = function(address){
+      $scope.using_preset=true;
+      $scope.tripForm.ngAddress=address;
+      $scope.address_confirmed=true;
+    };
 
     $scope.preTime = function(baseTimeString,preWindow){
       let dt = new Date(Date.parse(baseTimeString));

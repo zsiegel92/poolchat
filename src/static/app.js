@@ -76,6 +76,11 @@ myApp.filter('relativedate', ['$filter', function ($filter) {
   };
 }]);
 
+myApp.filter('yesNo', function() {
+    return function(input) {
+        return input ? 'yes' : 'no';
+    }
+});
 
 myApp.filter('relativeFromTime', ['$filter', function ($filter) {
   return function (rel,time, format) {
@@ -98,7 +103,7 @@ myApp.config(function ($routeProvider,$httpProvider) {
   $httpProvider.defaults.withCredentials = true;
   $routeProvider
     .when('/', {
-      access: {restricted: true},
+      access: {restricted: false},
       controller: 'navController',
       templateUrl: 'static/partials/home.html'
     })
@@ -154,7 +159,7 @@ myApp.config(function ($routeProvider,$httpProvider) {
       controller: 'approveTeamJoinController',
       access: {restricted: true}
     })
-    .when('/joinPool/:id/name/:name/address/:address/date/:date/time/:time/dateTime/:dateTime/email/:email/notice/:notice/latenessWindow/:latenessWindow/carpooler/cpname/:cpname/cpfirst/:cpfirst/cplast/:cplast/cpemail/:cpemail', {
+    .when('/joinPool/:id/name/:name/address/:address/date/:date/time/:time/dateTime/:dateTime/email/:email/notice/:notice/latenessWindow/:latenessWindow/carpooler/cpname/:cpname/cpfirst/:cpfirst/cplast/:cplast/cpemail/:cpemail/past_addresses/:past_addresses/max_seats/:max_seats/ever_must_drive/:ever_must_drive/ever_organizer/:ever_organizer', {
       templateUrl: 'static/partials/joinPool.html',
       controller: 'joinPoolController',
       access: {restricted: true}

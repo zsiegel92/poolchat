@@ -41,6 +41,8 @@
           <span class="error" ng-show="poolForm.email.$error.email">Valid Email Required!</span>
           <br>
           <span class="error" ng-show="poolForm.email.$error.pattern">Email should match &ltemail &gt@&ltdomain&gt.&ltext&gt</span>
+
+          <!-- EMAIL AUTOFILLERS -->
           <span ng-repeat="team in teams"><button ng-click="poolForm.ngEmail=team.email;">Set to {{team.name}}'s email: {{team.email}}</button><br></span>
           <button ng-click="poolForm.ngEmail=self.email;">Set to your email: {{self.email}}</button>
         </div>

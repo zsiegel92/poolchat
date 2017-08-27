@@ -14,8 +14,8 @@
         <input type="password" class="form-control" placeholder="password" ng-model='loginForm.password' name="user_password" required>
         </div>
       <div class="form-group">
-        <label>Remember Me</label>
-        <input type="checkbox" class="form-control" name="user_remember_me" ng-model='loginForm.remember_me' ng-true-value="true" ng-false-value="false">
+        <label>Keep me logged in on this computer (until I log out)</label>
+        <input type="checkbox" class="form-control" name="user_remember_me" ng-model='loginForm.remember_me' ng-true-value="true" ng-false-value="false" ng-init="loginForm.remember_me=true;">
       </div>
       <div>
         <button type="submit"  class="btn btn-default" ng-disabled="loginForm.$invalid || disabled">Login</button>
@@ -23,7 +23,6 @@
 
   </form>
 
-  <form method='get' target='_self' action='/#!/register/'>
-    <button>REGISTER</button>
-  </form>
+
+<button ng-click="goto_register()">Register New User</button>
 </div>

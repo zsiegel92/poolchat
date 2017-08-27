@@ -43,17 +43,22 @@
 
 <!-- TOP-Navigation -->
   <div  ng-controller="navController">
-      <li ng-show='!logged_in' ng-class="navClass('login')"><a href='#!/login'>login</a></li>
-      <ul ng-show='logged_in' class="nav nav-list">
-          <li> <a ng-click='logout()' class="btn btn-default">Logout</a> </li>
-          <!-- <li ng-class="navClass('triggers')"><a href='#!/triggers'>Triggers</a></li> -->
-          <li ng-class="navClass('viewPool')"><a href='#!/viewPool'>Events - Yours and Your Teams'</a></li>
-          <li ng-class="navClass('joinTeam')"><a href='#!/joinTeam'>Join Team</a></li>
-          <li ng-class="navClass('makePool')"><a href='#!/makePool'>Create New Event</a></li>
-          <li ng-class="navClass('makeTeam')"><a href='#!/makeTeam'>Create Team</a></li>
-          <!-- <li ng-class="navClass('logout')"><a href='#!/logout'>Log Out</a></li> -->
+    <ul ng-show="!logged_in">
+      <li ng-class="navClass('login')"><a href='#!/login'>login</a></li>
+      <li ng-class="navClass('register')"><a href='#!/register'>Register New User</a></li>
+      <li ng-class="navClass('')"><a href='#!/'>Welcome</a></li>
+    </ul>
+    <ul ng-show='logged_in' class="nav nav-list">
+        <li> <a ng-click='logout()' class="btn btn-default">Logout</a> </li>
+        <li ng-class="navClass('')"><a href='#!/'>About GroupThere</a></li>
+        <!-- <li ng-class="navClass('triggers')"><a href='#!/triggers'>Triggers</a></li> -->
+        <li ng-class="navClass('viewPool')"><a href='#!/viewPool'>Events - Yours and Your Teams'</a></li>
+        <li ng-class="navClass('joinTeam')"><a href='#!/joinTeam'>Join Team</a></li>
+        <li ng-class="navClass('makePool')"><a href='#!/makePool'>Create New Event</a></li>
+        <li ng-class="navClass('makeTeam')"><a href='#!/makeTeam'>Create Team</a></li>
+        <!-- <li ng-class="navClass('logout')"><a href='#!/logout'>Log Out</a></li> -->
 
-      </ul>
+    </ul>
 
 
 <!--       <a ng-click='logout()' class="btn btn-default">Logout</a>
@@ -74,7 +79,18 @@
 
       </div>
     </div>
-
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
 
 
 

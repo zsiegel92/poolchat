@@ -1,4 +1,10 @@
-var myApp = angular.module('myApp', ['ngRoute'])
+'use strict'
+
+
+var myApp = angular.module('myApp', ['ngRoute','myApp.makePool','myApp.joinPool','myApp.joinTeam','myApp.login','myApp.viewPool','myApp.makeTeam','myApp.register','myApp.approveTeamJoin','myApp.logout','myApp.nav','myApp.triggers'])
+
+
+
 .directive('convertToNumber', function() {
   return {
     require: 'ngModel',
@@ -13,7 +19,18 @@ var myApp = angular.module('myApp', ['ngRoute'])
   };
 });
 
-
+myApp.config(function ($routeProvider,$httpProvider) {
+  $httpProvider.defaults.withCredentials = true;
+  $routeProvider
+    // .when('/', {
+    //   access: {restricted: false},
+    //   controller: 'navController',
+    //   templateUrl: 'static/partials/home.html'
+    // })
+    .otherwise({
+      redirectTo: '/'
+    });
+});
 
 myApp.filter('relativedate', ['$filter', function ($filter) {
   return function (rel, format) {
@@ -62,75 +79,7 @@ myApp.filter('relativeFromDate', ['$filter', function ($filter) {
   };
 }]);
 
-myApp.config(function ($routeProvider,$httpProvider) {
-  $httpProvider.defaults.withCredentials = true;
-  $routeProvider
-    .when('/', {
-      access: {restricted: false},
-      controller: 'navController',
-      templateUrl: 'static/partials/home.html'
-    })
-    .when('/login', {
-      templateUrl: 'static/partials/login.html',
-      controller: 'loginController',
-      access: {restricted: false}
-    })
-    .when('/logout', {
-      controller: 'logoutController',
-      access: {restricted: true}
-    })
-    .when('/register', {
-      templateUrl: 'static/partials/register.html',
-      controller: 'registerController',
-      access: {restricted: false}
-    })
-    .when('/one', {
-      template: '<h1>This is page one!</h1>',
-      access: {restricted: true}
-    })
-    .when('/two', {
-      template: '<h1>This is page two!</h1>',
-      access: {restricted: false}
-    })
-    .when('/triggers', {
-      templateUrl: 'static/partials/triggers.html',
-      controller: 'triggerController',
-      access: {restricted: true}
-    })
-    .when('/viewPool', {
-      templateUrl: 'static/partials/viewPool.html',
-      controller: 'viewPoolController',
-      access: {restricted: true}
-    })
-    .when('/makePool', {
-      templateUrl: 'static/partials/makePool.html',
-      controller: 'makePoolController',
-      access: {restricted: true}
-    })
-    .when('/makeTeam', {
-      templateUrl: 'static/partials/makeTeam.html',
-      controller: 'makeTeamController',
-      access: {restricted: true}
-    })
-    .when('/joinTeam', {
-      templateUrl: 'static/partials/join_team.html',
-      controller: 'joinTeamController',
-      access: {restricted: true}
-    })
-    .when('/approve_member/:new_user_id/:team_id', {
-      templateUrl: 'static/partials/approveTeamJoin.html',
-      controller: 'approveTeamJoinController',
-      access: {restricted: true}
-    })
-    .when('/joinPool/:id/name/:name/address/:address/date/:date/time/:time/dateTime/:dateTime/email/:email/notice/:notice/latenessWindow/:latenessWindow/carpooler/cpname/:cpname/cpfirst/:cpfirst/cplast/:cplast/cpemail/:cpemail/past_addresses/:past_addresses/max_seats/:max_seats/ever_must_drive/:ever_must_drive/ever_organizer/:ever_organizer', {
-      templateUrl: 'static/partials/joinPool.html',
-      controller: 'joinPoolController',
-      access: {restricted: true}
-    })
-    .otherwise({
-      redirectTo: '/'
-    });
-});
+
 
 myApp.run(function ($rootScope, $location, $route, AuthService) {
   $rootScope.$on('$routeChangeStart',

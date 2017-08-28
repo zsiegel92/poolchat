@@ -1,0 +1,33 @@
+<!-- access poolId with $routeParams.poolId
+Make sure $scope, $route, $routeParams are injected in controller -->
+<div class="container">
+    <div class="row">
+        <div class='col' style="float:left; width:50%;">
+          <!-- button that calls backto_view -->
+          <!-- <a ng-click='backto_view()' class="btn btn-default">Join a different event...</a> -->
+
+          <div ng-show="error">
+            <h4>ERROR:</h4>
+            {{error}}
+          </div>
+
+          <div ng-show="message">
+            <h3>A message from GroupThere </h3>
+            <p>
+              {{message}}
+            </p>
+          </div>
+
+        </div><!-- Column -->
+        <div class='col' style="float:right; width:50%">
+          <div ng-show="email">
+            <b>The following email was sent by GroupThere:</b>
+            <br>
+            FROM: {{email.from}} <br>
+            TO: {{email.to}} <br>
+            SUBJECT: {{email.subject}} <br>
+            BODY: {{email.body}}
+          </div>
+        </div> <!-- COLUMN -->
+    </div>
+</div>

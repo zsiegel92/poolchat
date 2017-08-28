@@ -174,8 +174,7 @@ def api_approve_team(team_id,user_id):
 	return_message = "User {user_name} added to team {team_name}. They have been notified via an email to {user_email}, which also lets them know that the team's codeword is {codeword}.".format(user_name=carpooler.name,team_name=team.name,user_email=carpooler.email,codeword=team.password)
 	return jsonify({'message':return_message,'email':{'from':emailer.get_email(),'to':carpooler.email,'body':message,'subject':subject}}),200
 
-#TODO: Frontend route '?#!/approve_member/{new_user_id}/{team_id}' should include a link to
-#'/api/approve_team/teamId/{team_id}/userId/{new_user_id}'
+
 @app.route('/api/request_team_codeword/teamId/<int:team_id>',methods=['POST'])
 @login_required
 def api_request_team_codeword(team_id):
@@ -190,7 +189,7 @@ def api_request_team_codeword(team_id):
 		subject = "GroupThere user " + str(current_user.name) + " wants to join your team " + str(team.name) + "!"
 
 		url_base = app.config['URL_BASE']#ends in /
-		link = url_base + '?#!/approve_member/{new_user_id}/{team_id}'.format(new_user_id=current_user.id,team_id=team.id)
+		link = url_base + '?#!/approveTeamJoin/{new_user_id}/{team_id}'.format(new_user_id=current_user.id,team_id=team.id)
 		text_message = 'Hello, organizer of {team_name},\n GroupThere user {user_name} wants to join your team {team_name}. To approve, please visit this link: {link}'.format(team_name=team.name,user_name=current_user.name,link=link)
 		html_body = "Hello, organizer of {team_name},<br> GroupThere user {user_name} wants to join your team {team_name}.<br>To approve, please <a href='{link}'>click here</a>. <br>To contact {user_name}, you can email them at {user_email}, and feel free to give them the codeword {codeword}, which will allow them to add themself.".format(team_name=team.name,user_name=current_user.name,link=link,user_email = current_user.email,codeword = team.password)
 
@@ -250,8 +249,9 @@ def api_get_teams():
 # 	return render_template('index.html', emailForm=emailForm,errors=errors, results=results)
 @app.route('/', methods=['GET', 'POST'])
 def index():
-	# return app.send_static_file('index.html')
-	return render_template('index.html')
+	print("Sending index.html")
+	return app.send_static_file('index.html')
+	# return render_template('index.html')
 
 @app.route('/form_views/',methods=['POST'])
 @login_required

@@ -64,10 +64,11 @@ angular.module('myApp.joinPool', ['ngRoute'])
     };
 
     $scope.set_all_prefill_false = function() {
-      for (i = 0; i < $scope.prefill_disabled.length; i++){
+      for (var i = 0; i < $scope.prefill_disabled.length; i++){
         $scope.prefill_disabled[i]=false;
       }
     };
+
 
     $scope.preTime = function(baseTimeString,preWindow){
       let dt = new Date(Date.parse(baseTimeString));

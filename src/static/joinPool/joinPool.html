@@ -1,16 +1,9 @@
-<!-- access poolId with $routeParams.poolId
-Make sure $scope, $route, $routeParams are injected in controller -->
+
 <div class="container">
         <div class='col' style="float:left; width:43%;">
         <!-- button that calls backto_view -->
         <a ng-click='backto_view()'>Join a different event...</a>
 
-    <!--
-        address = db.Column(db.String())
-        num_seats = db.Column(db.Integer)
-        preWindow = db.Column(db.Integer)
-        on_time = db.Column(db.Integer)
-        must_drive = db.Column(db.Integer) -->
         <h2>Event Information</h2>
 
         <form class="form"  name="tripForm" ng-submit="joinTrip()">
@@ -35,11 +28,11 @@ Make sure $scope, $route, $routeParams are injected in controller -->
     <!-- PREWINDOW -->
             <div class="form-group">
                 <label> When will you be available to head out? </label>
-                <select ng-model="tripForm.ngPreWindow" name="preWindow" ng-init="tripForm.ngPreWindow=30" convert-to-number>
+                <br>
+                I can leave <select style="max-width:calc(2em + 15px);overflow:hidden;"ng-model="tripForm.ngPreWindow" name="preWindow" ng-init="tripForm.ngPreWindow=30; preMarker=tripForm.ngPreWindow;" ng-change="preMarker=tripForm.ngPreWindow;" convert-to-number>
      <!--            <option value="10">I can leave at {{preTime(pool.dateTime,10) | date:'short'}} or just as string {{preTime(pool.dateTime,10)}} </option> -->
-                    <option ng-repeat='pre in preTimes' value='{{pre}}'>I can leave {{pre}} minutes ahead, at {{preTime(pool.dateTime,pre) }}</option>
-
-                </select>
+                    <option ng-repeat='pre in preTimes' value='{{pre}}'>{{pre}} minutes ahead, at {{preTime(pool.dateTime,pre) | date : 'hh:mm' : 'UTC' }}</option>
+                </select> minutes ahead, at {{preTime(pool.dateTime,preMarker)| date : 'hh:mm' : 'UTC' }}
             </div>
 
 
@@ -113,7 +106,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                                 <li ng-show="tripForm.ngAddress"> I'll be coming from {{tripForm.ngAddress}}</li>
                                 <li ng-show="tripForm.ngNumSeats >0"> My vehicle has {{tripForm.ngNumSeats}} {{(tripForm.ngNumSeats >1) ? 'seats' : 'seat'}} (including driver).</li>
                                 <li ng-show="tripForm.ngNumSeats ==0">I will not be driving!</li>
-                                <li ng-show="tripForm.ngPreWindow"> I can be ready to go at {{preTime(pool_dateTime,tripForm.ngPreWindow)}} ({{tripForm.ngPreWindow}} minutes before the event). </li>
+                                <li ng-show="tripForm.ngPreWindow"> I can be ready to go at {{preTime(pool_dateTime,tripForm.ngPreWindow) | date : 'hh:mm' : 'UTC' }} ({{tripForm.ngPreWindow}} minutes before the event). </li>
                                 <li ng-show="tripForm.ngOn_time"> I have to arrive on time (I am an organizer).</li>
                                 <li ng-show="!tripForm.ngOn_time"> I can arrive up to {{pool.latenessWindow}} minutes late (I am not an organizer).</li>
                                 <li ng-show="tripForm.ngMust_drive && tripForm.ngNumSeats >0">I have to drive. I cannot catch a ride.</li>
@@ -135,12 +128,17 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                             <ul>
                                 <li> Event Name: {{pool.name}} </li>
                                 <li> Event Address: <span ng-if="!pool_info"> {{pool.address}} </span><span ng-if="pool_info"> {{pool_info.formatted_address}} </span></li>
-                                <li> Event Date: {{pool.date}} </li>
-                                <li> Event Time: {{pool.time}} </li>
-                                <li> Event DateTime: {{pool.dateTime | date:'medium'}} </li>
+<!--                                 <li> Event Date: {{pool.date}} </li>
+                                <li> Event Time: {{pool.time}} </li> -->
+                                <li> Event Date and Time: {{pool.dateTime | date:'medium'}}
+                                  <ul>
+                                    <li> Non-Organizers can arrive up to {{pool.latenessWindow}} minutes after {{pool.time}}</li>
+                                    <li> Carpooling instructions will be sent out {{pool.notice}} hours before the event</li>
+                                  </ul>
+                                </li>
                                 <li> Event Contact Email: {{pool.email}} </li>
-                                <li> Non-Organizers can arrive up to {{pool.latenessWindow}} minutes after {{pool.time}}</li>
-                                <li> Notice given for carpooling instructions: {{pool.notice}} hours</li>
+
+
                             </ul>
                         </div><!-- COLUMN -->
 

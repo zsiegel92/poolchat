@@ -43,8 +43,16 @@
 
 <!-- CONTACT EMAIL -->
         <div class="form-group">
-          <label>Event Email</label>
-          <input type="email" class="form-control" name="email" placeholder="email@domain.ext" ng-pattern="/^[_a-z0-9]+(\.[_a-z0-9]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/"  ng-model="poolForm.ngEmail" required>
+            <label for="eventEmail">Event Email</label>
+            <br>
+            <input type="email" style="width:40%; display:inline;" class="form-control" name="email" id="eventEmail" placeholder="email@domain.ext" ng-pattern="/^[_a-z0-9]+(\.[_a-z0-9]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/"  ng-model="poolForm.ngEmail" required> <
+            <!-- EMAIL AUTOFILLERS -->
+            <div class="btn-group-vertical btn-group-xs inline">
+              <button type="button" class='btn btn-default' ng-click="poolForm.ngEmail=self.email;">your email</button>
+
+              <button class='btn btn-default' type="button" ng-click="poolForm.ngEmail=team.email;" ng-repeat="team in teams" ng-show="poolForm.selectedTeams[$index]">{{team.name| limitTo : 12 }}{{team.name.length>12 ? '..' : ''}}'s email</button>
+              <!-- {{team.name| limitTo : 7 }}{{team.name.length>7 ? '..' : ''}}'s email: {{team.email | limitTo : 7}}{{team.email.length>7 ? '..' : ''}} -->
+            </div>
 
           <span class="error" ng-show="poolForm.email.$error.required">
           Required!</span>
@@ -52,14 +60,6 @@
           <br>
           <span class="error" ng-show="poolForm.email.$error.pattern">Email should match &ltemail &gt@&ltdomain&gt.&ltext&gt</span>
 
-          <!-- EMAIL AUTOFILLERS -->
-<!--           <br>
-          teams: {{teams}}<br>
-          teamSelection: {{teamSelection}}<br>
-          poolForm.selectedTeams: {{poolForm.selectedTeams}}<br> -->
-
-          <button type="button" class='btn btn-default' ng-click="poolForm.ngEmail=self.email;">Set to your email: {{self.email}}</button>
-          <span ng-repeat="team in teams"><span ng-show="poolForm.selectedTeams[$index]"><button type="button" class='btn btn-default' ng-click="poolForm.ngEmail=team.email;">Set to {{team.name}}'s email: {{team.email}}</button><br></span></span>
         </div>
 
 <!-- ADDRESS -->

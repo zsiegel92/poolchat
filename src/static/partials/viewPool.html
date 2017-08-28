@@ -1,3 +1,63 @@
+
+            <!-- EVENT LIST -->
+<!--             <div ng-if="joined_pools" class="container">
+                <div class="row">
+                    <div class="[ col-xs-12 col-sm-offset-2 col-sm-8 ]">
+                        <ul class="event-list">
+                            <li ng-repeat="pool in joined_pools">
+                                <time datetime="{{asDateTime(pool.dateTime)}}">
+                                    <span class="day">{{asDateTime(pool.dateTime) | date: 'dd'}}</span>
+                                    <span class="month">{{asDateTime(pool.dateTime) | date: 'MMM'}}</span>
+                                    <span class="year">{{asDateTime(pool.dateTime) | date: 'yyyy'}}</span>
+                                    <span class="time">{{asDateTime(pool.dateTime) | date: 'hh:mma'}}</span>
+                                </time>
+                                <img alt="{{pool.name}}" src="/static/img/beautiful_map/beautiful_map_200.jpg" />
+                                <div class="info">
+                                    <h2 class="title">{{pool.name}}</h2>
+                                    <p class="desc">~ with <span ng-repeat="team in pool.teams">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{team.name}}</span> ~
+
+                                        <ul>
+                                            <li> Event Address: {{pool.address}} </li>
+                                            <li> Event Contact Email: {{pool.email}} </li>
+                                            <li> Non-Organizers can arrive up to {{pool.latenessWindow}} minutes after {{pool.time}}</li>
+                                            <li> Carpooling instructions will be sent out {{pool.fireNotice}} hours before {{pool.time}} on {{pool.date}}</li>
+                                            <li><b>Your Trip:</b>
+                                                <ul>
+                                                    <li>Your origin: {{pool.trip.address}}</li>
+                                                    <li>Maximum available time for the trip: {{pool.trip.preWindow}} minutes</li>
+                                                    <li>Number of seats in your vehicle: {{pool.trip.num_seats}} </li>
+                                                    <li>Have to drive: {{ pool.trip.must_drive | yesNo }} </li>
+                                                    <li>Have to arrive exactly on time: {{ pool.trip.on_time | yesNo }}</li>
+                                                </ul>
+                                            </li>
+                                        </ul>
+                                    </p>
+                                </div>
+                                <div class="social">
+                                    <ul>
+                                        <li class="facebook" style="width:33%;"><a href="#facebook"><span class="fa fa-facebook"></span></a></li>
+                                        <li class="twitter" style="width:34%;"><a href="#twitter"><span class="fa fa-twitter"></span></a></li>
+                                        <li class="google-plus" style="width:33%;"><a href="#google-plus"><span class="fa fa-google-plus"></span></a></li>
+                                    </ul>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div> -->
+            <!-- EVENT LIST -->
+
+<!--     <ul>
+        <li ng-repeat="pool in joined_pools">
+            <time datetime="{{asDateTime(pool.dateTime)}}">
+                <span class="day">{{asDateTime(pool.dateTime) | date: 'dd'}}</span>
+                <span class="month">{{asDateTime(pool.dateTime) | date: 'MMM'}}</span>
+                <span class="year">{{asDateTime(pool.dateTime) | date: 'yyyy'}}</span>
+                <span class="time">{{asDateTime(pool.dateTime) | date: 'hh:mma'}}</span>
+            </time>
+        </li>
+    </ul> -->
+
 <!-- access poolId with $routeParams.poolId
 Make sure $scope, $route, $routeParams are injected in controller -->
 <div class="container">
@@ -39,7 +99,6 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                 </li>
             </ol>
 
-
         </div><!-- Column -->
 
 
@@ -55,22 +114,23 @@ Make sure $scope, $route, $routeParams are injected in controller -->
 
 
             <form ng-show="eligible_pools" role='form' name="joinForm" ng-model="joinForm" ng-submit="goto_join()">
-              <select ng-model="joinForm.ngPool" name="pool">
-                  <option ng-repeat="pool in eligible_pools"  value="{{$index}}">'{{pool.name}}' - with {{pool.team_names | joinBy:', '}}</option>
+              <select ng-model="joinForm.ngPool" name="pool" required>
+                  <option ng-repeat="pool in eligible_pools"  ng-model="selectedPool" ng-value="{{$index}}">'{{pool.name}}' - with {{pool.team_names | joinBy:', '}}</option>
                   <!-- Try: {{team.name.join(', ')}} -->
               </select>
+              <br>
+              <button type="submit" ng-click="" ng-init="" class="btn btn-primary" ng-disabled="joinForm.$invalid || disabled || (eligible_pools.length < 1)">Join Pool!</button>
+            </form>
 
-              <button type="submit" ng-click="" ng-init="" class="btn btn-default" ng-disabled="joinForm.$invalid || disabled || (eligible_pools.length < 1)">Join Pool!</button>
-
-              <div ng-show="eligible_pools.length<1">
+            <div ng-show="eligible_pools.length<1">
                 <br>
                 There are no available events!
                 <br>
                 <a href='#!/makePool'>Make a new event ;) </a>
-              </div>
-              <span ng-show="eligible_pools.length>0"> <br> <a href='#!/makePool'>Make a new event</a></span>
-              <span> <br> <b><a href='#!/joinTeam'>Join a team (and access their events)</a></b> </span>
-            </form>
+            </div>
+            <span ng-show="eligible_pools.length>0"> <br> <a href='#!/makePool'>Make a new event</a></span>
+            <span> <br> <b><a href='#!/joinTeam'>Join a team (and access their events)</a></b> </span>
+
 
             <div ng-show="!joinForm.$dirty && eligible_pools.length>1">
                 <h3> Please select an event!</h3>

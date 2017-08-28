@@ -13,27 +13,23 @@ Make sure $scope, $route, $routeParams are injected in controller -->
         must_drive = db.Column(db.Integer) -->
         <h2>Event Information</h2>
 
-        <form class="form"  ng-model="tripForm" ng-submit="joinTrip()">
-
-
-
+        <form class="form"  name="tripForm" ng-submit="joinTrip()">
 
     <!-- ADDRESS -->
             <div class="form-group">
-              <label>I will be driving to the event from...</label>
+              <label>I will be driving to the event from...<span class="invalid" ng-show="tripForm.address.$error.required">*Required!</span></label>
               <input type="text" class="form-control" name="address" ng-model="tripForm.ngAddress" ng-change="!using_preset ? (confirmed ? unconfirm(): true) : un_preset();" required>
-              <!-- "if (!using_preset){ address_confirmed=false;} else{ using_preset=false;}" -->
             </div>
-            <span class="error" ng-show="tripForm.address.$error.required">
-              Required!</span>
+
             <div>
-                <div ng-repeat="address in past_addresses">
-                    Coming from <button class='btn' type="button" ng-disabled="prefill_disabled[$index] || disabled" ng-click="use_preset(address,$index);confirmAddress()">{{address}}</button>?
-                    <br>
-                </div>
+                Coming from <span class="btn-group-xs">
+                        <button class='btn btn-default' type="button" ng-disabled="prefill_disabled[$index] || disabled" ng-click="use_preset(address,$index);confirmAddress()" ng-repeat="address in past_addresses">{{address | limitTo : 16 }}...</button>
+                </span>?
                 <br>
-              <button class='btn' ng-click='confirmAddress()' type="button" ng-disabled="!tripForm.ngAddress || disabled || address_confirmed"><span ng-if="!address_confirmed">Confirm Address</span> <span ng-if="address_confirmed">Address Confirmed (edit if necessary)</span></button>
-              <span ng-show="!address_confirmed"> <b>You must confirm address before proceeding.</b></span>
+                <br>
+              <button class='btn btn-default' ng-click='confirmAddress()' type="button" ng-disabled="!tripForm.ngAddress || disabled || address_confirmed"><span ng-if="!address_confirmed" >Confirm Address</span> <span ng-if="address_confirmed">Address Confirmed (edit if necessary)</span></button>
+              <br>
+              <span ng-show="!address_confirmed" class="invalid"> <b>Confirm address or use preset ^</b></span>
             </div>
 
     <!-- PREWINDOW -->
@@ -64,23 +60,24 @@ Make sure $scope, $route, $routeParams are injected in controller -->
     <!-- MUST_DRIVE -->
             <div ng-show="tripForm.ngNumSeats>0" ng-init="tripForm.ngMust_drive=false; setDefaults()">
                <label>
-                <input type="radio" ng-model="tripForm.ngMust_drive" value=true>
+                <input type="radio" ng-model="tripForm.ngMust_drive" ng-value=true>
                 I HAVE TO drive! I cannot catch a ride.
               </label><br/>
               <label>
-                <input type="radio" ng-model="tripForm.ngMust_drive" value=false>
+                <input type="radio" ng-model="tripForm.ngMust_drive" ng-value=false>
                 I can drive OR catch a ride.
               </label><br/>
             </div>
         <!-- ON_TIME -->
+
             <h4>Do you have to arrive on time?</h4>
-            <div class="form-group" ng-init="tripForm.ngOn_time= false; setDefaults()">
+            <div class="form-group" ng-init="tripForm.ngOn_time= false;">
               <label>
-               <input type="radio" ng-model="tripForm.ngOn_time" value="true">
+               <input type="radio" ng-model="tripForm.ngOn_time" ng-value="true">
                 I HAVE TO arrive by {{pool.time}} because I am an organizer of the event.
               </label><br/>
               <label>
-               <input type="radio" ng-model="tripForm.ngOn_time" value="false">
+               <input type="radio" ng-model="tripForm.ngOn_time" ng-value="false">
                 I can arrive up to {{pool.latenessWindow}} after {{pool.time}}.
               </label><br/>
             </div>
@@ -90,10 +87,10 @@ Make sure $scope, $route, $routeParams are injected in controller -->
 
             <div>
             <!-- class="btn btn-default"  -->
-              <button class='btn' type="submit" ng-disabled="poolForm.$invalid || disabled || !address_confirmed">Register</button>
+              <button class='btn btn-primary' type="submit" ng-disabled="poolForm.$invalid || disabled || !address_confirmed">Register</button>
             </div>
 
-              <div ng-show="errorMessage">
+              <div class='invalid' ng-show="errorMessage">
               Errors: {{errorMessage}}
               </div>
         </form>
@@ -113,16 +110,17 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                             </div>
                             <h2>Your Trip:</h2>
                             <ul>
-                                <li ng-if="tripForm.ngAddress"> I'll be coming from {{tripForm.ngAddress}}</li>
-                                <li ng-if="tripForm.ngNumSeats >0"> My vehicle has {{tripForm.ngNumSeats}} {{(tripForm.ngNumSeats >1) ? 'seats' : 'seat'}} (including driver).</li>
-                                <li ng-if="tripForm.ngNumSeats ==0">I will not be driving!</li>
-                                <li ng-if="tripForm.ngPreWindow"> I can be ready to go at {{preTime(pool_dateTime,tripForm.ngPreWindow)}} ({{tripForm.ngPreWindow}} minutes before the event). </li>
-                                <li ng-if="tripForm.ngOn_time"> I have to arrive on time (I am an organizer).</li>
-                                <li ng-if="!tripForm.ngOn_time"> I can arrive up to {{pool.latenessWindow}} minutes late (I am not an organizer).</li>
-                                <li ng-if="tripForm.ngMust_drive && tripForm.ngNumSeats >0">I have to drive. I cannot catch a ride.</li>
-                                <li ng-if="!tripForm.ngMust_drive && tripForm.ngNumSeats >0">I can drive or catch a ride.</li>
+                                <li ng-show="tripForm.ngAddress"> I'll be coming from {{tripForm.ngAddress}}</li>
+                                <li ng-show="tripForm.ngNumSeats >0"> My vehicle has {{tripForm.ngNumSeats}} {{(tripForm.ngNumSeats >1) ? 'seats' : 'seat'}} (including driver).</li>
+                                <li ng-show="tripForm.ngNumSeats ==0">I will not be driving!</li>
+                                <li ng-show="tripForm.ngPreWindow"> I can be ready to go at {{preTime(pool_dateTime,tripForm.ngPreWindow)}} ({{tripForm.ngPreWindow}} minutes before the event). </li>
+                                <li ng-show="tripForm.ngOn_time"> I have to arrive on time (I am an organizer).</li>
+                                <li ng-show="!tripForm.ngOn_time"> I can arrive up to {{pool.latenessWindow}} minutes late (I am not an organizer).</li>
+                                <li ng-show="tripForm.ngMust_drive && tripForm.ngNumSeats >0">I have to drive. I cannot catch a ride.</li>
+                                <li ng-show="!tripForm.ngMust_drive && tripForm.ngNumSeats >0">I can drive or catch a ride.</li>
 
                             </ul>
+
 
 
                         </div><!-- COLUMN -->
@@ -145,7 +143,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                                 <li> Notice given for carpooling instructions: {{pool.notice}} hours</li>
                             </ul>
                         </div><!-- COLUMN -->
-                        <div class="after-box">Another box, after the floating boxes...</div>
+
                     </div>
 
         </div> <!-- COLUMN -->

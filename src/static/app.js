@@ -15,18 +15,6 @@ var myApp = angular.module('myApp', ['ngRoute'])
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 myApp.filter('relativedate', ['$filter', function ($filter) {
   return function (rel, format) {
     let date = new Date();
@@ -55,6 +43,7 @@ myApp.filter('relativeFromTime', ['$filter', function ($filter) {
     return $filter('date')(copy, format || 'hh:mma')
   };
 }]);
+
 
 myApp.filter('relativeFromMins', ['$filter', function ($filter) {
   return function (rel,time, format) {

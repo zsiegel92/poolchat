@@ -412,7 +412,7 @@ angular.module('myApp').controller('viewPoolController',
           $scope.rawResponse= response.data;
           if ($scope.eligible_pools.length >0){
             $log.log("There is an eligible pool!");
-            $scope.joinForm.ngPool=0;
+            // $scope.joinForm.ngPool=0; //Prevents form from being invalid due to 'required', but fails to actually select a pool on menu.
           }
           else{
             $log.log("There are no eligible pools!");
@@ -447,6 +447,11 @@ angular.module('myApp').controller('viewPoolController',
         .catch(function(response) {
           $log.log("Error in getPoolInfo calling api/get_pool_info API");
         });
+    };
+
+
+    $scope.asDateTime = function(dateStr) {
+      return new Date(Date.parse(dateStr));
     };
 
   $scope.getPoolInfoForUser();
@@ -488,10 +493,10 @@ angular.module('myApp').controller('joinPoolController',['$scope', '$location', 
     $scope.pool_dateTime = new Date(Date.parse($scope.pool.dateTime));
 
     $scope.setDefaults = function(){
-      $scope.tripForm.ngOn_time = String(($scope.ever_organizer==1));
-      $scope.tripForm.ngMust_drive = String(($scope.ever_must_drive==1));
+      $scope.tripForm.ngOn_time = ($scope.ever_organizer==1);
+      $scope.tripForm.ngMust_drive = ($scope.ever_must_drive==1);
     };
-
+    $scope.setDefaults();
 
 
     // $scope.zoneOffset = $scope.pool.dateTime.getTimezoneOffset();

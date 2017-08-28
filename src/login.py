@@ -8,7 +8,12 @@ login_manager = flask_login.LoginManager()
 
 @login_manager.user_loader
 def load_user(session_id):
-	# return Carpooler.query.filter_by(session_id=session_id).first()
+	# carpooler= db.session.query(Carpooler).filter(Carpooler.session_id==session_id).first()
+	# if carpooler is None:
+	# 	print("NOT LOGGED IN!")
+	# else:
+	# 	print("YOU ARE LOGGED IN!")
+	# return carpooler
 	return db.session.query(Carpooler).filter(Carpooler.session_id==session_id).first()
 
 login_manager.login_message = u"Please log in before proceeding."

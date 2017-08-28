@@ -22,7 +22,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                 Required!</span>
                 </div>
 
-              <button type="submit" ng-click="" ng-init="" class="btn btn-default" ng-disabled="joinForm.$invalid || disabled">Join Team</button>
+              <button type="submit" ng-click="" ng-init="" class="btn btn-primary" ng-disabled="joinForm.$invalid || disabled">Join Team</button>
 
             </form>
 
@@ -53,7 +53,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                 <ul>
                   <li ng-repeat="team in foreignTeams">{{team.name}}
                     <ul>
-                      <li>To request access to this team, <button ng-click="request_access(team.id)" ng-disabled="disabled">click here</button>.</li>
+                      <li>To request access to this team, <button class='btn btn-default btn-xs' ng-click="request_access(team.id)" ng-disabled="disabled">click here</button>.</li>
                       <li ng-if="access_request_feedback[team.id]"> {{access_request_feedback[team.id]}} </li>
                     </ul>
                   </li>

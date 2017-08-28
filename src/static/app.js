@@ -17,9 +17,8 @@ var myApp = angular.module('myApp', ['ngRoute','myApp.makePool','myApp.joinPool'
       });
     }
   };
-});
-
-myApp.config(function ($routeProvider,$httpProvider) {
+})
+.config(function ($routeProvider,$httpProvider) {
   $httpProvider.defaults.withCredentials = true;
   $routeProvider
     // .when('/', {

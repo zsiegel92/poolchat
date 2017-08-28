@@ -2,7 +2,7 @@
   <div class="row">
     <div class='col' style="float:left; width:50%;">
 
-      <h1>Register</h1>
+      <h1>Create Event</h1>
       <div ng-show="error" class="alert alert-danger">{{errorMessage}}</div>
       <form class="form" name="poolForm" ng-model="poolForm" ng-submit="register()">
 
@@ -156,7 +156,7 @@
 <!-- BUTTON -->
 <!-- BUTTON -->
         <div>
-          <button type="submit" class="btn btn-primary" ng-disabled="poolForm.$invalid || disabled || !address_confirmed || teamSelection.length ==0">Register</button>
+          <button type="submit" class="btn btn-primary" ng-disabled="poolForm.$invalid || disabled || !address_confirmed || teamSelection.length ==0">Create Event</button>
         </div>
 
 

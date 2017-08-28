@@ -97,13 +97,13 @@ angular.module('myApp.makePool', ['ngRoute'])
         .then(function(response) {
           $log.log("Teams for user:");
           $log.log(response.data);
-          // $scope.resultText=response.data.message;
-          // $scope.teams=response.data.team_names;
-          // $scope.team_ids = response.data.team_ids;
-
-          // Array containing teams as {name:,id:,email:}
+          $log.log("http request successful");
+          return response;
+        })
+        .then(function(response) {
+          $log.log("sending to DOM");
           $scope.teams=response.data.teams;
-          // object as {id:,email:}
+
           $scope.self=response.data.self;
           $scope.message = response.data.makePoolMessage;
           $scope.resultText = response.data.makePoolMessage;
@@ -111,14 +111,16 @@ angular.module('myApp.makePool', ['ngRoute'])
           $scope.teamSelection = [];
           $scope.teamSelection_ids=[];
           $scope.poolForm.selectedTeams = {};
-          for (i=0; i< $scope.teams.length;i++){
+          for (var i=0; i< $scope.teams.length;i++){
             $scope.poolForm.selectedTeams[String(i)]=true;
             $scope.teamSelection_ids[i]=$scope.teams[i].id;
             $scope.teamSelection[i]=$scope.teams[i].name;
           }
-        }).
-        catch(function(response) {
-          $log.log(response.data);
+        })
+        .catch(function(error) {
+          // Note: if exception thrown in second .then, response will be undefined.
+          $log.log("ERROR in /api/get_teams/ request")
+          $log.log(error);
           $scope.resultText="error obtaining teams.";
         });
     };

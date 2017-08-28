@@ -1,10 +1,9 @@
 <!-- access poolId with $routeParams.poolId
 Make sure $scope, $route, $routeParams are injected in controller -->
 <div class="container">
-    <div class="row">
-        <div class='col' style="float:left; width:50%;">
+        <div class='col' style="float:left; width:43%;">
         <!-- button that calls backto_view -->
-        <a ng-click='backto_view()' class="btn btn-default">Join a different event...</a>
+        <a ng-click='backto_view()'>Join a different event...</a>
 
     <!--
         address = db.Column(db.String())
@@ -29,21 +28,23 @@ Make sure $scope, $route, $routeParams are injected in controller -->
               Required!</span>
             <div>
                 <div ng-repeat="address in past_addresses">
-                    Use <button type="button" ng-click="use_preset(address)">{{address}}</button> :-)
+                    Coming from <button class='btn' type="button" ng-disabled="prefill_disabled[$index] || disabled" ng-click="use_preset(address,$index);confirmAddress()">{{address}}</button>?
                     <br>
                 </div>
                 <br>
-              <button ng-click='confirmAddress()' type="button" class="btn btn-default" ng-disabled="!tripForm.ngAddress || disabled || address_confirmed"><span ng-if="!address_confirmed">Confirm Address</span> <span ng-if="address_confirmed">Address Confirmed (edit if necessary)</span></button>
+              <button class='btn' ng-click='confirmAddress()' type="button" ng-disabled="!tripForm.ngAddress || disabled || address_confirmed"><span ng-if="!address_confirmed">Confirm Address</span> <span ng-if="address_confirmed">Address Confirmed (edit if necessary)</span></button>
               <span ng-show="!address_confirmed"> <b>You must confirm address before proceeding.</b></span>
             </div>
 
     <!-- PREWINDOW -->
-            <select ng-model="tripForm.ngPreWindow" name="preWindow" ng-init="tripForm.ngPreWindow=30" convert-to-number>
+            <div class="form-group">
+                <label> When will you be available to head out? </label>
+                <select ng-model="tripForm.ngPreWindow" name="preWindow" ng-init="tripForm.ngPreWindow=30" convert-to-number>
      <!--            <option value="10">I can leave at {{preTime(pool.dateTime,10) | date:'short'}} or just as string {{preTime(pool.dateTime,10)}} </option> -->
-                <option ng-repeat='pre in preTimes' value='{{pre}}'>I can leave {{pre}} minutes ahead, at {{preTime(pool.dateTime,pre) }}</option>
+                    <option ng-repeat='pre in preTimes' value='{{pre}}'>I can leave {{pre}} minutes ahead, at {{preTime(pool.dateTime,pre) }}</option>
 
-            </select>
-
+                </select>
+            </div>
 
 
     <!-- NUMBER SEATS -->
@@ -51,7 +52,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
               <label>Do you have a car? How many seats does it have?</label>
               <br>
               <select ng-model="tripForm.ngNumSeats" name="numSeats" ng-init="tripForm.ngNumSeats=max_seats ? max_seats : 0" convert-to-number>
-                <option value="0">I don't have a car</option>
+                <option value="0">I will not be driving</option>
                 <option value="1">I have a vehicle with 1 seat (only me)</option>
                 <option value="2">I have 2 seats</option>
                 <option value="3">I have 3 seats</option>
@@ -88,7 +89,8 @@ Make sure $scope, $route, $routeParams are injected in controller -->
 
 
             <div>
-              <button type="submit" class="btn btn-default" ng-disabled="poolForm.$invalid || disabled || !address_confirmed">Register</button>
+            <!-- class="btn btn-default"  -->
+              <button class='btn' type="submit" ng-disabled="poolForm.$invalid || disabled || !address_confirmed">Register</button>
             </div>
 
               <div ng-show="errorMessage">
@@ -98,43 +100,55 @@ Make sure $scope, $route, $routeParams are injected in controller -->
              <span>Note: this information is partially filled out based on your previous trips.</span>
 
         </div><!-- Column -->
-        <div class='col' style="float:right; width:50%">
 
-
+        <!-- COLUMN -->
+        <!-- COLUMN -->
+        <div class='col' style="float:right; width:54%">
             <h2> Your Travel Plans </h2>
+                    <div>
+                        <!-- TRIP COLUMN -->
+                        <div class="floating-box" >
+                            <div align="center">
+                                <img src="/static/img/beautiful_map/beautiful_map_200.jpg" ng-src="{{trip_image_url}}" alt="Trip Origin" style="width:200px;height:200px;">
+                            </div>
+                            <h2>Your Trip:</h2>
+                            <ul>
+                                <li ng-if="tripForm.ngAddress"> I'll be coming from {{tripForm.ngAddress}}</li>
+                                <li ng-if="tripForm.ngNumSeats >0"> My vehicle has {{tripForm.ngNumSeats}} {{(tripForm.ngNumSeats >1) ? 'seats' : 'seat'}} (including driver).</li>
+                                <li ng-if="tripForm.ngNumSeats ==0">I will not be driving!</li>
+                                <li ng-if="tripForm.ngPreWindow"> I can be ready to go at {{preTime(pool_dateTime,tripForm.ngPreWindow)}} ({{tripForm.ngPreWindow}} minutes before the event). </li>
+                                <li ng-if="tripForm.ngOn_time"> I have to arrive on time (I am an organizer).</li>
+                                <li ng-if="!tripForm.ngOn_time"> I can arrive up to {{pool.latenessWindow}} minutes late (I am not an organizer).</li>
+                                <li ng-if="tripForm.ngMust_drive && tripForm.ngNumSeats >0">I have to drive. I cannot catch a ride.</li>
+                                <li ng-if="!tripForm.ngMust_drive && tripForm.ngNumSeats >0">I can drive or catch a ride.</li>
 
-            <div ng-if="trip_image_url">
-            <h4> Your Origin </h4>
-                <img ng-src="{{trip_image_url}}" alt="Trip Origin" style="width:400px;height:400px;">
-            </div>
-
-<!--
-    address = db.Column(db.String())
-    num_seats = db.Column(db.Integer)
-    preWindow = db.Column(db.Integer)
-    on_time = db.Column(db.Integer)
-    must_drive = db.Column(db.Integer) -->
+                            </ul>
 
 
-            <h2>Event: </h2>
-            <div ng-if="pool_info">
-                <h4> Event Location </h4>
-                <img ng-src="{{pool_info.image_url}}" alt="Event Address" style="width:400px;height:400px;">
-            </div>
-            <h4>Event Information:</h4>
-            <ul>
-                <li> Event Name: {{pool.name}} </li>
-                <li> Event Address: <span ng-if="!pool_info"> {{pool.address}} </span><span ng-if="pool_info"> {{pool_info.formatted_address}} </span></li>
-                <li> Event Date: {{pool.date}} </li>
-                <li> Event Time: {{pool.time}} </li>
-                <li> Event DateTime: {{pool.dateTime | date:'medium'}} </li>
-                <li> Event Contact Email: {{pool.email}} </li>
-                <li> Non-Organizers can arrive up to {{pool.latenessWindow}} minutes after {{pool.time}}</li>
-                <li> Notice given for carpooling instructions: {{pool.notice}} hours</li>
-            </ul>
+                        </div><!-- COLUMN -->
+
+                        <!-- EVENT COLUMN --><!-- style="float:left;margin-right:5px;" -->
+                        <div class="floating-box" >
+                            <div align="center">
+                                <img src="/static/img/beautiful_map/beautiful_map_200.jpg" ng-src="{{pool_info.image_url}}" alt="Event Address" style="width:200px;height:200px;">
+                            </div>
+                            <h2>Event Information:</h2>
+
+                            <ul>
+                                <li> Event Name: {{pool.name}} </li>
+                                <li> Event Address: <span ng-if="!pool_info"> {{pool.address}} </span><span ng-if="pool_info"> {{pool_info.formatted_address}} </span></li>
+                                <li> Event Date: {{pool.date}} </li>
+                                <li> Event Time: {{pool.time}} </li>
+                                <li> Event DateTime: {{pool.dateTime | date:'medium'}} </li>
+                                <li> Event Contact Email: {{pool.email}} </li>
+                                <li> Non-Organizers can arrive up to {{pool.latenessWindow}} minutes after {{pool.time}}</li>
+                                <li> Notice given for carpooling instructions: {{pool.notice}} hours</li>
+                            </ul>
+                        </div><!-- COLUMN -->
+                        <div class="after-box">Another box, after the floating boxes...</div>
+                    </div>
 
         </div> <!-- COLUMN -->
-    </div>
 </div>
 
 

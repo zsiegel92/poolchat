@@ -8,11 +8,21 @@
 
         <h2>Affiliated Teams</h2>
         <b>Which teams are affiliated with this event?</b>
+        <br>
+        <span>
+          <span class="form-group" ng-repeat="team in teams">
+            <label>
+              <input type="checkbox" name="selectedTeams[$index]" ng-model="poolForm.selectedTeams[$index]" ng-init="true" value="{{team.name}}" ng-checked="teamSelection.indexOf(team.name) > -1" ng-click="toggleSelection(team)">
+              {{team.name}}
+            </label>
+          </span>
+        </span>
 
-        <div class="form-group">
-          <label ng-repeat="team in teams">
-          <input type="checkbox" name="selectedTeams[$index]" ng-model="poolForm.selectedTeams[$index]" ng-init="true" value="{{team.name}}" ng-checked="teamSelection.indexOf(team.name) > -1" ng-click="toggleSelection(team)">{{team.name}}</label>
-        </div>
+
+
+
+
+        <br>
           <ul ng-show="teamSelection.length > 0">
             <li ng-repeat="teamName in teamSelection"> Members of team <b>{{teamName}}</b> will be able to join this event!</li>
           </ul>
@@ -48,9 +58,8 @@
           teamSelection: {{teamSelection}}<br>
           poolForm.selectedTeams: {{poolForm.selectedTeams}}<br> -->
 
-
-          <button ng-click="poolForm.ngEmail=self.email;">Set to your email: {{self.email}}</button>
-          <span ng-repeat="team in teams"><span ng-show="poolForm.selectedTeams[$index]"><button ng-click="poolForm.ngEmail=team.email;">Set to {{team.name}}'s email: {{team.email}}</button><br></span></span>
+          <button type="button" class='btn btn-default' ng-click="poolForm.ngEmail=self.email;">Set to your email: {{self.email}}</button>
+          <span ng-repeat="team in teams"><span ng-show="poolForm.selectedTeams[$index]"><button type="button" class='btn btn-default' ng-click="poolForm.ngEmail=team.email;">Set to {{team.name}}'s email: {{team.email}}</button><br></span></span>
         </div>
 
 <!-- ADDRESS -->
@@ -91,6 +100,7 @@
             <b>Must be a valid date!</b></span>
         </div>
 <!-- TIME -->
+        <div class="form-group">
         <label>Event Time</label>
         <input type="time"
                ng-model="initial.ngTime"
@@ -98,7 +108,7 @@
                placeholder="HH:mm:ss"
                value="14:30:00"
                required="true">
-
+        </div>
 
 
 <!-- FIRE NOTICE -->
@@ -106,17 +116,12 @@
           <label>Notice for Email (number of hours before event that instructions will be sent out)</label>
           <br>
           <span>Instructions will be sent out
-
-          <select ng-model="poolForm.ngFireNotice" name="fireNotice" ng-init="poolForm.ngFireNotice=6;" convert-to-number>
-            <option value="6">6 hours</option>
-            <option value="12">12 hours</option>
-            <option value="18">18 hours</option>
-          </select>
+            <select ng-model="poolForm.ngFireNotice" name="fireNotice" ng-init="poolForm.ngFireNotice=6;" convert-to-number>
+              <option value="6">6 hours</option>
+              <option value="12">12 hours</option>
+              <option value="18">18 hours</option>
+            </select>
           hours before your event.</span>
-
-
-
-
         </div>
 
 <!-- LatenessWindow -->

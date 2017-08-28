@@ -485,6 +485,8 @@ angular.module('myApp').controller('joinPoolController',['$scope', '$location', 
     $scope.ever_must_drive = f(r.ever_must_drive);
     $scope.ever_organizer = f(r.ever_organizer);
 
+    $scope.pool_dateTime = new Date(Date.parse($scope.pool.dateTime));
+
     $scope.setDefaults = function(){
       $scope.tripForm.ngOn_time = String(($scope.ever_organizer==1));
       $scope.tripForm.ngMust_drive = String(($scope.ever_must_drive==1));
@@ -498,16 +500,28 @@ angular.module('myApp').controller('joinPoolController',['$scope', '$location', 
     $scope.unconfirm = function(){
       $log.log("unconfirm-ing");
       $scope.address_confirmed=false;
+      $scope.set_all_prefill_false();
     };
     $scope.un_preset = function(){
       $log.log("un preset-ing");
       $scope.address_confirmed=false;
       $scope.using_preset = false;
+      $scope.set_all_prefill_false();
     };
-    $scope.use_preset = function(address){
+    // $scope.prefill_disabled = Array.from({length:$scope.past_addresses.length}, i => false); //ES6 only!
+    $scope.prefill_disabled =Array($scope.past_addresses.length).fill(false);//ES6 only!
+    $scope.use_preset = function(address,index){
       $scope.using_preset=true;
       $scope.tripForm.ngAddress=address;
       $scope.address_confirmed=true;
+      $scope.set_all_prefill_false();
+      $scope.prefill_disabled[index]=true;
+    };
+
+    $scope.set_all_prefill_false = function() {
+      for (i = 0; i < $scope.prefill_disabled.length; i++){
+        $scope.prefill_disabled[i]=false;
+      }
     };
 
     $scope.preTime = function(baseTimeString,preWindow){
@@ -591,7 +605,7 @@ angular.module('myApp').controller('joinPoolController',['$scope', '$location', 
         $log.log("Registration response:");
         $log.log(response.data);
         $scope.resultText=response.data;
-        alert("Make sure you're ready for your trip on " + $scope.pool.date + " at " + $scope.pool.time + "! Visit " + baseURL + "/viewPool to see the events you're part of!");
+        alert("Make sure you're ready to go before this event on " + $scope.pool.date + " at " + $scope.pool.time + "! Visit " + baseURL + "/viewPool to see the events you're part of!");
         $location.path('/viewPool');
 
       }).

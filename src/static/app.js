@@ -13,6 +13,20 @@ var myApp = angular.module('myApp', ['ngRoute'])
   };
 });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 myApp.filter('relativedate', ['$filter', function ($filter) {
   return function (rel, format) {
     let date = new Date();
@@ -38,6 +52,14 @@ myApp.filter('relativeFromTime', ['$filter', function ($filter) {
   return function (rel,time, format) {
     var copy = new Date(time.getTime());
     copy.setHours(copy.getHours() + rel);
+    return $filter('date')(copy, format || 'hh:mma')
+  };
+}]);
+
+myApp.filter('relativeFromMins', ['$filter', function ($filter) {
+  return function (rel,time, format) {
+    var copy = new Date(time.getTime());
+    copy.setMinutes(copy.getMinutes() + rel);
     return $filter('date')(copy, format || 'hh:mma')
   };
 }]);
@@ -86,7 +108,7 @@ myApp.config(function ($routeProvider,$httpProvider) {
       controller: 'triggerController',
       access: {restricted: true}
     })
-    .when('/viewPool/', {
+    .when('/viewPool', {
       templateUrl: 'static/partials/viewPool.html',
       controller: 'viewPoolController',
       access: {restricted: true}

@@ -100,12 +100,12 @@ def send_register_email(email=None):
 	if carpooler is None:
 		#send a link to ?#!/register to whatever the email is
 		subject = "Register for GroupThere"
-		link = url_base + '?#!/register'
+		link = url_base + '?#!/register/' +str(email)
 		html_body= render_template('emails/invite.html',link=link,email=email)
 		text_message=render_template('emails/invite.txt',link=link,email=email)
 		html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
 		emailer.send_html(email,html_message=html,subject=subject,text_message=text_message)
-		return "Email not in database", 404
+		return "Email not in database, invitation sent!", 404
 	else:
 		print("carpooler is not None!")
 		if not carpooler.is_authenticated():

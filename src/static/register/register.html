@@ -1,61 +1,50 @@
 <div class="col-md-4">
   <h1>Register</h1>
   <div ng-show="errorMessage" class="alert alert-danger">{{errorMessage}}</div>
-  <form class="form" ng-model="registerForm" name="registerForm" ng-submit="register()">
-
-<!-- First Name -->
+  <form class="form"  ng-model="registerFormValues" name="registerForm" ng-submit="register()">
+    <!-- First Name -->
     <div class="form-group">
       <label>First Name</label>
-        <input type="text" class="form-control" name="first" ng-model="registerForm.ngFirst" placeholder="First Name, 4-25 characters" required>
+      <input type="text" class="form-control" name="first" ng-model="registerFormValues.ngFirst" placeholder="First Name, 3-25 characters" ng-minlength="3" ng-maxlength="25" required>
+      <span class="invalid" ng-show="registerForm.first.$error.minlength || registerForm.first.$error.maxlength">First Name must be between 3 and 25 characters
+      </span>
     </div>
-    <span ng-show="registerForm.ngFirst && (registerForm.ngFirst.length < 4 || (registerForm.ngFirst.length >25))"><b>First Name must be between 4 and 25 characters</b>
-    </span>
-<!-- Last Name -->
+    <!-- Last Name -->
     <div class="form-group">
       <label>Last Name</label>
-        <input type="text" class="form-control" name="last" ng-model="registerForm.ngLast" placeholder="Last Name, 4-25 characters" required>
+      <input type="text" class="form-control" name="last" ng-model="registerFormValues.ngLast" placeholder="Last Name, 3-25 characters" ng-minlength="3" ng-maxlength="25" required>
+      <span class="invalid" ng-show="registerForm.last.$error.minlength || registerForm.last.$error.maxlength">Last Name must be between 3 and 25 characters
+      </span>
     </div>
-    <span ng-show="registerForm.ngLast && (registerForm.ngLast.length < 4 || (registerForm.ngLast.length >25))"><b>Last Name must be between 4 and 25 characters</b>
-    </span>
-
-<!-- EMAIL -->
+    <!-- EMAIL -->
     <div class="form-group">
       <label>Email</label>
-      <input type="email" class="form-control" name="email" placeholder="email@domain.ext" ng-pattern="/^[_a-zA-Z0-9]+(\.[_a-zA-Z0-9]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*(\.[a-zA-Z]{2,4})$/"  ng-model="registerForm.ngEmail" required>
-
-      <span class="error" ng-show="registerForm.email.$error.required">
+      <input type="email" class="form-control" name="email" placeholder="email@domain.ext" ng-pattern="/^[_a-zA-Z0-9]+(\.[_a-zA-Z0-9]+)*@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*(\.[a-zA-Z]{2,4})$/"  ng-model="registerFormValues.ngEmail" required>
+      <span class="invalid" ng-show="registerForm.email.$error.required">
       Required!</span>
-      <span class="error" ng-show="registerForm.email.$error.email">Valid Email Required!</span>
+      <span class="invalid" ng-show="registerForm.email.$error.email">Valid Email Required!</span>
       <br>
-      <span class="error" ng-show="registerForm.email.$error.pattern">Email should match &ltemail &gt@&ltdomain&gt.&ltext&gt</span>
+      <span class="invalid" ng-show="registerForm.email.$error.pattern">Email should match '&ltemail &gt@&ltdomain&gt.&ltext&gt'</span>
     </div>
-
-
-<!-- CONFIRM EMAIL -->
+    <!-- PASSWORD  -->
     <div class="form-group">
       <label>Password</label>
-        <input type="password" class="form-control" name="password" ng-model="registerForm.ngPassword" placeholder="Password 4-25 characters" required>
-        <span ng-show="registerForm.ngPassword && (registerForm.ngPassword.length < 4 || (registerForm.ngPassword.length >25))"><b>PASSWORD MUST BE BETWEEN 4 AND 25 CHARACTERS</b>
-        </span>
+      <input type="password" class="form-control" name="password" ng-model="registerFormValues.ngPassword" ng-minlength="4" ng-maxlength="25" placeholder="Password 4-25 characters" required>
+      <span class="invalid" ng-show="registerForm.password.$error.minlength || registerForm.password.$error.maxlength"><b>Password must be between 4 and 25 characters</b>
+      </span>
     </div>
-
     <div class="form-group">
       <label>Confirm Password</label>
-        <input type="password"  class="form-control" name="confirm_password" placeholder="matching password" ng-model="registerForm.ngConfirm_password" ng-minlength="4" ng-maxlength="25" required>
-        <span ng-show="registerForm.ngConfirm_password != registerForm.ngPassword"><b>PASSWORDS MUST MATCH</b>
-        </span>
+      <input type="password"  class="form-control" name="confirm_password" placeholder="matching password" ng-model="registerFormValues.ngConfirm_password" ng-minlength="4" ng-maxlength="25" required>
+      <span class="invalid" ng-show="registerFormValues.ngConfirm_password != registerFormValues.ngPassword"><b>PASSWORDS MUST MATCH</b>
+      </span>
     </div>
     <div class="form-group">
-      <label>Accept Terms of Service (currently undefined)</label>
-      <input type="checkbox" ng-model="registerForm.ngAccept_tos" name="accept_tos" required>
+      <label>Accept Terms of Service (currently undefined)
+      <input type="checkbox" ng-model="registerFormValues.ngAccept_tos" name="accept_tos" required></label>
     </div>
-
     <div>
-      <button type="submit" class="btn btn-default" ng-disabled="disabled || registerForm.$invalid || registerForm.ngConfirm_password != registerForm.ngPassword">Register</button>
+      <button type="submit" class="btn btn-primary" ng-disabled="disabled || registerForm.$invalid || registerFormValues.ngConfirm_password != registerFormValues.ngPassword">Register</button>
     </div>
   </form>
-
-<!--   <div ng-show="errorMessage">
-  Errors: {{errorMessage}}
-  </div> -->
 </div>

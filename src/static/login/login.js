@@ -4,17 +4,21 @@ angular.module('myApp.login', ['ngRoute'])
 
 .config(['$routeProvider', function($routeProvider) {
   $routeProvider
-    .when('/login', {
+    .when('/login/:email?', {
       templateUrl: 'static/login/login.html',
       controller: 'loginController',
       access: {restricted: false}
     });
 }])
-
 .controller('loginController',
-  ['$scope', '$location', 'AuthService','$log',
-  function ($scope, $location, AuthService,$log) {
-
+  ['$scope', '$location', 'AuthService','$log','$routeParams','$window',
+  function ($scope, $location, AuthService,$log,$routeParams,$window) {
+    var f = $window.decodeURIComponent;
+    var r = $routeParams;
+    $scope.loginFormValues={};
+    if (r.email){
+      $scope.loginFormValues.email=f(r.email);
+    }
     $scope.goto_register = function (){
       $location.path('/register');
     };
@@ -24,17 +28,17 @@ angular.module('myApp.login', ['ngRoute'])
       $scope.error = false;
       $scope.disabled = true;
       // call login from service
-      AuthService.login($scope.loginForm.email, $scope.loginForm.password, $scope.loginForm.remember_me)
+      AuthService.login($scope.loginFormValues.email, $scope.loginFormValues.password, $scope.loginFormValues.remember_me)
         // handle success
         .then(function (response) {
           $scope.disabled = false;
           if(response.status === 200){
-            $scope.loginForm = {};
+            $scope.loginFormValues = {};
             $location.path('/');
           } else {
             $log.log(response.data);
-            $scope.loginForm.password='';
-            $scope.loginForm.remember_me=false;
+            $scope.loginFormValues.password='';
+            $scope.loginFormValues.remember_me=false;
             $scope.error = true;
             $scope.errorMessage = response.data;
           }
@@ -45,8 +49,8 @@ angular.module('myApp.login', ['ngRoute'])
           $scope.error = true;
           $scope.errorMessage = response.data;
           $scope.disabled = false;
-          $scope.loginForm.password='';
-          $scope.loginForm.remember_me=false;
+          $scope.loginFormValues.password='';
+          $scope.loginFormValues.remember_me=false;
         });
 
     };

@@ -1,0 +1,9 @@
+Hello, {{email}},
+\n
+\n
+Did you try to make a GroupThere account? Something may have gone wrong. Please visit {{link}} to try registering again.
+\n
+\n
+Thank you,
+\n
+GroupThere

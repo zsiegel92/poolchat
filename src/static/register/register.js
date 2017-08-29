@@ -24,17 +24,30 @@ angular.module('myApp.register', ['ngRoute'])
       // call register from service
       AuthService.register($scope.registerForm.ngFirst,$scope.registerForm.ngLast,$scope.registerForm.ngEmail,$scope.registerForm.ngPassword,$scope.registerForm.ngConfirm_password,$scope.registerForm.ngAccept_tos)
         // handle success
-        .then(function () {
-          $location.path('/login');
+        .then(function (response) {
           $scope.disabled = false;
-          $scope.registerForm = {};
+          if (response.status==200){
+            alert("An email has been sent to " + $scope.registerForm.ngEmail + ". Please click the link to confirm your account and start using GroupThere.");
+
+            $scope.registerForm = {};
+            $location.path('/login');
+        }
+        else{
+          $scope.registerForm.ngPassword='';
+          $scope.registerForm.ngConfirm_password='';
+          $scope.registerForm.ngAccept_tos =false;
+          $scope.errorMessage=response.data;
+        }
         })
         // handle error
-        .catch(function () {
+        .catch(function (response) {
           $scope.error = true;
-          $scope.errorMessage = "Something went wrong!";
+          $scope.errorMessage = response.data;
           $scope.disabled = false;
-          $scope.registerForm = {};
+          $scope.registerForm.ngPassword='';
+          $scope.registerForm.ngConfirm_password='';
+          $scope.registerForm.ngAccept_tos =false;
+          $scope.errorMessage=response.data;
         });
 
     };

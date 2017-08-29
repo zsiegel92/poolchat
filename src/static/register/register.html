@@ -1,6 +1,6 @@
 <div class="col-md-4">
   <h1>Register</h1>
-  <div ng-show="error" class="alert alert-danger">{{errorMessage}}</div>
+  <div ng-show="errorMessage" class="alert alert-danger">{{errorMessage}}</div>
   <form class="form" ng-model="registerForm" name="registerForm" ng-submit="register()">
 
 <!-- First Name -->
@@ -55,7 +55,7 @@
     </div>
   </form>
 
-  <div ng-show="errorMessage">
+<!--   <div ng-show="errorMessage">
   Errors: {{errorMessage}}
-  </div>
+  </div> -->
 </div>

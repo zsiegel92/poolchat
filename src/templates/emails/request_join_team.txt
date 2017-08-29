@@ -1,0 +1,10 @@
+Hello, organizer of {{team.name}},
+\n GroupThere user {{current_user.name}} wants to join your team {{team.name}}.
+\n
+To approve, please visit this link: {{link}}
+\n
+\nTo contact {{current_user.name}}, you can email them at {{current_user.email}}, and feel free to give them the codeword {{team.password}}, which will allow them to add themself.
+\n
+\n
+Thank you,
+\nGroupThere

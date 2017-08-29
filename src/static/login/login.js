@@ -12,8 +12,8 @@ angular.module('myApp.login', ['ngRoute'])
 }])
 
 .controller('loginController',
-  ['$scope', '$location', 'AuthService',
-  function ($scope, $location, AuthService) {
+  ['$scope', '$location', 'AuthService','$log',
+  function ($scope, $location, AuthService,$log) {
 
     $scope.goto_register = function (){
       $location.path('/register');
@@ -26,17 +26,27 @@ angular.module('myApp.login', ['ngRoute'])
       // call login from service
       AuthService.login($scope.loginForm.email, $scope.loginForm.password, $scope.loginForm.remember_me)
         // handle success
-        .then(function () {
-          $location.path('/');
+        .then(function (response) {
           $scope.disabled = false;
-          $scope.loginForm = {};
+          if(response.status === 200){
+            $scope.loginForm = {};
+            $location.path('/');
+          } else {
+            $log.log(response.data);
+            $scope.loginForm.password='';
+            $scope.loginForm.remember_me=false;
+            $scope.error = true;
+            $scope.errorMessage = response.data;
+          }
+
         })
         // handle error
-        .catch(function () {
+        .catch(function (response) {
           $scope.error = true;
-          $scope.errorMessage = "Invalid username and/or password";
+          $scope.errorMessage = response.data;
           $scope.disabled = false;
-          $scope.loginForm = {};
+          $scope.loginForm.password='';
+          $scope.loginForm.remember_me=false;
         });
 
     };

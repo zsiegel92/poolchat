@@ -58,7 +58,7 @@ class Carpooler(db.Model):
 	# session_id=db.Column(db.Integer,unique=True)
 
 	password = db.Column(db.String())
-
+	authenticated = db.Column(db.Boolean())
 	# Note: pools[0] is the current pool!
 	# Note: EVERY member OWNS their pools!
 	pools = db.relationship("Trip",back_populates ='member')
@@ -86,6 +86,7 @@ class Carpooler(db.Model):
 
 	def __init__(self, fbId="",**kwargs):
 		super().__init__()
+		self.authenticated=False
 		self.fbId = fbId #facebook id of user
 		self.fieldstate = "name"
 		self.menu = "fieldstate"
@@ -98,7 +99,8 @@ class Carpooler(db.Model):
 
 
 	def is_authenticated(self):
-		return True
+		return self.authenticated
+
 	def is_active(self):
 		return True
 	def is_anonymous(self):

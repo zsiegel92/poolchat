@@ -20,12 +20,12 @@ angular.module('myApp.makePool', ['ngRoute'])
     var relativeDateText = function(rel,format) {
       let date = new Date();
       date.setDate(date.getDate() + rel);
-      return $filter('date')(date,format|| 'MM-dd-yyyy')
+      return $filter('date')(date,format|| 'MM-dd-yyyy');
     };
     var relativeDateTime = function(rel,format) {
       let date = new Date();
       date.setDate(date.getDate() + rel);
-      return date
+      return date;
     };
 
     var getEmail= function(){
@@ -119,7 +119,7 @@ angular.module('myApp.makePool', ['ngRoute'])
         })
         .catch(function(error) {
           // Note: if exception thrown in second .then, response will be undefined.
-          $log.log("ERROR in /api/get_teams/ request")
+          $log.log("ERROR in /api/get_teams/ request");
           $log.log(error);
           $scope.resultText="error obtaining teams.";
         });

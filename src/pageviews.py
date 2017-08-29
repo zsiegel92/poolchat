@@ -175,6 +175,7 @@ def api_approve_team(team_id,user_id):
 	return jsonify({'message':return_message,'email':{'from':emailer.get_email(),'to':carpooler.email,'body':message,'subject':subject}}),200
 
 
+
 @app.route('/api/request_team_codeword/teamId/<int:team_id>',methods=['POST'])
 @login_required
 def api_request_team_codeword(team_id):
@@ -190,12 +191,11 @@ def api_request_team_codeword(team_id):
 
 		url_base = app.config['URL_BASE']#ends in /
 		link = url_base + '?#!/approveTeamJoin/{new_user_id}/{team_id}'.format(new_user_id=current_user.id,team_id=team.id)
-		text_message = 'Hello, organizer of {team_name},\n GroupThere user {user_name} wants to join your team {team_name}. To approve, please visit this link: {link}'.format(team_name=team.name,user_name=current_user.name,link=link)
-		html_body = "Hello, organizer of {team_name},<br> GroupThere user {user_name} wants to join your team {team_name}.<br>To approve, please <a href='{link}'>click here</a>. <br>To contact {user_name}, you can email them at {user_email}, and feel free to give them the codeword {codeword}, which will allow them to add themself.".format(team_name=team.name,user_name=current_user.name,link=link,user_email = current_user.email,codeword = team.password)
-
-		# emailer.email(toAddress,message=text_message,subject=subject)
-		emailer.send_html_body(toAddress,html_body=html_body,subject=subject,text_message=text_message)
-		# send_html_body(self,toAddress,html_body,subject="",text_message=""):
+		html_body= render_template('emails/request_join_team.html',team=team,link=link)
+		text_message=render_template('emails/request_join_team.txt',team=team,link=link)
+		html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
+		emailer.send_html(toAddress,html_message=html,subject=subject,text_message=text_message)
+		# emailer.send_html_body(toAddress,html_body=html_body,subject=subject,text_message=text_message)
 		return "A request has been sent to the owner of team {team_name}! Alternatively, ask anyone you know who is a member of this team to visit {link}".format(team_name=team.name, link=link),200
 
 

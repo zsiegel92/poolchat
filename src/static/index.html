@@ -1,82 +1,59 @@
 <!doctype html>
 <html lang="en" ng-app='myApp'>
-<head>
-  <meta charset="UTF-8">
-  <title>GroupThere</title>
-  <!-- styles -->
-
-  <!-- <link href="/static/lib/bootstrap/css/bootstrap.css" rel="stylesheet" media="screen"> -->
-
-  <!-- <link href="{{ url_for('static', filename='lib/bootstrap/css/bootstrap.css') }}" rel="stylesheet" media="screen"> -->
-
-  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-  <link rel="stylesheet" href="/static/app.css">
-  <!-- <link href="static/lib/bootstrap/css/bootstrap.css" rel="stylesheet" media="screen"> -->
-  <style>
-
-  </style>
-
-
-
-</head>
+  <head>
+    <meta charset="UTF-8">
+    <title>GroupThere</title>
+    <!-- styles -->
+    <!-- <link href="/static/lib/bootstrap/css/bootstrap.css" rel="stylesheet" media="screen"> -->
+    <!-- <link href="{{ url_for('static', filename='lib/bootstrap/css/bootstrap.css') }}" rel="stylesheet" media="screen"> -->
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/app.css">
+    <!-- <link href="static/lib/bootstrap/css/bootstrap.css" rel="stylesheet" media="screen"> -->
+    <style>
+    </style>
+  </head>
   <body>
-
-
-<!-- TOP-Navigation -->
-
-<nav ng-controller="navController" class="navbar navbar-inverse">
-  <div class="container-fluid">
-    <div class="navbar-header">
-      <a class="navbar-brand" href='#!/'>GroupThere</a>
-    </div>
-    <ul ng-show='logged_in' class="nav navbar-nav">
-      <li ng-class="navClass('viewPool')"><a href='#!/viewPool'>Events</a></li>
-      <li ng-class="navClass('makePool')"><a href='#!/makePool'>Create Event</a></li>
-      <li ng-class="navClass('joinTeam')"><a href='#!/joinTeam'>Join Team</a></li>
-      <li ng-class="navClass('makeTeam')"><a href='#!/makeTeam'>Create Team</a></li>
-    </ul>
-    <ul ng-show="!logged_in" class="nav navbar-nav">
-      <li ng-class="navClass('login')"><a href='#!/login'>login</a></li>
-      <li ng-class="navClass('register')"><a href='#!/register'>Register New User</a></li>
-    </ul>
-    <button ng-show="logged_in" ng-click='logout()' class="btn btn-danger navbar-btn">logout</button>
-  </div>
-</nav>
-
-
-
-
-<!-- APP GOES HERE: -->
+    <!-- TOP-Navigation -->
+    <nav ng-controller="navController" class="navbar navbar-inverse">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href='#!/'>GroupThere</a>
+        </div>
+        <ul ng-show='logged_in' class="nav navbar-nav">
+          <li ng-class="navClass('viewPool')"><a href='#!/viewPool'>Events</a></li>
+          <li ng-class="navClass('makePool')"><a href='#!/makePool'>Create Event</a></li>
+          <li ng-class="navClass('joinTeam')"><a href='#!/joinTeam'>Join Team</a></li>
+          <li ng-class="navClass('makeTeam')"><a href='#!/makeTeam'>Create Team</a></li>
+        </ul>
+        <ul ng-show="!logged_in" class="nav navbar-nav">
+          <li ng-class="navClass('login')"><a href='#!/login'>login</a></li>
+          <li ng-class="navClass('register')"><a href='#!/register'>Register New User</a></li>
+        </ul>
+        <button ng-show="logged_in" ng-click='logout()' class="btn btn-danger navbar-btn">logout</button>
+      </div>
+    </nav>
+    <!-- APP GOES HERE: -->
     <div class="container">
       <div ng-view>
-
       </div>
     </div>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-
-
-
-
-
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
     <!-- scripts from cdn -->
-
     <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-route.js"></script>
-
-
     <script src="/static/app.js" type="text/javascript"></script>
     <script src="/static/services.js" type="text/javascript"></script>
     <script src="/static/makePool/makePool.js" type="text/javascript"></script>
@@ -90,7 +67,6 @@
     <script src="/static/logout/logout.js" type="text/javascript"></script>
     <script src="/static/nav/nav.js" type="text/javascript"></script>
     <script src="static/triggers/triggers.js" type="text/javascript"></script>
-
-
+    <script src="static/confirmEmail/confirmEmail.js" type="text/javascript"></script>
   </body>
 </html>

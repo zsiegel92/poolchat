@@ -76,6 +76,12 @@ class Emailer:
 
 	def send_html_body(self,toAddress,html_body,subject="",text_message=""):
 		print("in Emailer.send_html_body")
+		html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
+		return self.send_html(toAddress,html,subject,text_message)
+
+
+	def send_html(self,toAddress,html_message,subject="",text_message=""):
+		print("in Emailer.send_html")
 		if toAddress.split("@")[-1]== 'notARealThing.com':
 			subject = subject + " REDIRECTED from " + str(toAddress)
 			toAddress = self.gmail_user
@@ -84,9 +90,9 @@ class Emailer:
 		msg['Subject']=subject
 		msg['From']=self.gmail_user
 		msg['To']=toAddress
-		html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
+		html = html_message
 		if text_message=="":
-			text = html_body
+			text = html_message
 		else:
 			text=text_message
 
@@ -100,7 +106,5 @@ class Emailer:
 			self.send_from_server(msg['From'],self.gmail_password,msg['To'],msg.as_string())
 		else:
 			self.queue.enqueue_call(func=self.send_from_server,args=(msg['From'],self.gmail_password,msg['To'],msg.as_string(),),result_ttl=5000)
-
-
 
 

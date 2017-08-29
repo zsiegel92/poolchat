@@ -1,0 +1,12 @@
+Hello, {{carpooler.name}},
+\n
+\n
+To confirm your email address and start using GroupThere, please visit this link:
+\n
+\n
+{{link}}
+\n
+\n
+Thank you,
+\n
+GroupThere

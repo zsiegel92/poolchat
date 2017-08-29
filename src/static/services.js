@@ -1,3 +1,5 @@
+'use strict'
+
 angular.module('myApp').factory('AuthService',
   ['$q', '$timeout', '$http','$log',
   function ($q, $timeout, $http, $log) {
@@ -24,32 +26,32 @@ angular.module('myApp').factory('AuthService',
 
     function login(email, password,remember_me) {
 
-      // create a new instance of deferred
-      var deferred = $q.defer();
       $log.log("Trying to log in with email " + email + " and p-word xxxx");
-      $http.post('/api/login',
+      var resp= $http.post('/api/login',
                 $.param({email: email, password: password,remember_me: remember_me}),
                 {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
       // send a post request to the server
         // handle success
         .then(function (response) {
-          if(response.status === 200 && response.data.result){
+          if(response.status === 200){
             $log.log("logged in")
             user = true;
-            deferred.resolve();
+            return response;
           } else {
+            $log.log("Error in services.Authservice.login");
             user = false;
-            deferred.reject();
+            return response;
           }
         })
         // handle error
         .catch(function (response) {
+          $log.log("Error in services.Authservice.login");
           user = false;
-          deferred.reject();
+          return response;
         });
 
       // return promise object
-      return deferred.promise;
+      return resp;
 
     }
 
@@ -85,26 +87,30 @@ angular.module('myApp').factory('AuthService',
 
 // ,firstname,lastname,accept_tos
       // create a new instance of deferred
-      var deferred = $q.defer();
+      // var deferred = $q.defer();
       // send a post request to the server
-      $http.post('/api/register', $.param({firstName: first, lastName: last, email: email, password: password,confirm: confirm, accept_tos: accept_tos}),{headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+      var resp= $http.post('/api/register', $.param({firstName: first, lastName: last, email: email, password: password,confirm: confirm, accept_tos: accept_tos}),{headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
         // handle success
         .then(function (response) {
-          if(response.status === 200 && response.data.result){
-            deferred.resolve();
+          if(response.status === 200){
+            // deferred.resolve();
+            $log.log("Registered");
+            return response;
           } else {
-            deferred.reject();
+            // deferred.reject();
+            $log.log("error");
+            return response;
           }
         })
         // handle error
         .catch(function (response) {
-          $log.log(response.data);
-          deferred.reject();
+          // $log.log(response.data);
+          // deferred.reject();
+          return response;
         });
-
-      // return promise object
-      return deferred.promise;
-
+        return resp;
+      // // return promise object
+      // return deferred.promise;
     }
 
     function getUserStatus() {

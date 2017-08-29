@@ -26,7 +26,7 @@
         <div class="form-group">
           <label>Event Name</label>
           <input type="text" class="form-control" name="name" ng-model="poolForm.ngName" required>
-          <span class="error" ng-show="poolForm.name.$error.required">
+          <span class="invalid" ng-show="poolForm.name.$error.required">
           Required!</span>
         </div>
         <!-- CONTACT EMAIL -->
@@ -40,18 +40,19 @@
             <button class='btn btn-default' type="button" ng-click="poolForm.ngEmail=team.email;" ng-repeat="team in teams" style="{{$last ? 'border-bottom-left-radius:8px; border-bottom-right-radius:8px;' : ''}}" ng-show="poolForm.selectedTeams[$index]">{{team.name| limitTo : 12 }}{{team.name.length>12 ? '..' : ''}}'s email</button>
             <!-- {{team.name| limitTo : 7 }}{{team.name.length>7 ? '..' : ''}}'s email: {{team.email | limitTo : 7}}{{team.email.length>7 ? '..' : ''}} -->
           </div>
-          <span class="error" ng-show="poolForm.email.$error.required">
-          Required!</span>
-          <span class="error" ng-show="poolForm.email.$error.email">Valid Email Required!</span>
           <br>
-          <span class="error" ng-show="poolForm.email.$error.pattern">Email should match &ltemail &gt@&ltdomain&gt.&ltext&gt</span>
+          <span class="invalid" ng-show="poolForm.email.$error.required">
+          Required!</span>
+          <span class="invalid" ng-show="poolForm.email.$error.email">Valid Email Required!</span>
+          <br>
+          <span class="invalid" ng-show="poolForm.email.$error.pattern">Email should match &ltemail &gt@&ltdomain&gt.&ltext&gt</span>
         </div>
         <!-- ADDRESS -->
         <div class="form-group">
           <label>Event Address</label>
           <input type="text" class="form-control" name="address" ng-model="poolForm.ngAddress" ng-change="address_confirmed=false;" required>
         </div>
-        <span class="error" ng-show="poolForm.address.$error.required">
+        <span class="invalid" ng-show="poolForm.address.$error.required">
         Required!</span>
         <div>
           <button ng-click='confirmAddress()' class="btn btn-default" ng-disabled="!poolForm.ngAddress || disabled || address_confirmed"><span ng-if="!address_confirmed">Confirm Address</span> <span ng-if="address_confirmed">Address Confirmed (edit if necessary)</span></button>
@@ -71,13 +72,13 @@
           <!-- value="{{minDate | date: 'yyyy-MM-dd'}}" -->
           <!--             <span class="error" ng-show="poolForm.date.$error">
           Not a valid date!</span> -->
-          <span class="error" ng-show="poolForm.date.$error.max">
+          <span class="invalid" ng-show="poolForm.date.$error.max">
           <b>Date cannot be more than 1 year hence!</b></span>
-          <span class="error" ng-show="poolForm.date.$error.min">
+          <span class="invalid" ng-show="poolForm.date.$error.min">
           <b>Date must be at least {{minNumberDays}} in the future!</b></span>
-          <span class="error" ng-show="poolForm.date.$error.required">
+          <span class="invalid" ng-show="poolForm.date.$error.required">
           <b>Must enter a date!</b></span>
-          <span class="error" ng-show="poolForm.date.$error.date">
+          <span class="invalid" ng-show="poolForm.date.$error.date">
           <b>Must be a valid date!</b></span>
         </div>
         <!-- TIME -->

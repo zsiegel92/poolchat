@@ -3,7 +3,7 @@ import flask
 
 from urllib.parse import urlparse, urljoin
 
-from wtforms_ext import LoginForm, RegistrationForm,ngRegistrationForm,EmailForm
+from wtforms_ext import LoginForm, RegistrationForm,ngRegistrationForm,EmailForm,ngPasswordChangeRequestForm, ngForgotPasswordChangeForm, ngPasswordChangeForm
 
 from rq import Queue
 from rq.job import Job
@@ -12,7 +12,7 @@ q = Queue(connection=conn)
 
 from models import Carpooler,Pool, Trip
 
-from app import app
+from app import app, ts
 from database import db
 from login import login_manager
 from flask_login import current_user, login_user, logout_user,login_required
@@ -110,7 +110,10 @@ def send_register_email(email=None):
 		print("carpooler is not None!")
 		if not carpooler.is_authenticated():
 			subject = "GroupThere confirmation for " + str(carpooler.name)
+
+			token=ts.dumps(email,salt='email-confirm-key')
 			link = url_base + '?#!/confirmEmail/'+str(email) +'/'+ str(carpooler.id)
+			link = url_base + '?#!/confirmEmail/'+str(email) +'/'+ str(token)
 			html_body= render_template('emails/confirm_email.html',carpooler=carpooler,link=link)
 			text_message=render_template('emails/confirm_email.txt',carpooler=carpooler, link=link)
 			html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
@@ -119,16 +122,36 @@ def send_register_email(email=None):
 		else:
 			return "User already authenticated",200
 
+#token-free
+# @app.route('/api/confirm_email',methods=['POST'])
+# def confirm_email():
+# 	email=request.values.get('email')
+# 	id = request.values.get('id')
+# 	print("Trying to confirm email for user with " + str(email) + " and id " + str(id))
+# 	carpooler=Carpooler.query.filter_by(id=id).first()
+# 	if carpooler is None:
+# 		return "Invalid Request",400
+# 	elif not carpooler.email.lower() == email.lower():
+# 		return "Invalid Email", 400
+# 	else:
+# 		carpooler.authenticated=True
+# 		db.session.commit()
+# 		return "Email Confirmed! Start using GroupThere now!",200
 @app.route('/api/confirm_email',methods=['POST'])
 def confirm_email():
 	email=request.values.get('email')
-	id = request.values.get('id')
-	print("Trying to confirm email for user with " + str(email) + " and id " + str(id))
-	carpooler=Carpooler.query.filter_by(id=id).first()
+	token = request.values.get('token')
+	try:
+		email2 = ts.loads(token, salt="email-confirm-key", max_age=86400)
+	except:
+		return "Invalid request!",400
+	if email2.lower() != email.lower():
+		return "Invalid request!",400
+
+	print("Trying to confirm email for user with " + str(email))
+	carpooler=Carpooler.query.filter_by(email=email.lower()).first()
 	if carpooler is None:
 		return "Invalid Request",400
-	elif not carpooler.email.lower() == email.lower():
-		return "Invalid Email", 400
 	else:
 		carpooler.authenticated=True
 		db.session.commit()
@@ -163,7 +186,7 @@ def api_login():
 					return "Logged in",200 #log in
 				else:
 					# return jsonify({"result":"password doesn't match"}),401
-					return "Passwords do not match",401
+					return "Username or Password Incorrect",401
 			else:
 				# not authenticated
 				#re-sending email

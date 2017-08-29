@@ -9,7 +9,7 @@ class Config(object):
 	DEBUG = False
 	TESTING = False
 	CSRF_ENABLED = True
-	SECRET_KEY = 'this-really-needs-to-be-changed'
+	SECRET_KEY = 'masterfulCarpooling'
 	SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
 	print("Setting SQLALCHEMY_DATABASE_URI TO " + str(SQLALCHEMY_DATABASE_URI))
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -20,6 +20,7 @@ class Config(object):
 class ProductionConfig(Config):
 	APP_NAME="ZachAndFriends"
 	DEBUG = False
+	SECRET_KEY = 'masterfulCarpoolingPro'
 	SQLALCHEMY_TRACK_MODIFICATIONS = False #might cause problems
 	MESSENGER_PLATFORM_ACCESS_TOKEN='EAAbL0Ffr9PkBADy64t821NSnuMRQx8U1Tm0FAXgS5840g7bm2ryZAHVo4YP74O5mOuZCERJ5mXxaDi7aaFC8RjHM9B4a1YGaba3do6ZAkxX5ci9ncGIH8KuHx2UJoBzUdAuuCWamNJXSbbxGdxqJoUpPoCyGEBYjTx4RdczFwZDZD' #ZachNFriends
 	GMAPS_STATIC_API_TOKEN = 'AIzaSyDpWUPSNr1RW4MsWWEcXMJiX1ZN3ZTqpU0'
@@ -51,6 +52,7 @@ class DevelopmentConfig(Config):
 	APP_NAME = "GroupThere"
 	DEVELOPMENT = True
 	DEBUG = True
+	SECRET_KEY = 'masterfulCarpoolingDev'
 	MESSENGER_PLATFORM_ACCESS_TOKEN=os.environ.get('MESSENGER_PLATFORM_ACCESS_TOKEN') #Zach and Friends
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
 	GMAPS_STATIC_API_TOKEN = 'AIzaSyDpWUPSNr1RW4MsWWEcXMJiX1ZN3ZTqpU0'

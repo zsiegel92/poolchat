@@ -1,16 +1,28 @@
 'use strict'
 
-angular.module('myApp.confirmEmail', ['ngRoute'])
+angular.module('myApp.changePassword', ['ngRoute'])
 
 .config(['$routeProvider', function($routeProvider) {
   $routeProvider
-    .when('/confirmEmail/:email/:id', {
-      templateUrl: 'static/confirmEmail/confirmEmail.html',
-      controller: 'confirmEmailController',
+    .when('/changePassword', {
+      templateUrl: 'static/changePassword/changePassword.html',
+      controller: 'changePasswordController',
+      access: {restricted: true}
+    });
+  $routeProvider
+    .when('/forgotPasswordChange', {
+      templateUrl: 'static/changePassword/forgotPasswordChange.html',
+      controller: 'changePasswordController',
+      access: {restricted: false}
+    });
+  $routeProvider
+    .when('/forgotPassword', {
+      templateUrl: 'static/changePassword/forgotPassword.html',
+      controller: 'changePasswordController',
       access: {restricted: false}
     });
 }])
-.controller('confirmEmailController',
+.controller('changePasswordController',
   ['$scope', '$location', 'AuthService','$route', '$routeParams','$log','$http','$window',
   function ($scope, $location, AuthService,$route,$routeParams,$log,$http,$window) {
 
@@ -24,7 +36,7 @@ angular.module('myApp.confirmEmail', ['ngRoute'])
     $scope.user_email = dec(rp.email);
     $scope.user_id = dec(rp.id);
 
-  // NOTE: the token (referred to as 'id' in this controller) is a token generated on server, times out.
+
   var conf_email = function(address){
       $scope.disabled = true;
 
@@ -32,7 +44,7 @@ angular.module('myApp.confirmEmail', ['ngRoute'])
             $.param(
               {
                 email:$scope.user_email,
-                token:$scope.user_id
+                id:$scope.user_id
               }
             ),
             {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 from flask import Flask, request, abort, json
+from itsdangerous import URLSafeTimedSerializer
+
 # from database import db
 from app_factory import create_app
 from login import login_manager
@@ -19,7 +21,7 @@ import models
 # db.init_app(app)
 app = create_app(__name__)
 app.config.from_object(os.environ['APP_SETTINGS'])
-
+ts = URLSafeTimedSerializer(app.config["SECRET_KEY"])
 
 #NOTE: SQLALCHEMY_TRACK_MODIFICATIONS prints model object fields when they are edited!
 #SQLAlchemy(app,session_options={'autocommit': True})

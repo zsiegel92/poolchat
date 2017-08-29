@@ -76,8 +76,25 @@ class ngRegistrationForm(wtforms.Form):
 	confirm = PasswordField('Repeat Password')
 	accept_tos = BooleanField('I accept the TOS', [validators.DataRequired()])
 
+class ngPasswordChangeRequestForm(wtforms.Form):
+	email = StringField('Email Address', [validators.Length(min=6, max=35),validators.Required("Please enter your email address."), validators.Email("Please enter your email address.")])
 
+class ngForgotPasswordChangeForm(wtforms.Form):
+	password = PasswordField('New Password', [validators.Length(min=4, max=25),
+		validators.DataRequired(),
+		validators.EqualTo('confirm', message='Passwords must match')
+	])
+	confirm = PasswordField('Repeat Password')
 
+class ngPasswordChangeForm(wtforms.Form):
+	current_password = PasswordField('New Password', [validators.Length(min=4, max=25),
+		validators.DataRequired()
+	])
+	password = PasswordField('New Password', [validators.Length(min=4, max=25),
+		validators.DataRequired(),
+		validators.EqualTo('confirm', message='Passwords must match')
+	])
+	confirm = PasswordField('Repeat Password')
 
 
 def test_EmailForm():

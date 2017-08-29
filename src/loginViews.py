@@ -155,7 +155,7 @@ def api_login():
 		print("Successfully queried for carpooler")
 		if carpooler is not None:
 			if carpooler.is_authenticated():
-				if password==carpooler.password:
+				if carpooler.is_correct_password(password):
 					print("logging in user " + str(email) + "!")
 					login_user(carpooler,remember=remember_me)
 					db.session.commit()
@@ -204,7 +204,7 @@ def login():
 		email=form.email.data
 		carpooler = Carpooler.query.filter_by(email=email).first()
 		if carpooler is not None:
-			if password==carpooler.password:
+			if carpooler.is_correct_password(password):
 				login_user(carpooler,remember=remember_me)
 				db.session.commit()
 				flask.flash('Logged in successfully.')

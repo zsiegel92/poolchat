@@ -4,6 +4,10 @@ import json
 from collections import OrderedDict
 #from sqlalchemy.dialects.postgresql import ARRAY
 # from sqlalchemy.dialects.postgresql import JSON #Import if we use JSON in field
+from sqlalchemy.ext.hybrid import hybrid_property
+# from flask_bcrypt import generate_password_hash
+from encryption import bcrypt
+
 from fieldTrees import fields,poolfields,findPool,tripfields,modesFirst
 #from decision_trees import poolertree as fields
 import sys
@@ -57,7 +61,7 @@ class Carpooler(db.Model):
 	session_id = db.Column(db.String(length=36),default=random_uuid,unique=True)
 	# session_id=db.Column(db.Integer,unique=True)
 
-	password = db.Column(db.String())
+	_password = db.Column(db.String(128))
 	authenticated = db.Column(db.Boolean())
 	# Note: pools[0] is the current pool!
 	# Note: EVERY member OWNS their pools!
@@ -96,7 +100,16 @@ class Carpooler(db.Model):
 		for arg in kwargs:
 			if hasattr(self,arg):
 				setattr(self,arg,kwargs[arg])
+	@hybrid_property
+	def password(self):
+		return self._password
 
+	@password.setter
+	def _set_password(self, plaintext):
+		self._password = bcrypt.generate_password_hash(plaintext).decode('utf-8')
+
+	def is_correct_password(self, plaintext):
+		return bcrypt.check_password_hash(self._password, plaintext)
 
 	def is_authenticated(self):
 		return self.authenticated

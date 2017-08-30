@@ -150,7 +150,7 @@ def forgot_password():
 		return "Invalid entry",400
 
 #post with form {password:,confirm:}
-@app.route('/api/reset_email/<token>', methods=["POST"])
+@app.route('/api/reset_password/<token>', methods=["POST"])
 def reset_with_token(token):
 	try:
 		email = ts.loads(token, salt="recover-key", max_age=86400)

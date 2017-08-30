@@ -25,7 +25,7 @@ angular.module('myApp.forgotPasswordChange', ['ngRoute'])
     $scope.change_pass = function(){
       $scope.disabled = true;
 
-      return $http.post('/api/reset_email/'+String(token),
+      return $http.post('/api/reset_password/'+String(token),
             $.param(
               {
                 password:$scope.changePassFormValues.ngPassword,

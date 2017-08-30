@@ -524,7 +524,6 @@ def confirm_team_email():
 			return jsonify({'message':"Team created, but the user who created the team could not be added to " + str(permTeam.name) + ". They can join the team like everyone else, though.","team_name":permTeam.name}),200
 
 
-
 @app.route('/api/join_team/',methods=['POST'])
 @login_required
 def api_join_team():

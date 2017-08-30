@@ -44,7 +44,7 @@ angular.module('myApp.confirmTeamEmail', ['ngRoute'])
             $scope.team_name = response.data.team_name;
             $scope.message= response.data.message;
             alert("Email confirmed! The team " + String($scope.team_name) + " with email " + String($scope.team_email) + " can now be used. " + String($scope.message));
-            $location.path('/' + $scope.team_email);
+            $location.path('/');
           }
           else{
             $scope.resultText = "Something went wrong! Email not confirmed.";

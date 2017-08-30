@@ -23,7 +23,7 @@ import pickle
 
 from helpers import findRelativeDelta
 from interactions import newPool
-from models import  Carpooler,Pool, Trip,ensure_carpooler_notNone,Team
+from models import  Carpooler,Pool, Trip,ensure_carpooler_notNone,Team,TempTeam
 from groupThere.GroupThere import GroupThere
 
 from GT_manager import create_generic_parameters
@@ -458,19 +458,73 @@ def api_create_team():
 	email=request.values.get("email")
 	codeword=request.values.get("codeword")
 	redundant_team = Team.query.filter_by(name=name).first()
-	if redundant_team is None:
+	redundant_temp = TempTeam.query.filter_by(name=name).first()
+	if (redundant_team is not None) or (redundant_temp is not None):
+		return "Team already in database.", 409
+	if current_user.email.lower()==email.lower():
 		team=Team()
 		team.name = name
 		team.email=email
 		team.password=codeword
-		db.session.add(team)
 		db.session.add(team)
 		db.session.commit()
 		team.members.append(current_user)
 		db.session.commit()
 		return "Team added to database.", 200
 	else:
-		return "Team already in database.", 409
+		team=TempTeam()
+		team.name=name
+		team.email=email
+		team.password=codeword
+		team.carpooler_id=current_user.id
+		db.session.add(team)
+		db.session.commit()
+		send_team_email_confirmation(team)
+		return "Team status pending.", 201
+
+def send_team_email_confirmation(temp_team):
+	#utilize current_user
+	#temp teams have an id that is not guessable.
+	print("in send_team_email_confirmation")
+	email=temp_team.email.lower()
+	url_base = app.config['URL_BASE']#ends in /
+	#send a link to ?#!/register to whatever the email is
+	subject = "Confirm Email for New GroupThere Team " + str(temp_team.name) +"!"
+	link = '{base}?#!/confirmTeamEmail/{email}/{id}'.format(base=url_base,email=temp_team.email.lower(),id=temp_team.id)
+	html_body= render_template('emails/confirmTeamEmail.html',link=link,team=temp_team)
+	text_message=render_template('emails/confirmTeamEmail.txt',link=link,team=temp_team)
+	html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
+	emailer.send_html(email,html_message=html,subject=subject,text_message=text_message)
+	return "email sent!"
+
+@app.route('/api/confirm_team_email',methods=['POST'])
+def confirm_team_email():
+	email=request.values.get('email')
+	id = request.values.get('id')
+	team=TempTeam.query.filter_by(email=email.lower()).first()
+	print("Trying to confirm email for team with email " + str(email))
+	if team is None:
+		return "No such team!",404
+	if team.id != id:
+		return "Invalid confirmation link!",400
+	else:
+		permTeam=Team()
+		permTeam.name = team.name
+		permTeam.email=team.email
+		permTeam.password=team.password
+		db.session.add(permTeam)
+		db.session.commit()
+		db.session.delete(team)
+		db.session.commit()
+		carpooler=Carpooler.query.filter_by(id=team.carpooler_id).first()
+		if carpooler is not None:
+			permTeam.members.append(carpooler)
+			db.session.commit()
+			return jsonify({'message':"User " + str(carpooler.name) + " added to " + str(permTeam.name),"team_name":permTeam.name}),200
+		else:
+			return jsonify({'message':"Team created, but the user who created the team could not be added to " + str(permTeam.name) + ". They can join the team like everyone else, though.","team_name":permTeam.name}),200
+
+
 
 @app.route('/api/join_team/',methods=['POST'])
 @login_required

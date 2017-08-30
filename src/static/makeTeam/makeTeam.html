@@ -32,11 +32,11 @@
           <label>Team Email</label>
           <input type="email" class="form-control" name="email" placeholder="email@domain.ext" ng-pattern="/^[_a-z0-9]+(\.[_a-z0-9]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/"  ng-model="teamForm.ngEmail" required>
 
-          <span class="error" ng-show="teamForm.email.$error.required">
+          <span class="invalid" ng-show="teamForm.email.$error.required">
           Required!</span>
-          <span class="error" ng-show="teamForm.email.$error.email">Valid Email Required!</span>
+          <span class="invalid" ng-show="teamForm.email.$error.email">Valid Email Required!</span>
           <br>
-          <span class="error" ng-show="teamForm.email.$error.pattern">Email should match &ltemail &gt@&ltdomain&gt.&ltext&gt</span>
+          <span class="invalid" ng-show="teamForm.email.$error.pattern">Email should be all lowercase, and match &ltemail &gt@&ltdomain&gt.&ltext&gt</span>
         </div>
         <div>
           <button type="submit" class="btn btn-primary" ng-disabled="teamForm.$invalid || disabled">Create Team</button>

@@ -554,6 +554,14 @@ class Team(db.Model):
 
 	def to_dict(self):
 		return {'id':self.id,'email':self.email,'name':self.name,'codeword':self.password}
+class TempTeam(db.Model):
+	__tablename__='temp_teams'
+	id = db.Column(db.String(length=36),default=random_uuid,unique=True,primary_key=True)
+	name=db.Column(db.String(),unique=True)
+	email=db.Column(db.String())
+	password=db.Column(db.String())
+	carpooler_id=db.Column(db.Integer,db.ForeignKey('carpooler.id'))
+
 
 class Trip(db.Model):
 	__tablename__ = 'trips'

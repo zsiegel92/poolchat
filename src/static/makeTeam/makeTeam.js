@@ -56,8 +56,15 @@ angular.module('myApp.makeTeam', ['ngRoute'])
             $log.log("Registration response:");
             $log.log(response.data);
             $scope.resultText=response.data;
-            alert("You have created a team called '" + String($scope.teamForm.ngName) + "' and codeword '" + String($scope.teamForm.ngPassword) + "'. Ready to make your first event?");
+            if (response.status==200){
+              alert("You have created a team called '" + String($scope.teamForm.ngName) + "' with codeword '" + String($scope.teamForm.ngPassword) + "'. Ready to make your first event?");
             $location.path('/makePool');
+            }
+            else{
+              alert("You have created a team called '" + String($scope.teamForm.ngName) + "' with codeword '" + String($scope.teamForm.ngPassword) + "'. You can start using this team as soon as you confirm the email address. Check the inbox of " + String($scope.teamForm.ngEmail));
+              $location.path('/makePool');
+            }
+
           }).
           catch(function(response) {
             $scope.disabled = false;

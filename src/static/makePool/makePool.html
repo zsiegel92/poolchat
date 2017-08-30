@@ -33,13 +33,17 @@
         <div class="form-group">
           <label for="eventEmail">Event Email</label>
           <br>
-          <input type="email" style="width:70%; display:inline;" class="form-control" name="email" id="eventEmail" placeholder="email@domain.ext" ng-pattern="/^[_a-z0-9]+(\.[_a-z0-9]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/"  ng-model="poolForm.ngEmail" required> <
+          <input type="email" style="width:70%; display:inline;" class="form-control" name="email" id="eventEmail" placeholder="email@domain.ext" ng-pattern="/^[_a-z0-9]+(\.[_a-z0-9]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/"  ng-model="poolForm.ngEmail" ng-disabled="!presetting" required> <
           <!-- EMAIL AUTOFILLERS -->
           <div class="btn-group-vertical btn-group-xs inline">
-            <button type="button" class='btn btn-default' style="border-top-left-radius:8px; border-top-right-radius:8px;{{(teamSelection.length == 0) ? 'border-bottom-left-radius:8px; border-bottom-right-radius:8px;' : ''}}" ng-click="poolForm.ngEmail=self.email;">your email</button>
+            <button type="button" class='btn btn-default' style="border-top-left-radius:8px; border-top-right-radius:8px;{{(teamSelection.length == 0) ? 'border-bottom-left-radius:8px; border-bottom-right-radius:8px;' : ''}}" ng-click="presetting=true; poolForm.ngEmail=self.email; presetting=false;">your email</button>
             <button class='btn btn-default' type="button" ng-click="poolForm.ngEmail=team.email;" ng-repeat="team in teams" style="{{$last ? 'border-bottom-left-radius:8px; border-bottom-right-radius:8px;' : ''}}" ng-show="poolForm.selectedTeams[$index]">{{team.name| limitTo : 12 }}{{team.name.length>12 ? '..' : ''}}'s email</button>
             <!-- {{team.name| limitTo : 7 }}{{team.name.length>7 ? '..' : ''}}'s email: {{team.email | limitTo : 7}}{{team.email.length>7 ? '..' : ''}} -->
           </div>
+          <br>
+          This can be your email address, or the email address of any of your teams!
+          <br>
+          <a href='#!/makeTeam'>(Create a new team)</a>
           <br>
           <span class="invalid" ng-show="poolForm.email.$error.required">
           Required!</span>

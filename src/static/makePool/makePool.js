@@ -14,7 +14,7 @@ angular.module('myApp.makePool', ['ngRoute'])
 .controller('makePoolController',
   ['$scope', '$location','$log', '$http','$filter','AuthService',
   function ($scope, $location, $log, $http,$filter,AuthService) {
-
+    $scope.presetting=false;
     // $log.log("tomorrow is: ");
     // $log.log(relativeDateText(1));
     var relativeDateText = function(rel,format) {

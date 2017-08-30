@@ -505,7 +505,7 @@ def confirm_team_email():
 	print("Trying to confirm email for team with email " + str(email))
 	if team is None:
 		return "No such team!",404
-	if team.id != id:
+	if str(team.id) != str(id):
 		return "Invalid confirmation link!",400
 	else:
 		permTeam=Team()

@@ -164,6 +164,7 @@ def reset_with_token(token):
 		if carpooler is None:
 			return "Invalid token",404
 		carpooler.password = form.password.data
+		carpooler.authenticated=True #changing password => email valid!
 		db.session.add(carpooler)
 		db.session.commit()
 		return "Password Changed",200

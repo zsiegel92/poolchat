@@ -56,7 +56,7 @@ angular.module('myApp.login', ['ngRoute'])
     };
 
     $scope.forgot_password = function () {
-      $location.path('/changePassword');
+      $location.path('/forgotPassword');
     };
 
 

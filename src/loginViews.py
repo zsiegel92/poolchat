@@ -39,41 +39,42 @@ def redirect_back(endpoint, **values):
 	return redirect(target)
 
 
-#TODO: register.html
-#Form fields: username,email,password,confirm,accept_tos
-@app.route('/register/', methods=['GET', 'POST'])
-def register():
-	if 'email'in request.form:
-		form = RegistrationForm(request.form)
-		# email=request.form.email.data
-	else:
-		form = RegistrationForm(request.form)
-	if request.method == 'POST' and form.validate():
-		try:
-			carpooler = Carpooler(name=form.username.data, email=form.email.data,password=form.password.data)
-		except:
-			from werkzeug.datastructures import MultiDict
-			formb= RegistrationForm(formdata=MultiDict([('email',request.form['email']),('username',request.form['username']),('password',''),('confirm',''),('accept_tos',False)]))
-			#non-unique violation
-			return render_template('register.html',form=formb)
-		db.session.add(carpooler)
-		db.session.commit()
-		return redirect(url_for('login'))
-	return render_template('register.html', form=form)
+# #TODO: register.html
+# #Form fields: username,email,password,confirm,accept_tos
+# @app.route('/register/', methods=['GET', 'POST'])
+# def register():
+# 	if 'email'in request.form:
+# 		form = RegistrationForm(request.form)
+# 		# email=request.form.email.data
+# 	else:
+# 		form = RegistrationForm(request.form)
+# 	if request.method == 'POST' and form.validate():
+# 		try:
+# 			carpooler = Carpooler(name=form.username.data, email=form.email.data,password=form.password.data)
+# 		except:
+# 			from werkzeug.datastructures import MultiDict
+# 			formb= RegistrationForm(formdata=MultiDict([('email',request.form['email']),('username',request.form['username']),('password',''),('confirm',''),('accept_tos',False)]))
+# 			#non-unique violation
+# 			return render_template('register.html',form=formb)
+# 		db.session.add(carpooler)
+# 		db.session.commit()
+# 		return redirect(url_for('login'))
+# 	return render_template('register.html', form=form)
 
 @app.route('/api/register', methods=['POST'])
 def api_register():
 	form = ngRegistrationForm(request.form)
 	if form.validate():
-		if Carpooler.query.filter_by(email=form.email.data).first() is None:
+		email=form.email.data.lower()
+		if Carpooler.query.filter_by(email=email).first() is None:
 			try:
-				carpooler = Carpooler(firstname=form.firstName.data, lastname=form.lastName.data,name= str(form.firstName.data) + " " + str(form.lastName.data), email=form.email.data.lower(),password=form.password.data)
+				carpooler = Carpooler(firstname=form.firstName.data, lastname=form.lastName.data,name= str(form.firstName.data) + " " + str(form.lastName.data), email=email,password=form.password.data)
 				db.session.add(carpooler)
 				db.session.commit()
 			except Exception as exc:
 				return 'Database error! ' + str(exc),400
 			try:
-				send_register_email(carpooler.email)
+				send_register_email(email)
 				return app.config['URL_BASE'] + str(url_for('login')),200
 			except Exception as exc:
 				print("ERROR IN api_register WITH SENDING EMAIL!")
@@ -87,6 +88,7 @@ def api_register():
 @app.route('/api/send_register_email',methods=['POST'])
 def send_register_email(email=None):
 	print("in send_register_email for user with email " + str(email))
+	email=email.lower()
 	if email is None:
 		if request:
 			if request.values:
@@ -112,7 +114,7 @@ def send_register_email(email=None):
 			subject = "GroupThere confirmation for " + str(carpooler.name)
 
 			token=ts.dumps(email,salt='email-confirm-key')
-			link = url_base + '?#!/confirmEmail/'+str(email) +'/'+ str(carpooler.id)
+			# link = url_base + '?#!/confirmEmail/'+str(email) +'/'+ str(carpooler.id)
 			link = url_base + '?#!/confirmEmail/'+str(email) +'/'+ str(token)
 			html_body= render_template('emails/confirm_email.html',carpooler=carpooler,link=link)
 			text_message=render_template('emails/confirm_email.txt',carpooler=carpooler, link=link)
@@ -122,21 +124,56 @@ def send_register_email(email=None):
 		else:
 			return "User already authenticated",200
 
-#token-free
-# @app.route('/api/confirm_email',methods=['POST'])
-# def confirm_email():
-# 	email=request.values.get('email')
-# 	id = request.values.get('id')
-# 	print("Trying to confirm email for user with " + str(email) + " and id " + str(id))
-# 	carpooler=Carpooler.query.filter_by(id=id).first()
-# 	if carpooler is None:
-# 		return "Invalid Request",400
-# 	elif not carpooler.email.lower() == email.lower():
-# 		return "Invalid Email", 400
-# 	else:
-# 		carpooler.authenticated=True
-# 		db.session.commit()
-# 		return "Email Confirmed! Start using GroupThere now!",200
+#post with form {email:}
+@app.route('/api/forgot_password',methods=['POST'])
+def forgot_password():
+	form = ngPasswordChangeRequestForm(request.form)
+	if form.validate():
+		email=form.email.data.lower()
+		carpooler=Carpooler.query.filter_by(email=email).first()
+		if carpooler is None:
+			return "No such user in database",404
+		url_base = app.config['URL_BASE']
+		token = ts.dumps(email,salt='recover-key')
+		link = url_base+ '?#!/forgotPasswordChange/'+ str(email.lower()) + "/" + str(token)
+
+		subject = "Change your GroupThere password"
+
+		html_body= render_template('emails/recovery_email.html',carpooler=carpooler,link=link)
+		text_message=render_template('emails/recovery_email.txt',carpooler=carpooler, link=link)
+		html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
+		emailer.send_html(email,html_message=html,subject=subject,text_message=text_message)
+
+		print("SENDING EMAIL TO " + email.lower())
+		return "Sent registrration email",200
+	else:
+		return "Invalid entry",400
+
+#post with form {password:,confirm:}
+@app.route('/api/reset_email/<token>', methods=["POST"])
+def reset_with_token(token):
+	try:
+		email = ts.loads(token, salt="recover-key", max_age=86400)
+	except:
+		return "Please re-request password change email",400
+
+	form = ngForgotPasswordChangeForm(request.form)
+
+	if form.validate():
+		carpooler = Carpooler.query.filter_by(email=email).first()
+		if carpooler is None:
+			return "Invalid token",404
+		carpooler.password = form.password.data
+		db.session.add(carpooler)
+		db.session.commit()
+		return "Password Changed",200
+	else:
+		return "Please try again! Password invalid.",400
+
+
+
+
+
 @app.route('/api/confirm_email',methods=['POST'])
 def confirm_email():
 	email=request.values.get('email')

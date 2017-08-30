@@ -1,7 +1,7 @@
 'use strict'
 
 
-var myApp = angular.module('myApp', ['ngRoute','myApp.makePool','myApp.joinPool','myApp.joinTeam','myApp.login','myApp.viewPool','myApp.makeTeam','myApp.register','myApp.approveTeamJoin','myApp.logout','myApp.nav','myApp.triggers','myApp.confirmEmail','myApp.changePassword'])
+var myApp = angular.module('myApp', ['ngRoute','myApp.makePool','myApp.joinPool','myApp.joinTeam','myApp.login','myApp.viewPool','myApp.makeTeam','myApp.register','myApp.approveTeamJoin','myApp.logout','myApp.nav','myApp.triggers','myApp.confirmEmail','myApp.forgotPassword','myApp.forgotPasswordChange'])
 
 
 

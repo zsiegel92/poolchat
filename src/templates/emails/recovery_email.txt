@@ -1,0 +1,9 @@
+Hi {{carpooler.email}},
+\n
+\n
+To change your password, visit {{link}}
+\n
+\n
+Thank you,
+\n
+GroupThere

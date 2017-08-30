@@ -500,13 +500,13 @@ def send_team_email_confirmation(temp_team):
 @app.route('/api/confirm_team_email',methods=['POST'])
 def confirm_team_email():
 	email=request.values.get('email')
-	id = request.values.get('id')
+	my_id = request.values.get('id')
 	team=TempTeam.query.filter_by(email=email.lower()).first()
 	print("Trying to confirm email for team with email " + str(email))
 	if team is None:
 		return "No such team!",404
-	if str(team.id) != str(id):
-		return "Invalid confirmation link!",400
+	if str(team.id) != str(my_id):
+		return "Invalid confirmation link! team.id is " + str(team.id) + ", but my_id is " + str(my_id),400
 	else:
 		permTeam=Team()
 		permTeam.name = team.name

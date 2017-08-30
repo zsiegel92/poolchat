@@ -48,7 +48,7 @@ angular.module('myApp.confirmTeamEmail', ['ngRoute'])
           }
           else{
             $scope.resultText = "Something went wrong! Email not confirmed.";
-            $log.log($scope.result);
+            $log.log(response.data);
           }
         }).
         catch(function(response) {

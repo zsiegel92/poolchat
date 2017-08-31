@@ -563,6 +563,30 @@ class TempTeam(db.Model):
 	carpooler_id=db.Column(db.Integer,db.ForeignKey('carpooler.id'))
 
 
+
+
+class Trip_Distance(db.Model):
+	__tablename__ = 'trip_dists'
+	pool_id=db.Column(db.Integer,db.ForeignKey('pool.id'),primary_key=True)
+	from_carpooler_id = db.Column(db.Integer,db.ForeignKey('carpooler.id'),primary_key=True)
+	to_carpooler_id=db.Column(db.Integer,db.ForeignKey('carpooler.id'),primary_key=True)
+	feet = db.Column(db.Integer)
+	seconds = db.Column(db.Integer)
+
+class Event_Distance(db.Model):
+	__tablename__ = 'to_event_dists'
+	pool_id=db.Column(db.Integer,db.ForeignKey('pool.id'),primary_key=True)
+	carpooler_id = db.Column(db.Integer,db.ForeignKey('carpooler.id'),primary_key=True)
+	feet = db.Column(db.Integer)
+	seconds = db.Column(db.Integer)
+
+	def to_dict(self):
+		return {'pool_id':self.pool_id,'carpooler_id':self.carpooler_id,'feet':self.feet,'seconds':self.seconds}
+	def __repr__(self):
+		return str(self.to_dict())
+
+
+
 class Trip(db.Model):
 	__tablename__ = 'trips'
 

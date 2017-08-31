@@ -6,10 +6,15 @@ from flask import render_template,url_for,jsonify,json,make_response,send_from_d
 from flask_login import current_user, login_user, logout_user,login_required
 from sqlalchemy.orm.session import make_transient
 from dateutil.parser import parse
+from dateutil.relativedelta import relativedelta
 from datetime import datetime
 
 from collections import OrderedDict
+from numpy import zeros, ceil,savetxt,loadtxt
 import numpy as np
+import googlemaps
+import time
+
 import sys
 import os
 import config
@@ -19,11 +24,11 @@ from rq import Queue
 from rq.job import Job
 from worker import conn
 q = Queue(connection=conn)
-import pickle
 
 from helpers import findRelativeDelta
+from operator import itemgetter
 from interactions import newPool
-from models import  Carpooler,Pool, Trip,ensure_carpooler_notNone,Team,TempTeam
+from models import  Carpooler,Pool, Trip,ensure_carpooler_notNone,Team,TempTeam,Trip_Distance,Event_Distance
 from groupThere.GroupThere import GroupThere
 
 from GT_manager import create_generic_parameters
@@ -33,6 +38,7 @@ from app import app,request,abort
 from database import db
 from emailer import Emailer
 emailer=Emailer(q)
+gmaps = googlemaps.Client(key=os.environ['DISTMAT_API_KEY'])
 #usage:
 # emailer.email(toAddress,message="",subject="")
 # emailer.self_email(message=message,subject=subject)
@@ -444,12 +450,17 @@ def api_create_trip():
 
 
 				db.session.commit()
+				job = q.enqueue_call(func=get_trip_dists,kwargs = {'carpooler_id':current_user.id,'pool_id':pool.id},result_ttl=5000)
+				print("job.get_id() = " + str(job.get_id()))
+				print(job.get_id())
 				return "Added trip to database!",200
 			except Exception as exc:
 				print(exc)
 				return str(exc),400
 	else:
 		return "Input invalid - errors: " + str(tripform.errors) +" (FLASK)",500
+
+
 
 @app.route('/api/create_team/',methods=['POST'])
 @login_required
@@ -637,7 +648,6 @@ def populate_generic(n,numberPools=2,randGen = False):
 
 			if 'joinPools' in fullDict['Pool']:
 				for pool_id in fullDict['Pool']['joinPools']:
-					# pool_id = pool__id
 					pool = Pool.query.filter_by(id=pool_id).first()
 					if pool is not None:
 						trip = None
@@ -741,4 +751,150 @@ def clear_data():
 	metadata = str(vars(db.metadata))
 	return metadata,200
 
+
+
+
+
+
+def get_trip_dists(carpooler_id,pool_id):
+	print("In get_trip_dists({carpooler_id},{pool_id})".format(carpooler_id=carpooler_id,pool_id=pool_id))
+	with app.app_context():
+		pool = Pool.query.filter_by(id=pool_id).first()
+		carpooler= Carpooler.query.filter_by(id=carpooler_id).first()
+		trip = Trip.query.filter_by(carpooler_id=carpooler_id,pool_id=pool_id).first()
+		if (pool is None) or (carpooler is None) or (trip is None):
+			print("Carpooler, or trip, or pool not found!")
+			assert(True==False) #Throw an informative exception ASAP!
+			# return "Carpooler, or trip, or pool not found!"
+		leaveTime=pool.eventDateTime - relativedelta(hours=1)
+		new_address = trip.address
+		dest = pool.eventAddress
+		others =[{'id':other_trip.carpooler_id,'address':other_trip.address} for other_trip in pool.members if (other_trip.carpooler_id !=carpooler.id)]
+
+		print("Generating Distance Objects")
+		from_new_address = gen_dist_row(new_address,others,leaveTime)
+		print("Got from_new_address!")
+		to_new_address=gen_dist_col(new_address,others,leaveTime)
+		print("Got to_new_address!")
+		to_event = gen_one_distance(new_address,dest,leaveTime)
+
+
+		for i in range(len(others)):
+			from_new_dist = Trip_Distance()
+			to_new_dist = Trip_Distance()
+
+			from_new_dist.pool_id = pool.id
+			from_new_dist.from_carpooler_id = carpooler.id
+			from_new_dist.to_carpooler_id = from_new_address[i]['id']
+			from_new_dist.feet = from_new_address[i]['distance']
+			from_new_dist.seconds = from_new_address[i]['duration']
+
+			to_new_dist.pool_id = pool.id
+			to_new_dist.from_carpooler_id = to_new_address[i]['id']
+			to_new_dist.to_carpooler_id = carpooler.id
+			to_new_dist.feet = to_new_address[i]['distance']
+			to_new_dist.seconds = to_new_address[i]['duration']
+
+			db.session.add(from_new_dist)
+			db.session.add(to_new_dist)
+
+
+		print("Processed all 'others'!")
+		to_event_dist = Event_Distance()
+		to_event_dist.pool_id = pool.id
+		to_event_dist.carpooler_id = carpooler.id
+		to_event_dist.feet = to_event['distance']
+		to_event_dist.seconds = to_event['duration']
+		db.session.add(to_event_dist)
+		db.session.commit()
+
+		print("Committed to-event distance!")
+		return
+
+
+# docs for gmaps https://developers.google.com/maps/documentation/distance-matrix/intro#traffic-model
+#origin is a string, leaveTime is datetime, others is list as [{id:,address:},...]
+def gen_dist_row(origin,others,leaveTime):
+	print("In gen_dist_row")
+	n = len(others)
+	numAtATime=10
+	distances=[]
+	durations=[]
+	durations_in_traffic=[]
+	for k in range(0,int(ceil(n/numAtATime))):
+		first= numAtATime*k
+		last = min(numAtATime*(k+1),n)
+		getter = itemgetter(*range(first,last))
+		dests = [others[i]['address'] for i in range(first,last)]
+		# best_guess
+		# optimistic
+		# pessimistic
+
+		matrix = gmaps.distance_matrix([origin],dests,mode='driving',language='en',avoid='tolls',units='imperial',departure_time=leaveTime,traffic_model='best_guess')
+
+		# if ((matrix.get('rows') is not None) and (len(matrix.get('rows'))>0)):
+		if (last-first)>1:
+			distances.extend([ element['distance']['value'] for element in getter(matrix['rows'][0]['elements']) ])
+
+			durations.extend([element['duration']['value'] for element in getter(matrix['rows'][0]['elements']) ])
+			durations_in_traffic.extend([element['duration_in_traffic']['value'] for element in getter(matrix['rows'][0]['elements']) ])
+		else:
+			distances.append(matrix['rows'][0]['elements'][0]['distance']['value'])
+			durations.append(matrix['rows'][0]['elements'][0]['duration']['value'])
+			durations_in_traffic.append(matrix['rows'][0]['elements'][0]['duration_in_traffic']['value'])
+
+
+		if (int(ceil(n/numAtATime)) > 1):
+			time.sleep(1) #To prevent API from overloading
+	labeled = [{'id':others[ind]['id'], 'distance':distances[ind],'duration':durations_in_traffic[ind]} for ind in range(len(others))]
+	return labeled
+
+#dest is a string, leaveTime is datetime, others is list as [{id:,address:},...]
+def gen_dist_col(dest,others,leaveTime):
+	print("In gen_dist_col")
+	n = len(others)
+	numAtATime=10
+	distances=[]
+	durations=[]
+	durations_in_traffic=[]
+	for k in range(0,int(ceil(n/numAtATime))):
+		first= numAtATime*k
+		last = min(numAtATime*(k+1),n)
+		getter = itemgetter(*range(first,last))
+		origins = [others[i]['address'] for i in range(first,last)]
+		# best_guess
+		# optimistic
+		# pessimistic
+		matrix = gmaps.distance_matrix(origins,[dest],mode='driving',language='en',avoid='tolls',units='imperial',departure_time=leaveTime,traffic_model='best_guess')
+		# if ((matrix.get('rows') is not None) and (len(matrix.get('rows'))>0)):
+
+
+
+		if (last-first)>1:
+			distances.extend([ row['elements'][0]['distance']['value'] for row in getter(matrix['rows']) ])
+			durations.extend([ row['elements'][0]['duration']['value'] for row in getter(matrix['rows']) ])
+			durations_in_traffic.extend([ row['elements'][0]['duration_in_traffic']['value'] for row in getter(matrix['rows']) ])
+		else:
+			distances.append(matrix['rows'][0]['elements'][0]['distance']['value'])
+			durations.append(matrix['rows'][0]['elements'][0]['duration']['value'])
+			durations_in_traffic.append(matrix['rows'][0]['elements'][0]['duration_in_traffic']['value'])
+
+		if (int(ceil(n/numAtATime)) > 1):
+			time.sleep(1) #To prevent API from overloading
+	labeled = [{'id':others[ind]['id'], 'distance':distances[ind],'duration':durations_in_traffic[ind]} for ind in range(len(others))]
+	return labeled
+
+
+#origin and dest are strings, leaveTime is datetime
+def gen_one_distance(origin,dest,leaveTime):
+	print("In gen_one_distance")
+	# best_guess
+	# optimistic
+	# pessimistic
+	matrix = gmaps.distance_matrix([origin],[dest],mode='driving',language='en',avoid='tolls',units='imperial',departure_time=leaveTime,traffic_model='best_guess')
+	distance = matrix['rows'][0]['elements'][0]['distance']['value']
+	duration = matrix['rows'][0]['elements'][0]['duration']['value']
+	duration_in_traffic=matrix['rows'][0]['elements'][0]['duration_in_traffic']['value']
+	time.sleep(1) #To prevent API from overloading
+	return {'duration':duration_in_traffic,'distance':distance}
 

@@ -31,8 +31,8 @@ class ProductionConfig(Config):
 	EMAIL = os.environ['EMAIL']
 	EMAIL_PASSWORD = os.environ['EMAIL_PASSWORD']
 	SEND_FILE_MAX_AGE_DEFAULT = 1200#seconds
-	# URL_BASE='https://poolchat.herokuapp.com/'
-	URL_BASE='https://grouptherenow.com/'
+	URL_BASE='https://poolchat.herokuapp.com/'
+	# URL_BASE='www.grouptherenow.com/' #NO SSL!
 
 #NOTE: I can change this to:
 
@@ -41,8 +41,6 @@ class ProductionConfig(Config):
 #As long as I run in a shell:
 
 #heroku config:set MESSENGER_PLATFORM_ACCESS_TOKEN=TOKEN_FROM_ABOVE --remote pro
-
-#The question is: would I rather edit these tokens in .env (for local) and on heroku (for remote), or in my  .env (for local) and in this file config.py (for remote).
 
 class StagingConfig(Config):
 	DEVELOPMENT = True

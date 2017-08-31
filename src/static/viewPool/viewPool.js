@@ -30,13 +30,6 @@ angular.module('myApp.viewPool', ['ngRoute'])
       return Math.floor(secs)%60;
     };
 
-    // $scope.toTime=function(secs){
-    //   hours = Math.floor(secs/3600);
-    //   seconds = secs - hours * 3600;
-    //   minutes = Math.floor(seconds/60);
-    //   seconds = seconds - minutes*60;
-    //   return {'hours':hours,'minutes':minutes,'seconds':seconds};
-    // };
 
     $scope.counter = 0;
     $scope.onTimeout = function(){
@@ -44,9 +37,9 @@ angular.module('myApp.viewPool', ['ngRoute'])
         mytimeout = $timeout($scope.onTimeout,1000);
     };
     var mytimeout = $timeout($scope.onTimeout,1000);
-    $scope.stop = function(){
-        $timeout.cancel(mytimeout);
-    };
+    // $scope.stop = function(){
+    //     $timeout.cancel(mytimeout);
+    // };
 
     $scope.past_addresses=[];
 

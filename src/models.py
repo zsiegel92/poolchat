@@ -451,7 +451,7 @@ class Pool(db.Model):
 	poolName = db.Column(db.String())
 	eventDate = db.Column(db.String())
 	eventTime = db.Column(db.String())#db.Column(db.Time) #Time of event encoded as int?
-	eventDateTime = db.Column(db.DateTime())
+	eventDateTime = db.Column(db.DateTime(timezone=True))
 	latenessWindow = db.Column(db.Integer())
 	eventAddress = db.Column(db.String())
 	eventContact = db.Column(db.String())

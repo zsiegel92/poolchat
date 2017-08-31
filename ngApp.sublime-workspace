@@ -1,0 +1,993 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"l",
+				"login_manager\tstatement"
+			],
+			[
+				"generate_groups",
+				"generate_groups_bits\tfunction"
+			],
+			[
+				"filename_dur",
+				"filename_eventdur\tparam"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "src/static/app.css",
+			"settings":
+			{
+				"buffer_size": 7087,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/static/app.js",
+			"settings":
+			{
+				"buffer_size": 2779,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/static/services.js",
+			"settings":
+			{
+				"buffer_size": 3452,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/static/index.html",
+			"settings":
+			{
+				"buffer_size": 4060,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+		[
+			[
+				[
+					"Packages/C++/C++ Single File.sublime-build",
+					""
+				],
+				[
+					"Packages/C++/C++ Single File.sublime-build",
+					"Run"
+				]
+			],
+			[
+				"Packages/C++/C++ Single File.sublime-build",
+				""
+			]
+		]
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 140.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"project",
+				"Project: Close"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"fontCycler",
+				"FontCycler - Next Font"
+			],
+			[
+				"LIST",
+				"Package Control: List Packages"
+			],
+			[
+				"colorsublime",
+				"Colorsublime: Install Theme"
+			],
+			[
+				"list",
+				"Package Control: List Packages"
+			],
+			[
+				"list packages",
+				"Package Control: List Packages"
+			]
+		],
+		"width": 489.0
+	},
+	"console":
+	{
+		"height": 126.0,
+		"history":
+		[
+			"import socket; socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((\"localhost\", 49309))",
+			"import socket; socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((\"localhost\", 49308))",
+			"import socket; socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((\"localhost\", 49309))",
+			"import socket; socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect((\"localhost\", 49269))",
+			"import urllib.request,os,hashlib; h = 'df21e130d211cfc94d9b0905775a7c0f' + '1e3d39e33b79698005270310898eea76'; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); by = urllib.request.urlopen( 'http://packagecontrol.io/' + pf.replace(' ', '%20')).read(); dh = hashlib.sha256(by).hexdigest(); print('Error validating download (got %s instead of %s), please try manual install' % (dh, h)) if dh != h else open(os.path.join( ipp, pf), 'wb' ).write(by)"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": true,
+		"side_bar_visible": false,
+		"status_bar_visible": true
+	},
+	"expanded_folders":
+	[
+	],
+	"file_history":
+	[
+		"/Users/Zach/poolchat/src/database.py",
+		"/Users/Zach/poolchat/src/manage.py",
+		"/Users/Zach/poolchat/src/emailer.py",
+		"/Users/Zach/poolchat/src/models.py",
+		"/Users/Zach/poolchat/src/app_factory.py",
+		"/Users/Zach/poolchat/src/utils.py",
+		"/Users/Zach/poolchat/src/login.py",
+		"/Users/Zach/poolchat/src/helpers.py",
+		"/Users/Zach/poolchat/src/encryption.py",
+		"/Users/Zach/poolchat/src/config.py",
+		"/Users/Zach/poolchat/src/app.py",
+		"/Users/Zach/poolchat/src/worker.py",
+		"/Users/Zach/poolchat/src/loginViews.py",
+		"/Users/Zach/poolchat/src/wtforms_ext.py",
+		"/Users/Zach/poolchat/src/static/confirmEmail/confirmTeamEmail.html",
+		"/Users/Zach/poolchat/src/untitled.py",
+		"/Users/Zach/poolchat/src/GT_manager.py",
+		"/Users/Zach/poolchat/src/pageviews.py",
+		"/Users/Zach/poolchat/src/scheduler_tasks.py",
+		"/Users/Zach/poolchat/src/db_test_stuff.py",
+		"/Users/Zach/poolchat/src/email_all_users.py",
+		"/Users/Zach/poolchat/src/cron_email_test.py",
+		"/Users/Zach/poolchat/src/templates/triggers.html",
+		"/Users/Zach/poolchat/src/groupThere/__init__.py",
+		"/Users/Zach/poolchat/src/static/main.js",
+		"/Users/Zach/poolchat/src/utils",
+		"/Users/Zach/poolchat/src/GT_PYTHON/GroupThere.py",
+		"/Users/Zach/poolchat/src/GT_PYTHON/__init__.py",
+		"/Users/Zach/poolchat/src/interactions.py",
+		"/Users/Zach/poolchat/src/externalActions.py",
+		"/Users/Zach/Drive/GroupThere_Python/src/helpers.py",
+		"/Users/Zach/Drive/GroupThere_Python/src/gen_func_test.py",
+		"/Users/Zach/Drive/GroupThere_Python/src/subsets.py",
+		"/Users/Zach/Drive/GroupThere_Python/src/SystemParam.py",
+		"/Users/Zach/Drive/GroupThere_Python/src/test_assignment.py",
+		"/Users/Zach/Drive/GroupThere_Python/src/GroupThere.py",
+		"/Users/Zach/Drive/GroupThere_Python/src/subsets2.py",
+		"/Users/Zach/Drive/GroupThere_Python/src/Experiments/helpers_non_bax.py",
+		"/Users/Zach/Drive/GroupThere_Python/src/supertest.py",
+		"/Users/Zach/Drive/GroupThere_Python/src/gen_func_test2.py",
+		"/Users/Zach/Desktop/gen_func_test.py",
+		"/Users/Zach/Desktop/gengroups_test.py",
+		"/Users/Zach/Drive/WebDev Resources/Python (and other) API Examples/decorator_test.py",
+		"/Users/Zach/poolchat/src/templates/index.html",
+		"/Users/Zach/poolchat/src/from flask_sqlalchemy import SQLAlchemy",
+		"/Users/Zach/Drive/WebDev Resources/sqlAlchemy_Association_Example.py",
+		"/Users/Zach/poolchat/src/messengerbot/__init__.py",
+		"/Users/Zach/poolchat/src/nodeOb.py",
+		"/Users/Zach/Desktop/TutorMeLA/Marissa_c++/mats.txt",
+		"/Users/Zach/poolchat/environment.yml",
+		"/Users/Zach/Library/Application Support/Sublime Text 3/Packages/User/SublimeLinter.sublime-settings",
+		"/Users/Zach/Desktop/Cpp/arrTest.cpp",
+		"/Users/Zach/Desktop/Cpp/inputTest.cpp",
+		"/Users/Zach/Desktop/Cpp/friends.cpp",
+		"/Users/Zach/Desktop/Cpp/freds.cpp",
+		"/Users/Zach/.bashrc",
+		"/Users/Zach/Desktop/Cpp/friends.c",
+		"/Users/Zach/Drive/Stop LAPD Spying/Predpol Project/Code/.gitignore",
+		"/Users/Zach/Drive/Stop LAPD Spying/Predpol Project/Code/how_to_generate_gitignore.txt",
+		"/Users/Zach/Drive/Stop LAPD Spying/Predpol Project/Code/forDianna/Run2/Format_for_Dianna_byEvent_aggregated_Run2.m",
+		"/Users/Zach/Drive/Carpooling/m_PDP_TW/.gitignore",
+		"/Users/Zach/Drive/Carpooling/m_PDP_TW/README",
+		"/Users/Zach/Drive/Carpooling/m_PDP_TW/src/distIndices.m",
+		"/Users/Zach/Drive/Carpooling/m_PDP_TW/src/shortTime.m",
+		"/Users/Zach/Drive/Carpooling/m_PDP_TW/src/scratch.m",
+		"/Users/Zach/Drive/Carpooling/m_PDP_TW/src/MPDPTW_test.m",
+		"/Users/Zach/Drive/Carpooling/m_PDP_TW/src/matlabmail.m",
+		"/Users/Zach/Drive/Carpooling/m_PDP_TW/src/ImportSystem.m",
+		"/Users/Zach/Drive/Carpooling/m_PDP_TW/src/import_google_form.m",
+		"/Users/Zach/Drive/Carpooling/m_PDP_TW/src/import_google_form_extra_real.m",
+		"/Users/Zach/Drive/Carpooling/m_PDP_TW/src/import_google_form_extra.m",
+		"/Users/Zach/Drive/Carpooling/m_PDP_TW/src/GroupThereMail.m",
+		"/Users/Zach/Drive/Carpooling/m_PDP_TW/src/GroupThere.m",
+		"/Users/Zach/Drive/Carpooling/m_PDP_TW/src/genGroups.m",
+		"/Users/Zach/Drive/Carpooling/m_PDP_TW/src/genGroups_extra.m",
+		"/Users/Zach/Drive/Carpooling/m_PDP_TW/src/Generate_Dist_Mat.m",
+		"/Users/Zach/Drive/Carpooling/m_PDP_TW/src/genConstraints.m",
+		"/Users/Zach/Drive/Carpooling/m_PDP_TW/src/distmat_onerow_onecol.m",
+		"/Users/Zach/condaPool/environment.yml",
+		"/Users/Zach/poolchat/.envPython",
+		"/Users/Zach/poolchat/.envConda",
+		"/Users/Zach/poolchat/.env",
+		"/Users/Zach/condaPool/Dockerfile",
+		"/Users/Zach/Desktop/docktest_condaStyle/environment.yml",
+		"/Users/Zach/Desktop/docktest_condaStyle/Dockerfile",
+		"/Users/Zach/Desktop/docktest_condaStyle/app.py",
+		"/Users/Zach/Desktop/docktest_PythonStyle/app.py",
+		"/Users/Zach/Desktop/docktest_PythonStyle/Dockerfile",
+		"/Users/Zach/condaPool/docker-compose.yml",
+		"/Users/Zach/condaPool/src/manage.py",
+		"/Users/Zach/condaPool/src/app.py",
+		"/Users/Zach/poolchat/src/fieldTrees.py",
+		"/Users/Zach/poolchat/src/webhookviews.py",
+		"/Users/Zach/poolchat/src/Scratch/menu_fieldstates.py",
+		"/Users/Zach/poolchat/src/modelDecoration.py",
+		"/Users/Zach/Library/Application Support/Sublime Text 3/Packages/User/Default (OSX).sublime-keymap",
+		"/Users/Zach/Library/Application Support/Sublime Text 3/Packages/User/Origami.sublime-settings",
+		"/Users/Zach/Library/Application Support/Sublime Text 3/Packages/Origami/Default (OSX).sublime-keymap",
+		"/Users/Zach/Library/Application Support/Sublime Text 3/Packages/Origami/Origami.sublime-settings",
+		"/Users/Zach/Desktop/carpoolAppResources/referral Postback from http-::m.me:GroupThere?ref=myparam.txt",
+		"/Users/Zach/Library/Application Support/Sublime Text 3/Packages/User/Anaconda.sublime-settings",
+		"/Users/Zach/Library/Application Support/Sublime Text 3/Packages/User/Package Control.sublime-settings",
+		"/Users/Zach/poolchat/src/testFile.py",
+		"/Users/Zach/poolchat/src/scratch.py",
+		"/Users/Zach/poolchat/src/optimize.py"
+	],
+	"find":
+	{
+		"height": 33.0
+	},
+	"find_in_files":
+	{
+		"height": 94.0,
+		"where_history":
+		[
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"send_",
+			"email",
+			".password",
+			"recover-key",
+			"<b>",
+			"registerForm",
+			"loginForm",
+			"response.data",
+			"{{",
+			"accept_tos",
+			"isLoggedIn",
+			"logout",
+			"email",
+			"boolean",
+			"db.Boolean",
+			"render_template",
+			"render_template()",
+			"render_template(",
+			"render_template",
+			"body",
+			"render_template",
+			"emailer.",
+			"for ",
+			"for (",
+			"for(",
+			"api/get_teams",
+			"emailer",
+			"Trip()",
+			"api/register",
+			"datetimetext",
+			"parse",
+			"request.value",
+			"request.val",
+			"request.",
+			"db.session.add",
+			"view_carpool",
+			"jsonify",
+			"drop_table",
+			"dropping all",
+			"drop_table",
+			"drop_tab",
+			"id",
+			"create_generic",
+			"populate_generic",
+			"email",
+			"populate_generic",
+			"db.session",
+			"current_user",
+			"dropTabs",
+			"view_pool",
+			"logon",
+			".query",
+			"emailField",
+			"urlparse",
+			"jsonify",
+			"ng_mode",
+			"type_",
+			"_type",
+			"field",
+			"click",
+			"output_list",
+			"triggers.html",
+			"doGroupThere",
+			"gt_fromBasicParams",
+			"enqueue",
+			"doGroupThere",
+			"GTresults",
+			"gt_fromBasic",
+			"doGroupThere",
+			"post_optimiz",
+			"systemParamFromPool",
+			"enqueue",
+			"populate_generic",
+			"ordered",
+			"random",
+			"copy",
+			"requests",
+			"newPool",
+			"generate_groups_",
+			"systemparam",
+			"mailparam",
+			"enqueue",
+			"enqueue_group",
+			"GT_results",
+			"emailer.",
+			"GroupThere",
+			"enqueue_group",
+			"doGroupThere",
+			"email_assignments",
+			"flatten",
+			"post_optimization",
+			"post_optimization_update",
+			"optimize",
+			"model",
+			"generate_g",
+			"sayname",
+			"systemparam",
+			"fromPool",
+			"MailParam",
+			"app",
+			"systemParam",
+			"relativeDel",
+			"findRelativeDelta",
+			"q",
+			"q.",
+			"enqueue",
+			"relativeDelta",
+			"OrderedDi",
+			"pool_forma",
+			"pool_formal",
+			"localTest",
+			"localTesting",
+			"en route",
+			"default",
+			"detault",
+			"default",
+			"direct_email",
+			"q.",
+			"better fire",
+			"eventEmail",
+			"email",
+			"query",
+			"Carpooler.qu",
+			"prefix",
+			"os.",
+			"isString",
+			"view_pool",
+			"success:"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"maxPeople",
+			"canLeaveAt",
+			"filelistDist",
+			"filename_dist",
+			"afilename",
+			"email",
+			"fireNotice"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 2,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "src/static/app.css",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 7087,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+								},
+								"icon":
+								{
+								},
+								"open":
+								{
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
+							[
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content"
+							],
+							"syntax": "Packages/CSS/CSS.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "src/static/app.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2779,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+									"1":
+									[
+										11,
+										12
+									]
+								},
+								"icon":
+								{
+									"1":
+									[
+										"Packages/BracketHighlighter/icons/single_quote.png",
+										"brackethighlighter.default"
+									]
+								},
+								"open":
+								{
+									"1":
+									[
+										0,
+										1
+									]
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
+							[
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content"
+							],
+							"git_gutter_is_enabled": true,
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "src/static/services.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3452,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								332,
+								332
+							]
+						],
+						"settings":
+						{
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+									"1":
+									[
+										398,
+										399
+									]
+								},
+								"icon":
+								{
+									"1":
+									[
+										"Packages/BracketHighlighter/icons/curly_bracket.png",
+										"brackethighlighter.default"
+									]
+								},
+								"open":
+								{
+									"1":
+									[
+										259,
+										260
+									]
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
+							[
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content"
+							],
+							"git_gutter_is_enabled": true,
+							"syntax": "Packages/JavaScript/JavaScript.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 3,
+					"file": "src/static/index.html",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4060,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4022,
+								4022
+							]
+						],
+						"settings":
+						{
+							"bracket_highlighter.busy": false,
+							"bracket_highlighter.locations":
+							{
+								"close":
+								{
+									"1":
+									[
+										4030,
+										4031
+									]
+								},
+								"icon":
+								{
+									"1":
+									[
+										"Packages/BracketHighlighter/icons/double_quote.png",
+										"brackethighlighter.default"
+									]
+								},
+								"open":
+								{
+									"1":
+									[
+										3992,
+										3993
+									]
+								},
+								"unmatched":
+								{
+								}
+							},
+							"bracket_highlighter.regions":
+							[
+								"bh_single_quote",
+								"bh_single_quote_center",
+								"bh_single_quote_open",
+								"bh_single_quote_close",
+								"bh_single_quote_content",
+								"bh_round",
+								"bh_round_center",
+								"bh_round_open",
+								"bh_round_close",
+								"bh_round_content",
+								"bh_regex",
+								"bh_regex_center",
+								"bh_regex_open",
+								"bh_regex_close",
+								"bh_regex_content",
+								"bh_angle",
+								"bh_angle_center",
+								"bh_angle_open",
+								"bh_angle_close",
+								"bh_angle_content",
+								"bh_double_quote",
+								"bh_double_quote_center",
+								"bh_double_quote_open",
+								"bh_double_quote_close",
+								"bh_double_quote_content",
+								"bh_tag",
+								"bh_tag_center",
+								"bh_tag_open",
+								"bh_tag_close",
+								"bh_tag_content",
+								"bh_curly",
+								"bh_curly_center",
+								"bh_curly_open",
+								"bh_curly_close",
+								"bh_curly_content",
+								"bh_square",
+								"bh_square_center",
+								"bh_square_open",
+								"bh_square_close",
+								"bh_square_content",
+								"bh_unmatched",
+								"bh_unmatched_center",
+								"bh_unmatched_open",
+								"bh_unmatched_close",
+								"bh_unmatched_content",
+								"bh_c_define",
+								"bh_c_define_center",
+								"bh_c_define_open",
+								"bh_c_define_close",
+								"bh_c_define_content",
+								"bh_default",
+								"bh_default_center",
+								"bh_default_open",
+								"bh_default_close",
+								"bh_default_content"
+							],
+							"git_gutter_is_enabled": true,
+							"syntax": "Packages/HTML/HTML.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 260.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 23.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			],
+			[
+				1,
+				0,
+				2,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			0.5,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 92.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "Packages/C++/C++ Single File.sublime-build",
+	"project": "poolchat.sublime-project",
+	"replace":
+	{
+		"height": 42.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"",
+				"~/poolchat/src/models.py"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"last_filter": "",
+		"selected_items":
+		[
+			[
+				"",
+				"~/poolchat/controllers.sublime-workspace"
+			]
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 294.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 360.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": false,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": false,
+	"side_bar_width": 50.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

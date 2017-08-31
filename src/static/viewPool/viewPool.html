@@ -1,5 +1,14 @@
 <!-- access poolId with $routeParams.poolId
 Make sure $scope, $route, $routeParams are injected in controller -->
+Total seconds: {{counter}}
+<br>
+<br>
+
+<!-- toTime: {{toTime(counter)}} -->
+
+
+<button ng-click="stop()">Stop</button>
+
 <div class="container">
     <div class="row">
         <div class='col' style="float:left; width:50%;">
@@ -8,7 +17,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                 {{pool_id_message}}
             </div>
             <form ng-show="eligible_pools" role='form' name="joinForm" ng-model="joinForm" ng-submit="goto_join()">
-                <select ng-model="joinForm.ngPool" name="pool" required>
+                <select ng-change="selectedPool_obj=eligible_pools[joinForm.ngPool];" ng-model="joinForm.ngPool" name="pool" required>
                     <option ng-repeat="pool in eligible_pools"  ng-model="selectedPool" ng-value="{{$index}}">'{{pool.name}}' - with {{pool.team_names | joinBy:', '}}</option>
                     <!-- Try: {{team.name.join(', ')}} -->
                 </select>
@@ -19,7 +28,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                 <br>
                 There are no available events!
                 <br>
-                <a href='#!/makePool'>Make a new event ;) </a>
+                <a href='#!/makePool'>Create a new event ;) </a>
             </div>
             <span ng-show="eligible_pools.length>0"> <br> <a href='#!/makePool'>Make a new event</a></span>
             <span> <br> <b><a href='#!/joinTeam'>Join a team (and access their events)</a></b> </span>
@@ -29,16 +38,18 @@ Make sure $scope, $route, $routeParams are injected in controller -->
             <div ng-show="joinForm.$dirty && joinForm.ngPool >=0">
                 <h3> Selected Event: </h3>
                 <ul>
-                    <li> Event Name: '{{eligible_pools[joinForm.ngPool].name}}' with <span ng-repeat="team in eligible_pools[joinForm.ngPool].teams">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{team.name}}</span></li>
+                    <li> Event Name: '{{selectedPool_obj.name}}' with <span ng-repeat="team in selectedPool_obj.teams">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{team.name}}</span></li>
                     <!-- {{team.name}}{{$last ? '': ', '}} -->
-                    <li> Event Address: {{eligible_pools[joinForm.ngPool].address}} </li>
-                    <li> Event Date: {{eligible_pools[joinForm.ngPool].date }} </li>
-                    <li> Event Time: {{eligible_pools[joinForm.ngPool].time }} </li>
-                    <li> Event DateTime: {{eligible_pools[joinForm.ngPool].dateTime | date:'medium' }} </li>
-                    <li> Event Contact Email: {{eligible_pools[joinForm.ngPool].email}} </li>
-                    <li> Non-Organizers can arrive up to {{eligible_pools[joinForm.ngPool].latenessWindow}} minutes after {{eligible_pools[joinForm.ngPool].time}}</li>
-                    <li> Carpooling instructions will be sent out {{eligible_pools[joinForm.ngPool].fireNotice}}  hours before {{eligible_pools[joinForm.ngPool].time}} on {{eligible_pools[joinForm.ngPool].date}}</li>
-                    <li> Notice given for carpooling instructions: {{eligible_pools[joinForm.ngPool].fireNotice}} hours</li>
+                    <li> Event Address: {{selectedPool_obj.address}} </li>
+                    <li> Event Date: {{selectedPool_obj.date }} </li>
+                    <li> Event Time: {{selectedPool_obj.time }} </li>
+                    <li> Event DateTime: {{selectedPool_obj.dateTime | date:'medium' }} </li>
+                    <li> <b>Happening in  {{toDays(selectedPool_obj.seconds_til-counter)}} days, {{toHours(selectedPool_obj.seconds_til-counter)}} hours, {{toMinutes(selectedPool_obj.seconds_til-counter)}} minues, {{toSeconds(selectedPool_obj.seconds_til-counter)}} seconds</b></li>
+                    <li> Event Contact Email: {{selectedPool_obj.email}} </li>
+                    <li> Non-Organizers can arrive up to {{selectedPool_obj.latenessWindow}} minutes after {{selectedPool_obj.time}}</li>
+                    <li> Carpooling instructions will be sent out {{selectedPool_obj.fireNotice}}  hours before {{selectedPool_obj.time}} on {{selectedPool_obj.date}}</li>
+                    <li> <b>Instructions will be send out in  {{toDays(selectedPool_obj.seconds_til_instructions-counter)}} days, {{toHours(selectedPool_obj.seconds_til_instructions-counter)}} hours, {{toMinutes(selectedPool_obj.seconds_til_instructions-counter)}} minues, {{toSeconds(selectedPool_obj.seconds_til_instructions-counter)}} seconds</b></li>
+                    <!-- <li> Notice given for carpooling instructions: {{selectedPool_obj.fireNotice}} hours</li> -->
                 </ul>
             </div>
             <div ng-if="resultText">
@@ -66,9 +77,11 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                             <li> Event Date: {{pool.date}} </li>
                             <li> Event Time: {{pool.time}} </li>
                             <li> Event DateTime: {{pool.dateTime}} </li>
+                            <li> <b>Happening in  {{toDays(pool.seconds_til-counter)}} days, {{toHours(pool.seconds_til-counter)}} hours, {{toMinutes(pool.seconds_til-counter)}} minues, {{toSeconds(pool.seconds_til-counter)}} seconds</b></li>
                             <li> Event Contact Email: {{pool.email}} </li>
                             <li> Non-Organizers can arrive up to {{pool.latenessWindow}} minutes after {{pool.time}}</li>
                             <li> Carpooling instructions will be sent out {{pool.fireNotice}} hours before {{pool.time}} on {{pool.date}}</li>
+                            <li> <b>Instructions will be send out in  {{toDays(pool.seconds_til_instructions-counter)}} days, {{toHours(pool.seconds_til_instructions-counter)}} hours, {{toMinutes(pool.seconds_til_instructions-counter)}} minues, {{toSeconds(pool.seconds_til_instructions-counter)}} seconds</b></li>
                             <li><b>Your Trip:</b>
                                 <ul>
                                     <li>Your origin: {{pool.trip.address}}</li>

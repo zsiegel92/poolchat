@@ -162,7 +162,7 @@ angular.module('myApp.makePool', ['ngRoute'])
     $scope.initial.ngTime.setDate($scope.initial.ngDate.getDate());
     $scope.initial.ngTime.setMonth($scope.initial.ngDate.getMonth());
     $scope.initial.ngTime.setFullYear($scope.initial.ngDate.getFullYear());
-    var dateTime=$filter('date')($scope.initial.ngTime,'MM-dd-yyyy HH:mm');
+    var dateTime=$filter('date')($scope.initial.ngTime,'MM-dd-yyyy HH:mm Z');
 
 
     $scope.disabled = true;

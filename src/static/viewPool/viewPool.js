@@ -11,8 +11,42 @@ angular.module('myApp.viewPool', ['ngRoute'])
     });
 }])
 .controller('viewPoolController',
-  ['$scope', '$location', 'AuthService','$route', '$routeParams','$log','$http','$window',
-  function ($scope, $location, AuthService,$route,$routeParams,$log,$http,$window) {
+  ['$scope', '$location', 'AuthService','$route', '$routeParams','$log','$http','$window','$timeout',
+  function ($scope, $location, AuthService,$route,$routeParams,$log,$http,$window,$timeout) {
+
+    var hours=0;
+    var minutes = 0;
+    var seconds=0;
+    $scope.toDays = function(secs){
+      return Math.floor(secs/86400);
+    };
+    $scope.toHours = function(secs){
+      return Math.floor(secs/3600) % 24;
+    };
+    $scope.toMinutes = function(secs){
+      return Math.floor(secs/60) % 60;
+    };
+    $scope.toSeconds = function(secs){
+      return Math.floor(secs)%60;
+    };
+
+    // $scope.toTime=function(secs){
+    //   hours = Math.floor(secs/3600);
+    //   seconds = secs - hours * 3600;
+    //   minutes = Math.floor(seconds/60);
+    //   seconds = seconds - minutes*60;
+    //   return {'hours':hours,'minutes':minutes,'seconds':seconds};
+    // };
+
+    $scope.counter = 0;
+    $scope.onTimeout = function(){
+        $scope.counter++;
+        mytimeout = $timeout($scope.onTimeout,1000);
+    };
+    var mytimeout = $timeout($scope.onTimeout,1000);
+    $scope.stop = function(){
+        $timeout.cancel(mytimeout);
+    };
 
     $scope.past_addresses=[];
 
@@ -55,6 +89,20 @@ angular.module('myApp.viewPool', ['ngRoute'])
             }
           }
 
+          var now = new Date();
+          for (let pool of $scope.eligible_pools) {
+            pool.seconds_til = Math.floor((new Date(Date.parse(pool.dateTime)).getTime() - now.getTime())/1000);
+            pool.seconds_til_instructions = Math.floor((new Date(Date.parse(pool.dateTime)).getTime() - pool.fireNotice*60*60*1000 - now.getTime())/1000);
+            // new Date(Date.parse(pool.dateTime)).getTime()
+            // (pool.dateTime.getTime() - now.getTime())/1000;
+          }
+          for (let pool of $scope.joined_pools) {
+            pool.seconds_til = Math.floor((new Date(Date.parse(pool.dateTime)).getTime() - now.getTime())/1000);
+            pool.seconds_til_instructions = Math.floor((new Date(Date.parse(pool.dateTime)).getTime() - pool.fireNotice*60*60*1000 - now.getTime())/1000);
+            // new Date(Date.parse(pool.dateTime)).getTime()
+            // (pool.dateTime.getTime() - now.getTime())/1000;
+          }
+
 
           $log.log("Successfully queried for teams, joined_pools, and eligible_pools!");
           $log.log(response.data);
@@ -69,19 +117,19 @@ angular.module('myApp.viewPool', ['ngRoute'])
       return new Date(Date.parse(dateStr));
     };
 
-  $scope.getPoolInfoForUser();
+    $scope.getPoolInfoForUser();
 
-  //route: '/joinPool/:id/name/:name/address/:address/date/:date/time/:time/email/:email/notice/:notice/latenessWindow/:latenessWindow'
-  $scope.goto_join = function(){
-    var pool = $scope.eligible_pools[$scope.joinForm.ngPool];
-    var cp = $scope.carpooler;
+    //route: '/joinPool/:id/name/:name/address/:address/date/:date/time/:time/email/:email/notice/:notice/latenessWindow/:latenessWindow'
+    $scope.goto_join = function(){
+      var pool = $scope.eligible_pools[$scope.joinForm.ngPool];
+      var cp = $scope.carpooler;
 
-    var f= $window.encodeURIComponent;
-    var pth = '/joinPool/' + f(pool.id) +'/name/'+ f(pool.name) + '/address/' + f(pool.address) + '/date/' + f(pool.date) + '/time/' + f(pool.time) + '/dateTime/' + f(pool.dateTime) + '/email/' + f(pool.email) + '/notice/' + f(pool.fireNotice) + "/latenessWindow/" + f(pool.latenessWindow) +"/carpooler/cpname/" + f(cp.name) + '/cpfirst/' + f(cp.first) + '/cplast/' + f(cp.last) + '/cpemail/' + f(cp.email) + '/past_addresses/' + f(JSON.stringify($scope.past_addresses)) + '/max_seats/' + f($scope.max_num_seats) + '/ever_must_drive/' + f($scope.ever_must_drive) + '/ever_organizer/' + f($scope.ever_organizer);
-    $log.log(pth);
-    // $log.log($window.encodeURIComponent(pth));
-    // $location.path($window.encodeURIComponent(pth));
-    $location.path(pth);
+      var f= $window.encodeURIComponent;
+      var pth = '/joinPool/' + f(pool.id) +'/name/'+ f(pool.name) + '/address/' + f(pool.address) + '/date/' + f(pool.date) + '/time/' + f(pool.time) + '/dateTime/' + f(pool.dateTime) + '/email/' + f(pool.email) + '/notice/' + f(pool.fireNotice) + "/latenessWindow/" + f(pool.latenessWindow) +"/carpooler/cpname/" + f(cp.name) + '/cpfirst/' + f(cp.first) + '/cplast/' + f(cp.last) + '/cpemail/' + f(cp.email) + '/past_addresses/' + f(JSON.stringify($scope.past_addresses)) + '/max_seats/' + f($scope.max_num_seats) + '/ever_must_drive/' + f($scope.ever_must_drive) + '/ever_organizer/' + f($scope.ever_organizer);
+      $log.log(pth);
+      // $log.log($window.encodeURIComponent(pth));
+      // $location.path($window.encodeURIComponent(pth));
+      $location.path(pth);
   };
 
 }]);

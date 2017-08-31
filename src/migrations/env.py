@@ -54,6 +54,7 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
+    # compare_type=True added by ZS on 8/30
 
     # this callback is used to prevent an auto-migration from being generated
     # when there are no changes to the schema
@@ -72,6 +73,7 @@ def run_migrations_online():
     connection = engine.connect()
     context.configure(connection=connection,
                       target_metadata=target_metadata,
+                      compare_type=True,
                       process_revision_directives=process_revision_directives,
                       **current_app.extensions['migrate'].configure_args)
 

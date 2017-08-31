@@ -63,8 +63,9 @@ angular.module('myApp.viewPool', ['ngRoute'])
           $scope.max_num_seats =0;
           $scope.ever_must_drive=0;
           $scope.ever_organizer=0;
+          var pool;
           for (var i = 0; i < $scope.joined_pools.length; i++) {
-            var pool = $scope.joined_pools[i];
+            pool = $scope.joined_pools[i];
             ad = pool.trip.address;
             if (ad){
               if ($scope.past_addresses.indexOf(ad) == -1 && ad !=''){
@@ -83,15 +84,15 @@ angular.module('myApp.viewPool', ['ngRoute'])
           }
 
           var now = new Date();
-          for (let pool of $scope.eligible_pools) {
-            pool.seconds_til = Math.floor((new Date(Date.parse(pool.dateTime)).getTime() - now.getTime())/1000);
-            pool.seconds_til_instructions = Math.floor((new Date(Date.parse(pool.dateTime)).getTime() - pool.fireNotice*60*60*1000 - now.getTime())/1000);
+          for (let pool1 of $scope.eligible_pools) {
+            pool1.seconds_til = Math.floor((new Date(Date.parse(pool1.dateTime)).getTime() - now.getTime())/1000);
+            pool1.seconds_til_instructions = Math.floor((new Date(Date.parse(pool1.dateTime)).getTime() - pool1.fireNotice*60*60*1000 - now.getTime())/1000);
             // new Date(Date.parse(pool.dateTime)).getTime()
             // (pool.dateTime.getTime() - now.getTime())/1000;
           }
-          for (let pool of $scope.joined_pools) {
-            pool.seconds_til = Math.floor((new Date(Date.parse(pool.dateTime)).getTime() - now.getTime())/1000);
-            pool.seconds_til_instructions = Math.floor((new Date(Date.parse(pool.dateTime)).getTime() - pool.fireNotice*60*60*1000 - now.getTime())/1000);
+          for (let pool2 of $scope.joined_pools) {
+            pool2.seconds_til = Math.floor((new Date(Date.parse(pool2.dateTime)).getTime() - now.getTime())/1000);
+            pool2.seconds_til_instructions = Math.floor((new Date(Date.parse(pool2.dateTime)).getTime() - pool2.fireNotice*60*60*1000 - now.getTime())/1000);
             // new Date(Date.parse(pool.dateTime)).getTime()
             // (pool.dateTime.getTime() - now.getTime())/1000;
           }

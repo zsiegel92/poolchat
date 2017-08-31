@@ -31,7 +31,8 @@ class ProductionConfig(Config):
 	EMAIL = os.environ['EMAIL']
 	EMAIL_PASSWORD = os.environ['EMAIL_PASSWORD']
 	SEND_FILE_MAX_AGE_DEFAULT = 1200#seconds
-	URL_BASE='https://poolchat.herokuapp.com/'
+	# URL_BASE='https://poolchat.herokuapp.com/'
+	URL_BASE='https://grouptherenow.com/'
 
 #NOTE: I can change this to:
 

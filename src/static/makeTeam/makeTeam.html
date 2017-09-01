@@ -1,37 +1,41 @@
 <div class="container">
   <div class="row">
     <div class='col' style="float:left; width:50%;">
-
       <h1>Create a Team</h1>
-      <div ng-show="error" class="alert alert-danger">{{errorMessage}}</div>
+      <ul style="width:80%;">
+        <li>
+          A GroupThere admin will be alerted regarding all team submissions. Once your team is approved, that team will be able to host events!
+        </li>
+        <li>
+          If you use an email address that is not your account email, you will receive an email at the new address asking you to confirm the email's usage for your team.
+        </li>
+      </ul>
+
+
+
+      <div ng-show="error" class="alert alert-danger">{{errorMessage}}<br>
+      </div>
+
       <form class="form" name="teamForm" ng-model="teamForm" ng-submit="register()">
-
-
-<!-- NAME -->
+        <!-- NAME -->
         <div class="form-group">
           <label>Team Name</label>
           <input type="text" class="form-control" name="name" ng-model="teamForm.ngName" placeholder="Team Name" required>
-         <span class="error" ng-show="teamForm.name.$error.required">
+          <span class="error" ng-show="teamForm.name.$error.required">
           Required!</span>
-          </div>
-
-<!-- PASSWORD -->
+        </div>
+        <!-- PASSWORD -->
         <div class="form-group">
           <label>Team CODE WORD</label>
           <span>This is something to distribute to your entire team.</span>
           <input type="text" class="form-control" name="password" placeholder='easy-to-remember code word' ng-model="teamForm.ngPassword" required>
           <span class="error" ng-show="teamForm.password.$error.required">
           Required!</span>
-          </div>
-
-
-
-
-<!-- CONTACT EMAIL -->
+        </div>
+        <!-- CONTACT EMAIL -->
         <div class="form-group">
           <label>Team Email</label>
           <input type="email" class="form-control" name="email" placeholder="email@domain.ext" ng-pattern="/^[_a-z0-9]+(\.[_a-z0-9]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/"  ng-model="teamForm.ngEmail" required>
-
           <span class="invalid" ng-show="teamForm.email.$error.required">
           Required!</span>
           <span class="invalid" ng-show="teamForm.email.$error.email">Valid Email Required!</span>
@@ -41,18 +45,13 @@
         <div>
           <button type="submit" class="btn btn-primary" ng-disabled="teamForm.$invalid || disabled">Create Team</button>
         </div>
-
         <a href='#!/joinTeam'>Click here to join an existing team!</a>
-
       </form>
-    </div><!-- COLUMN -->
-
-    <div class='col' style="float:right; width:50%;">
-    <h2>Information</h2>
-
-      <div ng-show="resultText" >{{resultText}} </div>
-
-      <h3> Summary </h3>
+      </div><!-- COLUMN -->
+      <div class='col' style="float:right; width:50%;">
+        <h2>Information</h2>
+        <div class="alert alert-info" ng-show="resultText" >{{resultText}} </div>
+        <h3> Summary </h3>
         <ul>
           <li>
             <b>Your Team will be called:</b> '{{teamForm.ngName}}'
@@ -61,10 +60,6 @@
             <b>Contact email for your Team is: </b>{{teamForm.ngEmail}}
           </li>
         </ul>
-
-
-    </div><!-- COLUMN -->
-  </div>
-</div>
-
-
+        </div><!-- COLUMN -->
+      </div>
+    </div>

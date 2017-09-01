@@ -12,6 +12,45 @@ from groupThere.SystemParam import SystemParam
 from groupThere.helpers import sayname, generate_groups_fromParam, generate_model,optimizePulp,gen_assignment,gen_assignment_fromParams, test_groups,test_model,groupsToLists,shortTime#, generate_groups
 
 
+# @pre: params.d_t, params. R_t, and params.dists_to_event['Distances'] and params.dists_to_event['Durations'] are all corrent
+def gt_fromDistmattedParams(params,mailParam):
+	print("in GT_manager.gt_fromDistmattedParams")
+	params.get_event_info_from_mailparam(mailParam)
+	# params.coordinate_and_clean()
+	with open("params/GTparams_"+str(datetime.now())[0:10]+".txt",'wb') as openfile:
+		pickle.dump(params.to_dict(),openfile)
+	with open("params/GTparams_prev.txt",'wb') as openfile:
+		pickle.dump(params.to_dict(),openfile)
+	# pickleFile = "params/GTparams_prev.txt"
+	# print("Loading all parameters from file: " + pickleFile)
+	# params=SystemParam(**pickle.load(open(pickleFile,'rb')))
+	print("wrote pickles!")
+	# print(params)
+
+
+	(groups,times) = generate_groups_fromParam(params,testing=False)
+	print("Generated groups! (gt_fromDistmattedParams)")
+	print("groups is: " + str(groups))
+	print("times is: " + str(times))
+	params.groups['groups']=groups
+	params.groups['times'] = times
+
+	n=params.numel
+	mx=max(list(map(int,params.numberCarSeats)))
+	mx=min(mx,n)
+	params.model = generate_model(groups,times,n,mx)
+	(params.solution['fun'],params.solution['x'],params.solution['success']) = optimizePulp(params.model)
+	print("Solution success: " + str(params.solution['success']))
+	params.solution['assignments']=gen_assignment_fromParams(params)
+	# for ass in params.solution['assignments']:
+	# 	print(ass['names'])
+	# 	print(ass['emails'])
+	print("assignments successful: " + str(params.solution['assignments']))
+	print("returning params from GT_manager.gt_fromDistmattedParams")
+	return params
+
+
+
 def gt_fromBasicParams(params,mailParam):
 	params.get_event_info_from_mailparam(mailParam)
 	params.coordinate_and_clean()

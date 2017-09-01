@@ -1,4 +1,4 @@
-from GT_interactions import doGroupThere,post_optimization_update,get_all_pool_ids,email_aPool
+from GT_interactions import doGroupThere,post_optimization_update,get_all_pool_ids,email_aPool,doGroupThere_fromDB
 
 from flask import jsonify,json
 from flask_login import current_user, login_user, logout_user,login_required
@@ -35,6 +35,32 @@ def flatten(L):
 
 
 
+# After calling, use
+# try:
+# 		job = Job.fetch(job_key, connection=conn)
+# 	except:
+# 		return "No such job",200
+# 	if job.is_finished:
+# 		try:
+# 			params=job.result
+#			instructions_id = params.instructions_id
+#			instructions = Instruction.query.filter_by(id=instruction_id).first()
+@app.route('/q_groupthere_fromdb/',methods=['POST'])
+@login_required
+def q_doGroupThere_fromDB(pool_id=None):
+	print('in q_groupthere')
+	if request:
+		pool_id = request.args.get('pool_id',None)
+		if pool_id is None:
+			data= request.get_json()
+			if data is not None:
+				pool_id = data.get("pool_id",None)
+	print("pool_id is " + str(pool_id))
+	job = q.enqueue_call(func=doGroupThere_fromDB,kwargs={'pool_id':pool_id},result_ttl=5000)
+
+	return job.get_id()
+
+
 @app.route('/q_groupthere/', methods=['GET','POST'])
 @login_required
 def q_groupthere(pool_id=None):
@@ -48,6 +74,8 @@ def q_groupthere(pool_id=None):
 	print("pool_id is " + str(pool_id))
 	job = q.enqueue_call(func=doGroupThere,kwargs={'pool_id':pool_id},result_ttl=5000)
 	return job.get_id()
+
+
 
 
 @app.route('/q_repeat_groupthere/', methods=['GET','POST'])

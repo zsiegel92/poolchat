@@ -9,7 +9,7 @@ import googlemaps
 from urllib.parse import quote_plus
 
 from GIS_routines import gen_dist_row,gen_dist_col,gen_one_distance
-
+from GT_interactions import doGroupThere_fromDB
 
 
 import os
@@ -159,11 +159,6 @@ def api_create_trip():
 	tripform = wtforms_ext.tripForm(request.form)
 
 	if tripform.validate():
-		# address=tripform.address.data
-		# num_seats=tripform.num_seats.data
-		# preWindow = tripform.preWindow.data
-		# on_time=tripform.on_time.data
-		# must_drive=tripform.must_drive.data
 		pool_id=tripform.pool_id.data
 
 
@@ -178,33 +173,25 @@ def api_create_trip():
 				trip = Trip()
 				trip.pool=pool
 				trip.member=current_user
-				# current_user.pools.append(trip)
 
 				db.session.add(trip)
 				db.session.commit()
 
 				db.session.commit()
 
-
 				print("STARTING TO ADD FIELDS")
 
-				# print("address: " + str(address))
-				# print("num_seats: " + str(num_seats))
-				# print("on_time: " + str(on_time))
-				# print("preWindow: " + str(preWindow))
-				# print("must_drive: " + str(must_drive))
+
 
 				tripform.populate_obj(trip)
 
-				# trip.address = str(address)
-				# trip.num_seats=int(num_seats)
-				# trip.on_time = int(on_time)
-				# trip.preWindow = preWindow
-				# trip.must_drive = int(must_drive)
 
 
 				db.session.commit()
 				job = q.enqueue_call(func=get_trip_dists,kwargs = {'carpooler_id':current_user.id,'pool_id':pool.id},result_ttl=5000)
+				gtJob = q.enqueue_call(func=doGroupThere_fromDB,kwargs={'pool_id':pool_id},result_ttl=5000)
+				# job.get_id()
+
 				print("job.get_id() = " + str(job.get_id()))
 				print(job.get_id())
 				return "Added trip to database!",200

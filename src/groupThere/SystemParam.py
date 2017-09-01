@@ -11,7 +11,7 @@ import time
 
 
 class SystemParam:
-	def __init__(self,email=[],name=[],carpooler_id=[],address=[],numberCarSeats =[],canLeaveAt=[],minsAvail=None,extra=[],latenessWindow=0,must_drive=[],timestamps=[],headers_colNames = [],eventAddress=None,eventDate=None,eventTime=None,eventDateTime=None,eventCoords=None,dist_mats = {'Distances':None,'Durations':None},dists_to_event={'Distances':None,'Durations':None},coords =[],mailParam=None,numel=None,model={'A':None,'Aeq':None,'b':None,'beq':None,'f':None},solution={'x':None,'fun':None,'success':None,'assignments':None},filename=None,groups={'groups':None,'times':None},pool_id=None, **kwargs):
+	def __init__(self,email=[],name=[],carpooler_id=[],address=[],numberCarSeats =[],canLeaveAt=[],minsAvail=None,extra=[],latenessWindow=0,must_drive=[],timestamps=[],headers_colNames = [],eventAddress=None,eventDate=None,eventTime=None,eventDateTime=None,eventCoords=None,dist_mats = {'Distances':None,'Durations':None},dists_to_event={'Distances':None,'Durations':None},coords =[],mailParam=None,numel=None,model={'A':None,'Aeq':None,'b':None,'beq':None,'f':None},solution={'x':None,'fun':None,'success':None,'assignments':None},filename=None,groups={'groups':None,'times':None},pool_id=None, instructions_id = None,**kwargs):
 		self.email = email
 		self.name = name
 		self.address= address
@@ -38,6 +38,7 @@ class SystemParam:
 
 		self.pool_id=pool_id
 		self.carpooler_id=carpooler_id
+		self.instructions_id=instructions_id
 
 		self.dist_mats = dist_mats#GENERATE DIST MATS (call f'n)
 		self.dists_to_event = dists_to_event
@@ -252,43 +253,6 @@ class SystemParam:
 	def load_dist_mat(self,filename_dist=None,filename_dur=None,filename_eventdist=None,filename_eventdur=None):
 		try:
 			os.chdir("params")
-			# if (not filename_dist) or (not filename_dur):
-			# 	filelist=[x for x in os.listdir() if x.endswith('.txt')]
-			# 	# filelistDist = os.listdir()
-			# 	filelistDur = [afilename for afilename in filelist if  re.match(r"durations2017-([0-9]{2})-([0-9]{2})\.txt",afilename)]
-			# 	filelistDist = [afilename for afilename in filelist if  re.match(r"distances2017-([0-9]{2})-([0-9]{2})\.txt",afilename)]
-			# 	if len(filelistDist)==1:
-			# 		print("Suitable file found in directory")
-			# 		filename_dist = filelistDist[0]
-			# 		filename_dur= filelistDur[0]
-			# 	elif len(filelistDist)==0:
-			# 		print("No suitable file found in directory")
-			# 	else:
-			# 		months = list(map((lambda nam: int(nam[14:16])),filelistDist))
-			# 		maxmonthstr=filelistDist[argmax(months)][14:16]
-			# 		filelistDist = [afilename for afilename in filelistDist if afilename[14:16]==filelistDist[argmax(months)][14:16]]
-
-			# 		months = list(map((lambda nam: int(nam[14:16])),filelistDur))
-			# 		filelistDur = [afilename for afilename in filelistDur if afilename[14:16]==filelistDur[argmax(months)][14:16]]
-
-			# 		days = list(map((lambda nam: int(nam[17:19])),filelistDist))
-			# 		maxdaystr=filelistDist[argmax(days)][17:19]
-			# 		filelistDist = [afilename for afilename in filelistDist if afilename[17:19]==filelistDist[argmax(days)][17:19]]
-
-			# 		days = list(map((lambda nam: int(nam[17:19])),filelistDur))
-			# 		filelistDur = [afilename for afilename in filelistDur if afilename[17:19]==filelistDur[argmax(days)][17:19]]
-			# 		if (len(filelistDist)>1):
-			# 			filename_dist=filelistDist[0]
-			# 			filename_dur=filelistDur[0]
-			# 			print("Duplicate files in directory. Arbitrariliy selecting file " + str(filename_dist))
-			# 		else:
-			# 			filename_dist=filelistDist[0]
-			# # 			filename_dur=filelistDur[0]
-			# 			print("Most recent saved dist matrix is " + str(filename_dist) + " from " + str(filename_dist[14:19]))
-			# 			print("Most recent saved duration matrix is " + str(filename_dur) + " from " + str(filename_dur[14:19]))
-			# if ((not filename_eventdur) or (not filename_eventdist)):
-			# 	filename_eventdist = "toEventDistances2017-" + str(maxmonthstr) + "-"+str(maxdaystr) +".txt"
-			# 	filename_eventdur = "toEventDurations2017-" + str(maxmonthstr) + "-"+str(maxdaystr) +".txt"
 
 			filename_dist='distances_prev.txt'
 			filename_dur='durations_prev.txt'

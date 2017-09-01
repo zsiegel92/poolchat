@@ -3,6 +3,7 @@ from database import db
 
 import numpy as np
 
+
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from helpers import findRelativeDelta
@@ -14,7 +15,7 @@ from flask_sqlalchemy import SQLAlchemy,current_app
 q = Queue(connection=conn)
 import pickle
 
-from models import Carpooler,Pool, Trip
+from models import Carpooler,Pool, Trip,Event_Distance,Trip_Distance,Team,Instruction
 
 from emailer import Emailer
 
@@ -23,7 +24,7 @@ from groupThere.MailParam import MailParam
 from groupThere.SystemParam import SystemParam
 from groupThere.helpers import sayname, generate_groups_fromParam, generate_model,optimizePulp,gen_assignment,gen_assignment_fromParams, test_groups,test_model,groupsToLists,shortTime#, generate_groups
 
-from GT_manager import gt_fromBasicParams
+from GT_manager import gt_fromBasicParams,gt_fromDistmattedParams
 
 from app_factory import create_app
 
@@ -79,12 +80,83 @@ def systemParamFromPool(pool):
 	params.numel = len(email)
 	return params
 
+# @pre: params.carpooler_id contains all carpooler.id for trip.member in pool.members
+# @pre: params.pool_id contains pool.id
+# @post: the following are set
+# params.d_t, params. R_t, params.dists_to_event['Distances'], params.dists_to_event['Durations']
+# RETURN: params
+def addDistMatsFromPool(pool,params):
+	print("In addDistMatsFromPool")
+	assert(pool is not None)
+	pool_id=pool.id
+	carpooler_ids = params.carpooler_id
+	n = params.numel
+	d_t = np.zeros((n,n))
+	R_t = np.zeros((n,n))
+	to_event_durations=np.zeros((1,n))
+	to_event_distances=np.zeros((1,n))
 
-# def enqueue_groupThere(pool_id=None):
-# 	job = q.enqueue_call(func=doGroupThere,kwargs={'pool_id':pool_id},result_ttl=5000)
-# 	# kwargs = {'n':n,'randGen': randGen,'numberPools':numberPools}
-# 	print("job.get_id() = " + str(job.get_id())) #job.result will store output of populate_generic(n), which is "output_list" in the non-enqueued version above
-# 	return job.get_id()
+	for i in range(n):
+		to_event_distance = Event_Distance.query.filter_by(pool_id=pool_id,carpooler_id = carpooler_ids[i]).first()
+		to_event_distances[0,i]=to_event_distance.feet
+		to_event_durations[0,i]=to_event_distance.seconds
+		for j in range(n):
+			if (j!=i):
+				trip_distance = Trip_Distance.query.filter_by(pool_id=pool_id,from_carpooler_id=carpooler_ids[i],to_carpooler_id=carpooler_ids[j]).first()
+				d_t[i,j]=trip_distance.feet
+				R_t[i,j]=trip_distance.seconds
+			else:
+				#=0
+				pass
+	params.dists_to_event['Distances']=to_event_distances
+	params.dists_to_event['Durations']=to_event_durations
+	params.dist_mats['Distances']=d_t
+	params.dist_mats['Durations']=R_t
+	print("Successfully created distance matrices from DB")
+	return params
+
+
+def doGroupThere_fromDB(pool_id=None):
+	print("In doGroupThere_fromDB")
+	if pool_id is not None:
+		try:
+			with current_app.app_context():
+				print("In current_app.app_context()")
+				pool = Pool.query.filter_by(id=pool_id).first()
+				print("Queried for pool successfully!")
+				pool.optimizedYet = True
+				pool.optimizationCurrent=True
+				pool.noticeWentOut=False
+				db.session.commit()
+				assert(pool is not None)
+				mailParam=mailParamsFromPool(pool)
+				params = systemParamFromPool(pool)
+				params = addDistMatsFromPool(pool,params)
+				params = gt_fromDistmattedParams(params,mailParam)
+				#SHOULD DO SOME DATABASE MAINTENENCE HERE, OR AT LEAST ENQUEUE IT
+				print("Successfully did groupthere! (doGroupThere_fromDB)")
+				instructions = Instruction()
+				instructions.pool_id = pool_id
+				# from GTviews.GT_results:
+				# output = [[ (tup[0],np.asscalar(tup[1]) if isinstance(tup[1],np.generic) else tup[1]) for tup in piece] for piece in output]
+				instructions.instruction=json.dumps(params.solution['assignments'])
+				instructions.success=str(params.solution['success'])
+				#params.solution['success'] is a pulp.lpProblem.status, which is an lpStatus object
+				instructions.dateTime=datetime.now()
+				db.session.add(instructions)
+				db.session.commit()
+				params.instructions_id = instructions.id #FOR QUERYING INSTRUCTIONS FROM DB
+				return params
+
+		except Exception as exc:
+			print("Error creating GT params.")
+			print(exc)
+			print("ERROR ERROR ERROR")
+			print("INFINITE ERROR")
+			return "ERROR ERROR ERROR"
+
+
+
 
 
 def doGroupThere(pool_id=None):

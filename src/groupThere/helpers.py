@@ -45,14 +45,19 @@ def generate_groups_bits(array_duration,boolList_canBeLate,int_minsAvailForTrans
 	except:
 		print("doubleList_durs_toEvent inexplicably already a list...")
 	numPeople = len(int_minsAvailForTransit)
+	maxGroupSize = min(numPeople,maxNumberSeats)
 	st = shortTime(array_duration,maxNumberSeats,boolList_canBeLate,int_minsAvailForTransit,int_numCarSeats,doubleList_durs_toEvent,int_latenessWindow,must_drive)
+	print("Created shortTime object")
 	groups = {}
 	times = {}
-	drivers = {i:bax((1 if val>=i else 0 for val in int_numCarSeats)) for i in range(1,maxNumberSeats+1)}
-	manditory_drivers=bax((1 if ((val>=1) and (must_drive[idx])) else 0 for idx,val in enumerate(int_numCarSeats)))
+	if maxGroupSize ==0:
+		print("Max group size is zero, returning " + str((groups,times)) + " from generate_groups_bits. Handle it.")
+		return (groups,times)
 
-	mandk = {k:manditory_drivers&drivers[k] for k in range(1,maxNumberSeats+1)}
-	mand_not_k = {k:manditory_drivers&(drivers[k].inverted()) for k in range(1,maxNumberSeats+1)}
+	drivers = {i:bax((1 if val>=i else 0 for val in int_numCarSeats)) for i in range(1,maxGroupSize+1)}
+	manditory_drivers=bax((1 if ((val>=1) and (must_drive[idx])) else 0 for idx,val in enumerate(int_numCarSeats)))
+	mandk = {k:manditory_drivers&drivers[k] for k in range(1,maxGroupSize+1)}
+	mand_not_k = {k:manditory_drivers&(drivers[k].inverted()) for k in range(1,maxGroupSize+1)}
 	#Generate groups of size 1
 	groups[1] = bax((1 if drivers[1][j]==1 else 0 for j in range(0,numPeople)),enum=en)
 
@@ -65,11 +70,13 @@ def generate_groups_bits(array_duration,boolList_canBeLate,int_minsAvailForTrans
 
 	calledForSingleDriver=False
 	#Generate groups of size 2 through maxNumSeats
-	for k in range(2,maxNumberSeats+1):
+	for k in range(2,maxGroupSize+1):
 		numFailk=0
 		groups[k]=bax.zeros(en.choose(numPeople,k),enum=en)
+		#IF numPeople < k, there is an issue
 		times[k] = []
 		for ind,group in enumerate(groups[k].bax_gen(numPeople,k)):
+			print("k is " + str(k) + "; Examining group " + str(group))
 			if (group&drivers[k]).any() and (not (group&mandk[k]).counts_to(2))and (not (group&mand_not_k[k]).counts_to(1)):
 				if (group&mandk[k]).counts_to(1):
 					driver=(group&mandk[k]).index(1)
@@ -390,7 +397,7 @@ class shortTime:
 
 	@sayname
 	def getRouteAdders(self,maxNumSeats):
-		assert(maxNumSeats >0)
+		# assert(maxNumSeats >0)
 		ra=[]
 		ra.append([[]])
 		ra.append([[1]])
@@ -407,7 +414,7 @@ class shortTime:
 			i = group[0]
 			#lateOk should be T/F
 			#is canBeLate T/F or 1/0?
-			return {'isPossible':True,'minTime':self.durs_toEvent[i],'bestOrder':[i],'driver':i,'lateOk':self.canBeLate[i],'notLatePossible':self.durs_toEvent[i]<=self.minsAvail[i],'bestTimes':[self.durs_toEvent[i]]}
+			return {'isPossible':True,'minTime':self.durs_toEvent[i],'bestOrder':[i],'driver':i,'lateOk':bool(self.canBeLate[i]),'notLatePossible':bool(self.durs_toEvent[i]<=self.minsAvail[i]),'bestTimes':[self.durs_toEvent[i]]}
 
 		drs = [i for i in group if self.numCarSeats[i] >= len(group)]
 		mds = 0
@@ -466,8 +473,8 @@ class shortTime:
 					if returnAll:
 						bestOrder = solution[2]
 						driver = solution[3]
-						lateOK = solution[4]
-						notLatePossible=solution[5]
+						lateOK = bool(solution[4])
+						notLatePossible= bool(solution[5])
 						bestTimes = solution[6]
 		#Note: bestOrder does not include driver.
 		return (isPossible,minTime,bestOrder,driver,lateOK,notLatePossible,bestTimes)

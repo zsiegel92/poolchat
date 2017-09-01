@@ -435,7 +435,13 @@ class Carpooler(db.Model):
 	def __repr__(self):
 		return '<id {}>'.format(self.id)
 
-
+class Instruction(db.Model):
+	__tablename='instructions'
+	id = db.Column(db.Integer,primary_key=True)
+	pool_id = db.Column(db.Integer,db.ForeignKey('pool.id'))
+	instruction=db.Column(db.Text) #stored as json with flask.json.dumps
+	dateTime = db.Column(db.DateTime())
+	success=db.Column(db.String())
 
 class Pool(db.Model):
 	__tablename__ = 'pool'
@@ -606,6 +612,7 @@ class Trip(db.Model):
 
 
 	address = db.Column(db.String())
+
 	num_seats = db.Column(db.Integer)
 	preWindow = db.Column(db.Integer)
 	on_time = db.Column(db.Integer)

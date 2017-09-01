@@ -79,6 +79,8 @@ class Emailer:
 		html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
 		return self.send_html(toAddress,html,subject,text_message)
 
+	def self_send_html_body(self,html_body,subject="",text_message=""):
+		self.send_html_body(self.gmail_user,html_body,subject,text_message)
 
 	def send_html(self,toAddress,html_message,subject="",text_message=""):
 		print("in Emailer.send_html")

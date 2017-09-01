@@ -49,6 +49,7 @@ app.url_map.converters['kwarg'] = KwargConverter
 #webhookviews imports from interactions which imports from app.
 import webhookviews
 import pageviews
+import registration_endpoints
 import triggerviews
 import GTviews
 

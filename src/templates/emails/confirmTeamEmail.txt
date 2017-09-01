@@ -1,7 +1,7 @@
 Hi {{team.email}},
 \n
 \n
-{{current_user.name}} just tried to create a team called "{{team.name}}" using this email address. This email address is not associated with {{current_user.name}}'s account, though.
+{{carpooler.name}} just tried to create a team called "{{team.name}}" using this email address. This email address is not associated with {{carpooler.name}}'s account, though.
 \n
 \n
 To confirm this email address for use with team {{team.name}}, please visit {{link}}

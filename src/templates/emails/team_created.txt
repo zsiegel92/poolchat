@@ -1,0 +1,12 @@
+Hey, {{carpooler.name}},
+\n
+\n
+The team you created, {{team.name}}, has been fully approved for use! Please visit the following link to make your first event!
+\n
+\n
+{{link}}
+\n
+\n
+Best wishes always,
+\n
+GroupThere

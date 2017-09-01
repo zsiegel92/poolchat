@@ -561,8 +561,13 @@ class TempTeam(db.Model):
 	email=db.Column(db.String())
 	password=db.Column(db.String())
 	carpooler_id=db.Column(db.Integer,db.ForeignKey('carpooler.id'))
+	confirmed_email = db.Column(db.Boolean)
+	approved = db.Column(db.Boolean)
 
-
+	def __init__(self):
+		super().__init__()
+		self.approved = False
+		self.confirmed_email=False
 
 
 class Trip_Distance(db.Model):

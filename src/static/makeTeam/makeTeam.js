@@ -56,12 +56,13 @@ angular.module('myApp.makeTeam', ['ngRoute'])
             $log.log("Registration response:");
             $log.log(response.data);
             $scope.resultText=response.data;
-            if (response.status==200){
+            if (response.status==201){
               alert("You have created a team called '" + String($scope.teamForm.ngName) + "' with codeword '" + String($scope.teamForm.ngPassword) + "'. Ready to make your first event?");
             $location.path('/makePool');
             }
             else{
-              alert("You have created a team called '" + String($scope.teamForm.ngName) + "' with codeword '" + String($scope.teamForm.ngPassword) + "'. You can start using this team as soon as you confirm the email address. Check the inbox of " + String($scope.teamForm.ngEmail));
+              // else if response.status==202 (accepted)
+              alert("You have created a team called '" + String($scope.teamForm.ngName) + "' with codeword '" + String($scope.teamForm.ngPassword) + "'. You can start using this team as soon as an administrator approves the team. If "+ String($scope.teamForm.ngEmail)+  " is not your GroupThere email address, you must click the link in your confirmation email as well before the team is active. Check the inbox of " + String($scope.teamForm.ngEmail) + " for updates!");
               $location.path('/makePool');
             }
 

@@ -1,0 +1,15 @@
+Hi {{team.email}},
+\n
+\n
+{{carpooler.name}} tried to create a team called "{{team.name}}" using this email address. This email address is not associated with {{carpooler.name}}'s account, though.
+\n
+\n
+The good news is, This team has been APPROVED by a GroupThere admin! As soon as you visit the link below, this group will be activated.
+\n
+\n
+To confirm this email address for use with team {{team.name}}, please visit {{link}}
+\n
+\n
+Thank you,
+\n
+GroupThere

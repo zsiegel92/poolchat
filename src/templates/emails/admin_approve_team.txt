@@ -1,0 +1,12 @@
+Hi Admin,
+\n
+\n
+User {{carpooler.name}} has just requested to create a team called {{team.name}}. To approve this team, visit {{link}}
+\n
+\n
+You can reach {{carpooler.name}} at {{carpooler.email}}.
+\n
+\n
+Thanks,
+\n
+GroupThere

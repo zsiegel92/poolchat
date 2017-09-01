@@ -113,6 +113,32 @@ angular.module('myApp.viewPool', ['ngRoute'])
 
     $scope.getPoolInfoForUser();
 
+    $scope.getPoolInstructions = function(ind) {
+      var pool = $scope.joined_pools[ind];
+      $scope.instruction_pool =$scope.joined_pools[ind];
+      $scope.current_instruction=ind;
+      $http.post('/api/get_most_recent_instructions',
+                  $.param(
+                    {
+                      pool_id:pool.id
+                    }
+                  ),
+                  {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+
+          .then(function(response) {
+            $scope.disabled = false;
+            $log.log("Getting instruction information");
+            $scope.instruction = response.data
+
+          }).
+          catch(function(response) {
+            $scope.disabled = false;
+            $scope.resultText=response.data;
+          });
+    };
+
+
+
     //route: '/joinPool/:id/name/:name/address/:address/date/:date/time/:time/email/:email/notice/:notice/latenessWindow/:latenessWindow'
     $scope.goto_join = function(){
       var pool = $scope.eligible_pools[$scope.joinForm.ngPool];

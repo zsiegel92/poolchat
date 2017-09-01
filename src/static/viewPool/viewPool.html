@@ -76,7 +76,12 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                             <li> Event Contact Email: {{pool.email}} </li>
                             <li> Non-Organizers can arrive up to {{pool.latenessWindow}} minutes after {{pool.time}}</li>
                             <li> Carpooling instructions will be sent out {{pool.fireNotice}} hours before {{pool.time}} on {{pool.date}}</li>
-                            <li> <b>Instructions will be send out in  {{toDays(pool.seconds_til_instructions-counter)}} days, {{toHours(pool.seconds_til_instructions-counter)}} hours, {{toMinutes(pool.seconds_til_instructions-counter)}} minues, {{toSeconds(pool.seconds_til_instructions-counter)}} seconds</b></li>
+                            <li>
+                                <b>Instructions will be send out in  {{toDays(pool.seconds_til_instructions-counter)}} days, {{toHours(pool.seconds_til_instructions-counter)}} hours, {{toMinutes(pool.seconds_til_instructions-counter)}} minues, {{toSeconds(pool.seconds_til_instructions-counter)}} seconds</b>
+                                <ul>
+                                <li>View most recent solution attempt now! <button type="button" clas="btn btn-default btn-xs" ng-click="getPoolInstructions($index)" > View </button></li>
+                                </ul>
+                            </li>
                             <li><b>Your Trip:</b>
                                 <ul>
                                     <li>Your origin: {{pool.trip.address}}</li>
@@ -89,6 +94,14 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                         </ul>
                     </li>
                 </ol>
+                <div ng-show="instruction">
+                    <h2>Instructions for {{instruction_pool.name}}</h2>
+                    <br>
+                    {{instruction}}
+                    <br>
+                    <br>
+
+                </div>
                 </div> <!-- COLUMN -->
             </div>
         </div>

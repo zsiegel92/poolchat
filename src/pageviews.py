@@ -21,7 +21,8 @@ q = Queue(connection=conn)
 
 
 from interactions import newPool
-from models import  Carpooler,Pool, Trip,ensure_carpooler_notNone,Team,TempTeam,Trip_Distance,Event_Distance
+from models import  Carpooler,Pool, Trip,ensure_carpooler_notNone,Team,TempTeam,Trip_Distance,Event_Distance,Instruction
+
 from groupThere.GroupThere import GroupThere
 
 from GT_manager import create_generic_parameters
@@ -83,6 +84,23 @@ def post_call_view_pool():
 		poolDict = {"Affiliated Teams":[team.name for team in pool.teams],"Members":[trip.member.name for trip in pool.members],"Name":pool.poolName,"Date":str(pool.eventDate) +" " + str(pool.eventTime),"Lateness Window":pool.latenessWindow,"Address":pool.eventAddress,"Contact (phone)":pool.eventContact,"Email":pool.eventEmail,"Host Organization":pool.eventHostOrg,"Signature":pool.signature,"Fire Notice":pool.fireNotice}
 
 	return jsonify(poolDict),status
+
+
+@app.route('/api/get_most_recent_instructions',methods=['POST'])
+@login_required
+def api_get_recent_instructions():
+	pool_id=request.values.get('pool_id')
+	pool = Pool.query.filter_by(id=pool_id).first()
+	if current_user not in [trip.member for trip in pool.members]:
+		return "Not a member of this pool! Access denied.",401
+	else:
+		instruction = Instruction.query.filter_by(pool_id=pool_id).order_by(Instruction.dateTime.desc()).first()
+		if instruction is not None:
+			return jsonify(instruction.to_dict()),200
+		else:
+			return "No instructions generated yet!",404
+
+
 
 @app.route('/view_pool/<int:number>/',methods=['GET'])
 @login_required

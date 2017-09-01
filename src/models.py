@@ -443,6 +443,9 @@ class Instruction(db.Model):
 	dateTime = db.Column(db.DateTime())
 	success=db.Column(db.String())
 
+	def to_dict(self):
+		return {'instruction':self.instruction,'dateTime':self.dateTime,'success':self.success}
+
 class Pool(db.Model):
 	__tablename__ = 'pool'
 

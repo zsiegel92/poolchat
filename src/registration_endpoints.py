@@ -21,7 +21,7 @@ q = Queue(connection=conn)
 
 from encryption import bcrypt
 
-from models import  Carpooler,Pool, Trip,ensure_carpooler_notNone,Team,TempTeam,Trip_Distance,Event_Distance
+from models import  Carpooler,Pool, Trip,Team,TempTeam,Trip_Distance,Event_Distance,Instruction
 
 
 
@@ -181,13 +181,11 @@ def api_create_trip():
 
 				print("STARTING TO ADD FIELDS")
 
-
-
 				tripform.populate_obj(trip)
-
-
-
+				pool.noticeWentOut=False
+				pool.optimizationCurrent=False
 				db.session.commit()
+
 				job = q.enqueue_call(func=get_trip_dists,kwargs = {'carpooler_id':current_user.id,'pool_id':pool.id},result_ttl=5000)
 				gtJob = q.enqueue_call(func=doGroupThere_fromDB,kwargs={'pool_id':pool_id},result_ttl=5000)
 				# job.get_id()
@@ -201,6 +199,10 @@ def api_create_trip():
 	else:
 		return "Input invalid - errors: " + str(tripform.errors) +" (FLASK)",500
 
+
+# def get_instruction_history(pool_id):
+# 	instructions = Instruction.query.filter_by(pool_id=pool_id).order_by(Instruction.dateTime.desc()).all()
+# 	return jsonify([instruction.to_dict() for instruction in instructions]),200
 
 
 @app.route('/api/create_team/',methods=['POST'])

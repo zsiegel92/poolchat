@@ -26,6 +26,7 @@ from models import  Carpooler,Pool, Trip,ensure_carpooler_notNone,Team,TempTeam,
 from groupThere.GroupThere import GroupThere
 
 from GT_manager import create_generic_parameters
+from GT_interactions import doGroupThere_fromDB
 
 from app import app,request,abort
 from database import db
@@ -85,6 +86,17 @@ def post_call_view_pool():
 
 	return jsonify(poolDict),status
 
+@app.route('/api/re_optimize',methods=['POST'])
+@login_required
+def api_re_optimize():
+	pool_id=request.values.get('pool_id')
+	pool = Pool.query.filter_by(id=pool_id).first()
+	if current_user not in [trip.member for trip in pool.members]:
+		return "Not a member of this pool! Access denied.",401
+	else:
+		q.enqueue_call(func=doGroupThere_fromDB,kwargs={'pool_id':pool_id},result_ttl=5000)
+		return "Enqueued the work to re-process this request.",200
+
 
 @app.route('/api/get_most_recent_instructions',methods=['POST'])
 @login_required
@@ -98,12 +110,22 @@ def api_get_recent_instructions():
 		if instruction is not None:
 			instruct = json.loads(instruction.instruction)
 			instruct['my_id']=current_user.id
-			instruct['my_index'] = instruct['carpooler_ids'].index(current_user.id)
-
-			my_ass = 0
+			try:
+				instruct['my_index'] = instruct['carpooler_ids'].index(current_user.id)
+			except:
+				instruct['my_index'] =-1
+			instruct['numel'] = len(instruct['carpooler_ids'])
+			my_ass = -1
 			for i in range(len(instruct['assignments'])):
-				if current_user.id in instruct['assignments'][i]['ids']:
-					instruct['my_ass']=my_ass
+				if hasattr(instruct['assignments'][i]['ids'],'__iter__'):
+					if current_user.id in instruct['assignments'][i]['ids']:
+						my_ass=i
+				else:
+					if current_user.id == instruct['assignments'][i]['ids']:
+						my_ass=i
+
+			instruct['my_ass_index']=my_ass
+
 			return jsonify(instruct),200
 		else:
 			return "No instructions generated yet!",404

@@ -2,6 +2,8 @@
 import os
 from flask import Flask, request, abort, json
 from itsdangerous import URLSafeTimedSerializer
+from flask_sslify import SSLify
+
 
 # from database import db
 from app_factory import create_app
@@ -22,6 +24,7 @@ import models
 app = create_app(__name__)
 app.config.from_object(os.environ['APP_SETTINGS'])
 ts = URLSafeTimedSerializer(app.config["SECRET_KEY"])
+sslify = SSLify(app)
 
 #NOTE: SQLALCHEMY_TRACK_MODIFICATIONS prints model object fields when they are edited!
 #SQLAlchemy(app,session_options={'autocommit': True})

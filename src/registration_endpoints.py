@@ -165,37 +165,40 @@ def api_create_trip():
 		pool=Pool.query.filter_by(id=pool_id).first()
 		if pool is None:
 			return "No such event!",400
-		elif current_user in [trip.member for trip in pool.members]:
-			#TODO: update trip?
-			return "You are already part of this event!",409
+
+		if current_user in [trip.member for trip in pool.members]:
+			if (tripform.resubmit.data == True):
+				trip = Trip.query.filter_by(pool_id=pool_id,carpooler_id = current_user.id).first()
+			else:
+				return "You are already part of this event!",409
 		else:
-			try:
-				trip = Trip()
-				trip.pool=pool
-				trip.member=current_user
 
-				db.session.add(trip)
-				db.session.commit()
+			trip = Trip()
+			trip.pool=pool
+			trip.member=current_user
 
-				db.session.commit()
+			db.session.add(trip)
+			db.session.commit()
 
-				print("STARTING TO ADD FIELDS")
+		print("STARTING TO ADD FIELDS")
 
-				tripform.populate_obj(trip)
-				pool.noticeWentOut=False
-				pool.optimizationCurrent=False
-				db.session.commit()
+		tripform.populate_obj(trip) #has additional "resubmit" property
+		pool.noticeWentOut=False
+		pool.optimizationCurrent=False
+		db.session.commit()
 
-				job = q.enqueue_call(func=get_trip_dists,kwargs = {'carpooler_id':current_user.id,'pool_id':pool.id},result_ttl=5000)
-				gtJob = q.enqueue_call(func=doGroupThere_fromDB,kwargs={'pool_id':pool_id},result_ttl=5000)
-				# job.get_id()
+		q.enqueue_call(func=get_trip_dists,kwargs = {'carpooler_id':current_user.id,'pool_id':pool.id},result_ttl=5000)
+		q.enqueue_call(func=doGroupThere_fromDB,kwargs={'pool_id':pool_id},result_ttl=5000)
+		# job.get_id()
 
-				print("job.get_id() = " + str(job.get_id()))
-				print(job.get_id())
-				return "Added trip to database!",200
-			except Exception as exc:
-				print(exc)
-				return str(exc),400
+		if (tripform.resubmit.data == True):
+			q.enqueue_call(func=send_pool_trip_update,kwargs={'pool_id':pool.id,'carpooler_id':current_user.id},result_ttl=5000)
+			return "Updated trip in database!",200
+		else:
+			q.enqueue_call(func=send_pool_join_notice,kwargs={'pool_id':pool.id,'carpooler_id':current_user.id},result_ttl=5000)
+			send_team_admin_approval_email(team)
+			return "Added trip to database!",200
+
 	else:
 		return "Input invalid - errors: " + str(tripform.errors) +" (FLASK)",500
 
@@ -412,18 +415,22 @@ def get_trip_dists(carpooler_id,pool_id):
 
 
 		for i in range(len(others)):
-			from_new_dist = Trip_Distance()
-			to_new_dist = Trip_Distance()
+			from_new_dist = Trip_Distance.query.filter_by(pool_id=pool.id,from_carpooler_id=carpooler.id,to_carpooler_id=from_new_address[i]['id']).first()
+			to_new_dist = Trip_Distance.query.filter_by(pool_id=pool.id,to_carpooler_id=carpooler.id,from_carpooler_id=from_new_address[i]['id']).first()
+			if from_new_dist is None:
+				from_new_dist = Trip_Distance()
+				from_new_dist.pool_id = pool.id
+				from_new_dist.from_carpooler_id = carpooler.id
+				from_new_dist.to_carpooler_id = from_new_address[i]['id']
+			if to_new_dist is None:
+				to_new_dist = Trip_Distance()
+				to_new_dist.pool_id = pool.id
+				to_new_dist.from_carpooler_id = to_new_address[i]['id']
+				to_new_dist.to_carpooler_id = carpooler.id
 
-			from_new_dist.pool_id = pool.id
-			from_new_dist.from_carpooler_id = carpooler.id
-			from_new_dist.to_carpooler_id = from_new_address[i]['id']
 			from_new_dist.feet = from_new_address[i]['distance']
 			from_new_dist.seconds = from_new_address[i]['duration']
 
-			to_new_dist.pool_id = pool.id
-			to_new_dist.from_carpooler_id = to_new_address[i]['id']
-			to_new_dist.to_carpooler_id = carpooler.id
 			to_new_dist.feet = to_new_address[i]['distance']
 			to_new_dist.seconds = to_new_address[i]['duration']
 
@@ -432,9 +439,11 @@ def get_trip_dists(carpooler_id,pool_id):
 
 
 		print("Processed all 'others'!")
-		to_event_dist = Event_Distance()
-		to_event_dist.pool_id = pool.id
-		to_event_dist.carpooler_id = carpooler.id
+		to_event_dist = Event_Distance.query.filter_by(pool_id=pool.id,carpooler_id=carpooler.id).first()
+		if to_event_dist is None:
+			to_event_dist = Event_Distance()
+			to_event_dist.pool_id = pool.id
+			to_event_dist.carpooler_id = carpooler.id
 		to_event_dist.feet = to_event['distance']
 		to_event_dist.seconds = to_event['duration']
 		db.session.add(to_event_dist)

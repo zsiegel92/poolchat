@@ -121,6 +121,7 @@ class tripForm(wtforms.Form):
 	on_time = castAsInteger_BooleanField('Do you have to arrive on time?', [validators.InputRequired()])
 	must_drive = castAsInteger_BooleanField("Do you have to drive (is it not possible to catch a ride)?",[validators.InputRequired()])
 	pool_id = nonpopulating_IntegerField('Pool ID',validators=[validators.InputRequired()])
+	resubmit = BooleanField('Resubmission',validators=[validators.InputRequired("Please specify whether or not this is a resubmission")])
 
 
 

@@ -33,6 +33,7 @@ angular.module('myApp.viewPool', ['ngRoute'])
     };
 
 
+
     $scope.counter = 0;
     $scope.onTimeout = function(){
         $scope.counter++;
@@ -104,6 +105,7 @@ angular.module('myApp.viewPool', ['ngRoute'])
           $log.log(response.data);
        })
         .catch(function(response) {
+          $scope.errorText=response.data;
           $log.log("Error in getPoolInfo calling api/get_pool_info API");
         });
     };
@@ -130,24 +132,64 @@ angular.module('myApp.viewPool', ['ngRoute'])
           .then(function(response) {
             $scope.disabled = false;
             $log.log("Getting instruction information");
+            $log.log(response.data);
             $scope.instruction = response.data;
-
+            if ($scope.instruction.my_ass_index > -1){
+              $scope.myAssignment = $scope.instruction.assignments[$scope.instruction.my_ass_index];
+              $scope.instruction.assignments.splice($scope.instruction.my_ass_index,1);
+            }
+            $log.log("My assignment:");
+            $log.log($scope.myAssignment);
+            $log.log("Other assignments:");
+            $log.log($scope.instruction.assignments);
           }).
           catch(function(response) {
             $scope.disabled = false;
+            $scope.errorText=response.data;
+          });
+    };
+    $scope.redoPool = function(ind) {
+      var pool = $scope.joined_pools[ind];
+
+      $http.post('/api/re_optimize',
+                  $.param(
+                    {
+                      pool_id:pool.id
+                    }
+                  ),
+                  {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+
+          .then(function(response) {
+            $scope.disabled = false;
+            $log.log("Re-Optimizing");
             $scope.resultText=response.data;
+          }).
+          catch(function(response) {
+            $scope.disabled = false;
+            $scope.errorText=response.data;
           });
     };
 
 
-
     //route: '/joinPool/:id/name/:name/address/:address/date/:date/time/:time/email/:email/notice/:notice/latenessWindow/:latenessWindow'
-    $scope.goto_join = function(){
-      var pool = $scope.eligible_pools[$scope.joinForm.ngPool];
+    $scope.goto_join = function(joined_index=-1){
+      var f= $window.encodeURIComponent;
       var cp = $scope.carpooler;
 
-      var f= $window.encodeURIComponent;
-      var pth = '/joinPool/' + f(pool.id) +'/name/'+ f(pool.name) + '/address/' + f(pool.address) + '/date/' + f(pool.date) + '/time/' + f(pool.time) + '/dateTime/' + f(pool.dateTime) + '/email/' + f(pool.email) + '/notice/' + f(pool.fireNotice) + "/latenessWindow/" + f(pool.latenessWindow) +"/carpooler/cpname/" + f(cp.name) + '/cpfirst/' + f(cp.first) + '/cplast/' + f(cp.last) + '/cpemail/' + f(cp.email) + '/past_addresses/' + f(JSON.stringify($scope.past_addresses)) + '/max_seats/' + f($scope.max_num_seats) + '/ever_must_drive/' + f($scope.ever_must_drive) + '/ever_organizer/' + f($scope.ever_organizer);
+      if (joined_index > -1){
+        $log.log("Re-submitting trip information.");
+        var pool = $scope.joined_pools[joined_index];
+        var repeat = true;
+        var pth = '/joinPool/' + f(pool.id) +'/name/'+ f(pool.name) + '/address/' + f(pool.address) + '/date/' + f(pool.date) + '/time/' + f(pool.time) + '/dateTime/' + f(pool.dateTime) + '/email/' + f(pool.email) + '/notice/' + f(pool.fireNotice) + "/latenessWindow/" + f(pool.latenessWindow) +"/carpooler/cpname/" + f(cp.name) + '/cpfirst/' + f(cp.first) + '/cplast/' + f(cp.last) + '/cpemail/' + f(cp.email) + '/past_addresses/' + f(JSON.stringify($scope.past_addresses)) + '/max_seats/' + f($scope.max_num_seats) + '/ever_must_drive/' + f($scope.ever_must_drive) + '/ever_organizer/' + f($scope.ever_organizer) + '/' + f(repeat) + '/' + f(pool.trip.address) + '/' + f(pool.trip.num_seats) + '/' + f(pool.trip.preWindow) + '/' + f(pool.trip.on_time) + '/' + f(pool.trip.must_drive);
+      }
+      else{
+        $log.log("Joining a new pool!");
+        var pool = $scope.eligible_pools[$scope.joinForm.ngPool];
+        var repeat = false;
+        var pth = '/joinPool/' + f(pool.id) +'/name/'+ f(pool.name) + '/address/' + f(pool.address) + '/date/' + f(pool.date) + '/time/' + f(pool.time) + '/dateTime/' + f(pool.dateTime) + '/email/' + f(pool.email) + '/notice/' + f(pool.fireNotice) + "/latenessWindow/" + f(pool.latenessWindow) +"/carpooler/cpname/" + f(cp.name) + '/cpfirst/' + f(cp.first) + '/cplast/' + f(cp.last) + '/cpemail/' + f(cp.email) + '/past_addresses/' + f(JSON.stringify($scope.past_addresses)) + '/max_seats/' + f($scope.max_num_seats) + '/ever_must_drive/' + f($scope.ever_must_drive) + '/ever_organizer/' + f($scope.ever_organizer) + '/' + f(repeat);
+      }
+
+
       $log.log(pth);
       // $log.log($window.encodeURIComponent(pth));
       // $location.path($window.encodeURIComponent(pth));

@@ -141,10 +141,9 @@ def doGroupThere_fromDB(pool_id=None):
 				instructions.pool_id = pool_id
 				# from GTviews.GT_results:
 				# output = [[ (tup[0],np.asscalar(tup[1]) if isinstance(tup[1],np.generic) else tup[1]) for tup in piece] for piece in output]
-				print("Got this far 1")
+
 				instruction_helper = {'assignments': params.solution['assignments']}
 
-				print("Got this far 2")
 				instruction_helper['carpooler_ids']=params.carpooler_id
 				instruction_helper['addresses']=params.address
 				instruction_helper['names'] = params.name
@@ -189,16 +188,14 @@ def doGroupThere_fromDB(pool_id=None):
 					plan['arrivalMinutesAfterEventStart'] = arrivalMins
 					plan['leaveTimeMinutesAfterEventStart']= leaveMins
 
-					plan['arrivalTime'] = eventDateTime - relativedelta(minutes=arrivalMins)
-					plan['departureTime']=eventDateTime - relativedelta(minutes=leaveMins)
+					plan['arrivalTime'] = (eventDateTime + relativedelta(minutes=arrivalMins)).isoformat()
+					plan['departureTime']=(eventDateTime + relativedelta(minutes=leaveMins)).isoformat()
 
 
-
-				print("Got this far 3")
 				instructions.instruction=json.dumps(instruction_helper)
 				instructions.success=str(params.solution['success'])
 				#params.solution['success'] is a pulp.lpProblem.status, which is an lpStatus object
-				instructions.dateTime=datetime.now()
+				instructions.dateTime=datetime.now().isoformat()
 				db.session.add(instructions)
 				db.session.commit()
 				params.instructions_id = instructions.id #FOR QUERYING INSTRUCTIONS FROM DB

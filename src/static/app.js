@@ -44,7 +44,7 @@ myApp.filter('yesNo', function() {
         return input ? 'yes' : 'no';
     }
 });
-// usage: {{array | joinBy,', '}}
+// usage: {{array | joinBy : ', '}}
 myApp.filter('joinBy', function () {
         return function (input,delimiter) {
             return (input || []).join(delimiter || ',');
@@ -63,7 +63,12 @@ myApp.filter('relativeFromTime', ['$filter', function ($filter) {
 
 myApp.filter('relativeFromMins', ['$filter', function ($filter) {
   return function (rel,time, format) {
-    var copy = new Date(time.getTime());
+    if (typeof time.getTime === 'function'){
+      var copy = new Date(time.getTime());
+    }
+    else{
+      var copy = new Date(Date.parse(time));
+    }
     copy.setMinutes(copy.getMinutes() + rel);
     return $filter('date')(copy, format || 'hh:mma')
   };

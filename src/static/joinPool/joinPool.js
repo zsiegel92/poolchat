@@ -4,7 +4,7 @@ angular.module('myApp.joinPool', ['ngRoute'])
 
 .config(['$routeProvider', function($routeProvider) {
   $routeProvider
-    .when('/joinPool/:id/name/:name/address/:address/date/:date/time/:time/dateTime/:dateTime/email/:email/notice/:notice/latenessWindow/:latenessWindow/carpooler/cpname/:cpname/cpfirst/:cpfirst/cplast/:cplast/cpemail/:cpemail/past_addresses/:past_addresses/max_seats/:max_seats/ever_must_drive/:ever_must_drive/ever_organizer/:ever_organizer', {
+    .when('/joinPool/:id/name/:name/address/:address/date/:date/time/:time/dateTime/:dateTime/email/:email/notice/:notice/latenessWindow/:latenessWindow/carpooler/cpname/:cpname/cpfirst/:cpfirst/cplast/:cplast/cpemail/:cpemail/past_addresses/:past_addresses/max_seats/:max_seats/ever_must_drive/:ever_must_drive/ever_organizer/:ever_organizer/:resubmit/:repAddress?/:repNumSeats?/:repPreWindow?/:repOnTime?/:repMustDrive?', {
       templateUrl: 'static/joinPool/joinPool.html',
       controller: 'joinPoolController',
       access: {restricted: true}
@@ -119,6 +119,8 @@ angular.module('myApp.joinPool', ['ngRoute'])
     });
    };
 
+
+
   $scope.joinTrip = function() {
 
     $scope.disabled = true;
@@ -130,7 +132,8 @@ angular.module('myApp.joinPool', ['ngRoute'])
                   preWindow:$scope.tripForm.ngPreWindow,
                   on_time:$scope.tripForm.ngOn_time,
                   must_drive:$scope.tripForm.ngMust_drive,
-                  pool_id:$scope.pool.id
+                  pool_id:$scope.pool.id,
+                  resubmit:$scope.resubmit
                 });
     $http.post('/api/create_trip/',
               $.param(
@@ -140,7 +143,8 @@ angular.module('myApp.joinPool', ['ngRoute'])
                   preWindow:$scope.tripForm.ngPreWindow,
                   on_time:$scope.tripForm.ngOn_time,
                   must_drive:$scope.tripForm.ngMust_drive,
-                  pool_id:$scope.pool.id
+                  pool_id:$scope.pool.id,
+                  resubmit:$scope.resubmit
                 }
               ),
               {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
@@ -169,6 +173,26 @@ angular.module('myApp.joinPool', ['ngRoute'])
       });
   };
 
+
+  $scope.prefill_fromPath = function(){
+    $scope.resubmit = (f(r.resubmit) == 'true');
+    if ($scope.resubmit == true){
+      $log.log("Resubmission in progress!");
+      $log.log("address: " + f(r.repAddress) + ", num_seats: " + Number(f(r.repNumSeats)) + ', preWindow: ' + Number(f(r.repPreWindow)) + ', on_time: ' + Boolean(Number(f(r.repOnTime))) + ', must_drive: ' + Boolean(Number(f(r.repMustDrive))) );
+
+      // Somehow, these weren't setting directly, so I set in ng-init
+      $scope.oldAddress=f(r.repAddress);
+      $scope.oldPreWindow = f(r.repPreWindow);
+      $scope.oldNumSeats = f(r.repNumSeats);
+
+      $scope.tripForm.ngOn_time= Boolean(Number(f(r.repOnTime)));
+      $scope.tripForm.ngMust_drive = Boolean(Number(f(r.repMustDrive)));
+      $scope.address_confirmed=true;
+    }
+  };
+
+
+  $scope.prefill_fromPath();
 }]);
 
 

@@ -440,11 +440,10 @@ class Instruction(db.Model):
 	id = db.Column(db.Integer,primary_key=True)
 	pool_id = db.Column(db.Integer,db.ForeignKey('pool.id'))
 	instruction=db.Column(db.Text) #stored as json with flask.json.dumps
-	dateTime = db.Column(db.DateTime())
+	dateTime = db.Column(db.DateTime()) #dateTime solution was generated
 	success=db.Column(db.String())
 
-	def to_dict(self):
-		return {'instruction':self.instruction,'dateTime':self.dateTime,'success':self.success}
+
 
 class Pool(db.Model):
 	__tablename__ = 'pool'

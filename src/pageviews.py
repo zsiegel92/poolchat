@@ -96,7 +96,7 @@ def api_get_recent_instructions():
 	else:
 		instruction = Instruction.query.filter_by(pool_id=pool_id).order_by(Instruction.dateTime.desc()).first()
 		if instruction is not None:
-			return jsonify(instruction.to_dict()),200
+			return jsonify(json.loads(instruction.instruction)),200
 		else:
 			return "No instructions generated yet!",404
 

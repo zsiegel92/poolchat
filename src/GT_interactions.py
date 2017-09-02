@@ -135,17 +135,38 @@ def doGroupThere_fromDB(pool_id=None):
 				params = gt_fromDistmattedParams(params,mailParam)
 				#SHOULD DO SOME DATABASE MAINTENENCE HERE, OR AT LEAST ENQUEUE IT
 				print("Successfully did groupthere! (doGroupThere_fromDB)")
+				print(params)
 				instructions = Instruction()
 				instructions.pool_id = pool_id
 				# from GTviews.GT_results:
 				# output = [[ (tup[0],np.asscalar(tup[1]) if isinstance(tup[1],np.generic) else tup[1]) for tup in piece] for piece in output]
-				instructions.instruction=json.dumps(params.solution['assignments'])
+				print("Got this far 1")
+				instruction_helper = {'assignments': params.solution['assignments']}
+
+				print("Got this far 2")
+				instruction_helper['carpooler_ids']=params.carpooler_id
+				instruction_helper['addresses']=params.address
+				instruction_helper['names'] = params.name
+				instruction_helper['number_carseats'] = params.numberCarSeats
+				instruction_helper['must_drive']=params.must_drive
+				instruction_helper['latenessWindow']=params.latenessWindow
+				instruction_helper['canBeLate']=params.extra
+				instruction_helper['eventDate']=params.eventDate
+				instruction_helper['eventTime']=params.eventTime
+				instruction_helper['eventDateTime']=params.eventDateTime
+				instruction_helper['minsAvail']=params.minsAvail
+				instruction_helper['success']=params.solution['success']
+				instruction_helper['totalGroupTime']=params.solution['fun']
+
+				print("Got this far 3")
+				instructions.instruction=json.dumps(instruction_helper)
 				instructions.success=str(params.solution['success'])
 				#params.solution['success'] is a pulp.lpProblem.status, which is an lpStatus object
 				instructions.dateTime=datetime.now()
 				db.session.add(instructions)
 				db.session.commit()
 				params.instructions_id = instructions.id #FOR QUERYING INSTRUCTIONS FROM DB
+
 				return params
 
 		except Exception as exc:

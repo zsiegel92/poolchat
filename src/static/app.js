@@ -79,7 +79,6 @@ myApp.filter('relativeFromDate', ['$filter', function ($filter) {
 }]);
 
 
-
 myApp.run(function ($rootScope, $location, $route, AuthService) {
   $rootScope.$on('$routeChangeStart',
     function (event, next, current) {

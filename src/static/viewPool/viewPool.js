@@ -11,8 +11,10 @@ angular.module('myApp.viewPool', ['ngRoute'])
     });
 }])
 .controller('viewPoolController',
-  ['$scope', '$location', 'AuthService','$route', '$routeParams','$log','$http','$window','$timeout',
-  function ($scope, $location, AuthService,$route,$routeParams,$log,$http,$window,$timeout) {
+  ['$scope', '$location', 'AuthService','$route', '$routeParams','$log','$http','$window','$timeout','$filter',
+  function ($scope, $location, AuthService,$route,$routeParams,$log,$http,$window,$timeout,$filter) {
+
+
 
     var hours=0;
     var minutes = 0;
@@ -128,7 +130,7 @@ angular.module('myApp.viewPool', ['ngRoute'])
           .then(function(response) {
             $scope.disabled = false;
             $log.log("Getting instruction information");
-            $scope.instruction = response.data
+            $scope.instruction = response.data;
 
           }).
           catch(function(response) {

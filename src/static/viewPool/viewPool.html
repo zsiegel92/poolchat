@@ -94,10 +94,15 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                         </ul>
                     </li>
                 </ol>
-                <div ng-show="instruction">
+                <div ng-if="instruction">
                     <h2>Instructions for {{instruction_pool.name}}</h2>
                     <br>
-                    {{instruction}}
+                    <ul>
+                        <li ng-repeat="(key,value) in instruction">
+                        {{key}} : {{value}}
+                        </li>
+
+                    </ul>
                     <br>
                     <br>
 

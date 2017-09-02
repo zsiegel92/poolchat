@@ -14,6 +14,7 @@ from worker import conn
 from flask_sqlalchemy import SQLAlchemy,current_app
 q = Queue(connection=conn)
 import pickle
+from operator import itemgetter
 
 from models import Carpooler,Pool, Trip,Event_Distance,Trip_Distance,Team,Instruction
 
@@ -72,7 +73,7 @@ def systemParamFromPool(pool):
 		address.append(trip.address) #trip.address is String
 		numberCarSeats.append(trip.num_seats) #trip.num_seats is int
 		minsAvail.append(trip.preWindow) #CONVERT TO DATETIME #trip.preWindow is int
-		extra.append(trip.on_time) #OPPOSITE/INVERTED #trip.on_time is int
+		extra.append(1-trip.on_time) #OPPOSITE/INVERTED #trip.on_time is int
 		must_drive.append(trip.must_drive) #trip.must_drive is int
 
 
@@ -157,6 +158,41 @@ def doGroupThere_fromDB(pool_id=None):
 				instruction_helper['minsAvail']=params.minsAvail
 				instruction_helper['success']=params.solution['success']
 				instruction_helper['totalGroupTime']=params.solution['fun']
+
+				eventDateTime= params.eventDateTime
+
+				minsAvail=params.minsAvail
+				#consider that minsAvail can have negative entries!
+				for plan in instruction_helper['assignments']:
+					order = plan['bestOrder']
+					#if only one person (a driver) in a plan:
+					if len(order)==1:
+						# arrivalTime
+						arrivalMins = max(0-params.minsAvail[order[0]] + plan['minTime'],0)
+						leaveMins = arrivalMins-plan['minTime']
+						plan['addresses'] = [params.address[order[0]]]
+					else:
+						best = plan['bestTimes']
+
+
+						driveTimes = [sum(best[i:]) for i in range(len(best))]
+						minsAvail = itemgetter(*order)(params.minsAvail)
+
+						minArrivalMins = [driveTimes[i]-minsAvail[i] for i in range(len(driveTimes))]
+
+
+						arrivalMins = max(max(minArrivalMins),0)
+						leaveMins = arrivalMins-plan['minTime']
+
+						plan['addresses']=itemgetter(*order)(params.address)
+
+					plan['arrivalMinutesAfterEventStart'] = arrivalMins
+					plan['leaveTimeMinutesAfterEventStart']= leaveMins
+
+					plan['arrivalTime'] = eventDateTime - relativedelta(minutes=arrivalMins)
+					plan['departureTime']=eventDateTime - relativedelta(minutes=leaveMins)
+
+
 
 				print("Got this far 3")
 				instructions.instruction=json.dumps(instruction_helper)

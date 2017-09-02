@@ -96,6 +96,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                 </ol>
                 <div ng-if="instruction">
                     <h2>Instructions for {{instruction_pool.name}}</h2>
+                    <h4>{{instruction_pool.address}}, on {{pool.date}} at {{pool.time}}</h4>
                     <br>
                     <ul>
                         <li ng-repeat="(key,value) in instruction">

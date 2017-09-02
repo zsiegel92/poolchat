@@ -28,8 +28,8 @@
         <br>
         I can leave <select style="max-width:calc(2em + 15px);overflow:hidden;"ng-model="tripForm.ngPreWindow" name="preWindow" ng-init="tripForm.ngPreWindow=30; preMarker=tripForm.ngPreWindow;" ng-change="preMarker=tripForm.ngPreWindow;" convert-to-number>
           <!--            <option value="10">I can leave at {{preTime(pool.dateTime,10) | date:'short'}} or just as string {{preTime(pool.dateTime,10)}} </option> -->
-          <option ng-repeat='pre in preTimes' value='{{pre}}'>{{pre}} minutes ahead, at {{preTime(pool.dateTime,pre) | date : 'hh:mm' : 'UTC' }}</option>
-        </select> minutes ahead, at {{preTime(pool.dateTime,preMarker)| date : 'hh:mm' : 'UTC' }}
+          <option ng-repeat='pre in preTimes' value='{{pre}}'>{{pre}} minutes ahead, at {{preTime(pool.dateTime,pre) | date : 'hh:mm' }}</option>
+        </select> minutes ahead, at {{preTime(pool.dateTime,preMarker)| date : 'hh:mm' }}
       </div>
       <!-- NUMBER SEATS -->
       <div class="form-group">
@@ -91,7 +91,7 @@
             <li ng-show="tripForm.ngAddress"> I'll be coming from {{tripForm.ngAddress}}</li>
             <li ng-show="tripForm.ngNumSeats >0"> My vehicle has {{tripForm.ngNumSeats}} {{(tripForm.ngNumSeats >1) ? 'seats' : 'seat'}} (including driver).</li>
             <li ng-show="tripForm.ngNumSeats ==0">I will not be driving!</li>
-            <li ng-show="tripForm.ngPreWindow"> I can be ready to go at {{preTime(pool_dateTime,tripForm.ngPreWindow) | date : 'hh:mm' : 'UTC' }} ({{tripForm.ngPreWindow}} minutes before the event). </li>
+            <li ng-show="tripForm.ngPreWindow"> I can be ready to go at {{preTime(pool_dateTime,tripForm.ngPreWindow) | date : 'hh:mm' }} ({{tripForm.ngPreWindow}} minutes before the event). </li>
             <li ng-show="tripForm.ngOn_time"> I have to arrive on time (I am an organizer).</li>
             <li ng-show="!tripForm.ngOn_time"> I can arrive up to {{pool.latenessWindow}} minutes late (I am not an organizer).</li>
             <li ng-show="tripForm.ngMust_drive && tripForm.ngNumSeats >0">I have to drive. I cannot catch a ride.</li>

@@ -96,7 +96,15 @@ def api_get_recent_instructions():
 	else:
 		instruction = Instruction.query.filter_by(pool_id=pool_id).order_by(Instruction.dateTime.desc()).first()
 		if instruction is not None:
-			return jsonify(json.loads(instruction.instruction)),200
+			instruct = json.loads(instruction.instruction)
+			instruct['my_id']=current_user.id
+			instruct['my_index'] = instruct['carpooler_ids'].index(current_user.id)
+
+			my_ass = 0
+			for i in range(len(instruct['assignments'])):
+				if current_user.id in instruct['assignments'][i]['ids']:
+					instruct['my_ass']=my_ass
+			return jsonify(instruct),200
 		else:
 			return "No instructions generated yet!",404
 

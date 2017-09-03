@@ -41,8 +41,8 @@ import wtforms_ext
 emailForm=wtforms_ext.EmailForm(ng_click='getCarpoolerInfo()')
 
 
-@app.route('/view_carpooler/',methods=['POST'])
-@login_required
+# @app.route('/view_carpooler/',methods=['POST'])
+# @login_required
 def view_carpooler():
 	# data = json.loads(request.data.decode())
 	# data=request.get_json(force=True)
@@ -62,8 +62,8 @@ def view_carpooler():
 	else:
 		return "Data invalid - errors: " + str(form.errors) +" (FLASK)",500
 
-@app.route('/view_pool/',methods=['POST'])
-@login_required
+# @app.route('/view_pool/',methods=['POST'])
+# @login_required
 def post_call_view_pool():
 	# pool_id = request.args.get('pool_id',None)
 	data = json.loads(request.data.decode())
@@ -132,8 +132,8 @@ def api_get_recent_instructions():
 
 
 
-@app.route('/view_pool/<int:number>/',methods=['GET'])
-@login_required
+# @app.route('/view_pool/<int:number>/',methods=['GET'])
+# @login_required
 def call_view_pool(number):
 	poolDict=view_pool_formal(number)
 	poolRep = '<br>'.join(['{0}: {1}'.format(key, value) for (key, value) in poolDict.items()])
@@ -244,16 +244,16 @@ def index():
 	return app.send_static_file('index.html')
 	# return render_template('index.html')
 
-@app.route('/form_views/',methods=['POST'])
-@login_required
+# @app.route('/form_views/',methods=['POST'])
+# @login_required
 def render_forms_1():
 	return render_template('form_sequence.html')
 
 
 
 #TODO: Flip through users in db, message them their table has been dropped :)
-@app.route('/dropTabs', methods=["GET","POST"])
-@login_required
+# @app.route('/dropTabs', methods=["GET","POST"])
+# @login_required
 def drop_table():
 	print("Dropping all tables")
 	rando=random.randint(1,10)
@@ -291,8 +291,8 @@ def drop_table():
 		return "Dropped and re-created all tables! Random integer: " + str(rando)+ " (your id is " + str(id) + ")", 200
 
 
-@app.route('/triggers/',methods=['GET',"POST"])
-@login_required
+# @app.route('/triggers/',methods=['GET',"POST"])
+# @login_required
 def load_triggers():
 	# <form action="/populate_generic/" method="post" target="_blank">
  #              Number of Generic Participants: <input type="int" name="n"><br>

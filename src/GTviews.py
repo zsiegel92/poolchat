@@ -48,9 +48,9 @@ def flatten(L):
 # 		try:
 # 			params=job.result
 #			instructions_id = params.instructions_id
-#			instructions = Instruction.query.filter_by(id=instruction_id).first()
-@app.route('/q_groupthere_fromdb/',methods=['POST'])
-@login_required
+# #			instructions = Instruction.query.filter_by(id=instruction_id).first()
+# @app.route('/q_groupthere_fromdb/',methods=['POST'])
+# @login_required
 def q_doGroupThere_fromDB(pool_id=None):
 	print('in q_groupthere')
 	if request:
@@ -65,8 +65,8 @@ def q_doGroupThere_fromDB(pool_id=None):
 	return job.get_id()
 
 
-@app.route('/q_groupthere/', methods=['GET','POST'])
-@login_required
+# @app.route('/q_groupthere/', methods=['GET','POST'])
+# @login_required
 def q_groupthere(pool_id=None):
 	print('in q_groupthere')
 	if request:
@@ -82,8 +82,8 @@ def q_groupthere(pool_id=None):
 
 
 
-@app.route('/q_repeat_groupthere/', methods=['GET','POST'])
-@login_required
+# @app.route('/q_repeat_groupthere/', methods=['GET','POST'])
+# @login_required
 def q_repeat_groupthere():
 	print('in q_repeat_groupthere')
 	job = q.enqueue_call(func=GroupThere,result_ttl=5000)
@@ -152,8 +152,8 @@ def GT_results(job_key):
 		return "Still working on GROUPTHERE!!", 202
 
 
-@app.route("/email_all/", methods=['GET','POST'])
-@login_required
+# @app.route("/email_all/", methods=['GET','POST'])
+# @login_required
 def email_all_carpoolers(pool_id=None):
 	with app.app_context():
 		# emailer = Emailer(queue=q)

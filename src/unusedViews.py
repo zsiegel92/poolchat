@@ -12,8 +12,8 @@ from groupThere.GroupThere import GroupThere
 
 
 #TODO: Flip through users in db, message them their table has been dropped :)
-@app.route('/drop_only', methods=["GET"])
-@login_required
+# @app.route('/drop_only', methods=["GET"])
+# @login_required
 def drop_table_only():
 	print("Dropping all tables")
 	try:
@@ -39,8 +39,8 @@ def drop_table_only():
 	else:
 		return "Dropped and re-created all tables!", 200
 
-@app.route('/drop_ping', methods=["GET"])
-@login_required
+# @app.route('/drop_ping', methods=["GET"])
+# @login_required
 def drop_and_ping():
 	try:
 		db.drop_all()
@@ -54,8 +54,8 @@ def drop_and_ping():
 
 
 
-@app.route('/pester', methods=["GET"])
-@login_required
+# @app.route('/pester', methods=["GET"])
+# @login_required
 def pester_view():
 	try:
 		sender_id = '1512768535401609'
@@ -66,8 +66,8 @@ def pester_view():
 		return "Pestered Zach!", 200
 
 
-@app.route('/ping_getStarted', methods=["GET"])
-@login_required
+# @app.route('/ping_getStarted', methods=["GET"])
+# @login_required
 def ping_getStarted():
 	try:
 		fbId = '1512768535401609'
@@ -77,8 +77,8 @@ def ping_getStarted():
 	else:
 		return "Got started!", 200
 
-@app.route('/ping_text', methods=["GET"])
-@login_required
+# @app.route('/ping_text', methods=["GET"])
+# @login_required
 def ping_text():
 	try:
 		fbId = '1512768535401609'
@@ -89,8 +89,8 @@ def ping_text():
 		return "ping_text successful!", 200
 
 
-@app.route('/drop_populate', methods=["GET"])
-@login_required
+# @app.route('/drop_populate', methods=["GET"])
+# @login_required
 def drop_populate():
 	try:
 		db.drop_all()

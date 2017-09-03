@@ -86,14 +86,14 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                                     <li>Have to drive: {{ pool.trip.must_drive | yesNo }} </li>
                                     <li>Have to arrive exactly on time: {{ pool.trip.on_time | yesNo }}</li>
                                     <li>Update your trip information!<br>
-                                    <button type="button" clas="btn btn-default btn-xs" ng-click="goto_join($index)" > Re-Submit </button></li>
+                                    <button type="button" clas="btn btn-default btn-xs" ng-click="goto_join($index)" > Edit </button></li>
                                 </ul>
                             </li>
                             <li>
                                 <b>Instructions will be send out in  {{toDays(pool.seconds_til_instructions-counter)}} days, {{toHours(pool.seconds_til_instructions-counter)}} hours, {{toMinutes(pool.seconds_til_instructions-counter)}} minues, {{toSeconds(pool.seconds_til_instructions-counter)}} seconds</b>
                                 <ul>
                                     <li>View most recent solution attempt now!<br>
-                                    <button type="button" clas="btn btn-default btn-xs" ng-click="getPoolInstructions($index)" > View </button></li>
+                                    <button type="button" clas="btn btn-default btn-xs" ng-click="getPoolInstructions($index)" > View Solution</button></li>
 <!--                                     <li> FOR TESTING: Generate a new solution now!<br>
                                     <button type="button" clas="btn btn-default btn-xs" ng-click="redoPool($index)" >Re-Generate Solution</button></li> -->
                                 </ul>

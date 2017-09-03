@@ -196,12 +196,10 @@ def api_create_trip():
 			return "Updated trip in database!",200
 		else:
 			q.enqueue_call(func=send_pool_join_notice,kwargs={'pool_id':pool.id,'carpooler_id':current_user.id},result_ttl=5000)
-			send_team_admin_approval_email(team)
 			return "Added trip to database!",200
 
 	else:
 		return "Input invalid - errors: " + str(tripform.errors) +" (FLASK)",500
-
 
 # def get_instruction_history(pool_id):
 # 	instructions = Instruction.query.filter_by(pool_id=pool_id).order_by(Instruction.dateTime.desc()).all()
@@ -242,65 +240,106 @@ def api_create_team():
 
 
 
+def send_pool_join_notice(pool_id,carpooler_id):
+	with app.app_context():
+		pool=Pool.query.filter_by(id=pool_id).first()
+		carpooler = Carpooler.query.filter_by(id=carpooler_id).first()
+		trip = Trip.query.filter_by(carpooler_id=carpooler_id,pool_id=pool_id).first()
+		instruction = Instruction.query.filter_by(pool_id = pool_id).order_by(Instruction.dateTime.desc()).first()
+		if carpooler is None or pool is None or trip is None:
+			assert(True==False)
+		email = pool.eventEmail
+		url_base = app.config['URL_BASE']#ends in /
+		subject = "(GroupThere) - " + str(pool.poolName) +" has a new member!"
+		link = '{base}?#!/viewPool'.format(base=url_base)
+		html_body = render_template('emails/tripJoin.html',link=link,carpooler=carpooler,pool=pool,trip=trip,instruction=instruction)
+		text_message = render_template('emails/tripJoin.txt',link=link,carpooler=carpooler,pool=pool,trip=trip,instruction=instruction)
+		html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
+		emailer.send_html(email,html_message=html,subject=subject,text_message=text_message)
+		return "email sent!"
+
+def send_pool_trip_update(pool_id,carpooler_id):
+	with app.app_context():
+		pool=Pool.query.filter_by(id=pool_id).first()
+		carpooler = Carpooler.query.filter_by(id=carpooler_id).first()
+		trip = Trip.query.filter_by(carpooler_id=carpooler_id,pool_id=pool_id).first()
+		instruction = Instruction.query.filter_by(pool_id = pool_id).order_by(Instruction.dateTime.desc()).first()
+		if carpooler is None or pool is None or trip is None:
+			assert(True==False)
+		email = pool.eventEmail
+		url_base = app.config['URL_BASE']#ends in /
+		subject = "(GroupThere) - " + str(pool.poolName) +" member " + str(carpooler.name) + " has edited their trip details."
+		link = '{base}?#!/viewPool'.format(base=url_base)
+		html_body = render_template('emails/tripUpdate.html',link=link,carpooler=carpooler,pool=pool,trip=trip,instruction=instruction)
+		text_message = render_template('emails/tripUpdate.txt',link=link,carpooler=carpooler,pool=pool,trip=trip,instruction=instruction)
+		html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
+		emailer.send_html(email,html_message=html,subject=subject,text_message=text_message)
+		return "email sent!"
+
+
+
 
 
 def send_team_email_confirmation(temp_team,second=False):
 	#utilize current_user
 	#temp teams have an id that is not guessable.
-	print("in send_team_email_confirmation")
-	email=temp_team.email.lower()
-	url_base = app.config['URL_BASE']#ends in /
-	#send a link to ?#!/register to whatever the email is
-	subject = "Confirm Email for New GroupThere Team " + str(temp_team.name) +"!"
-	link = '{base}?#!/confirmTeamEmail/{email}/{id}'.format(base=url_base,email=quote_plus(temp_team.email.lower()),id=quote_plus(temp_team.id))
-	if temp_team.carpooler_id != current_user.id:
-		carpooler = Carpooler.query.filter_by(id=temp_team.carpooler_id).first()
-	else:
-		carpooler = current_user
+	with app.app_context():
+		print("in send_team_email_confirmation")
+		email=temp_team.email.lower()
+		url_base = app.config['URL_BASE']#ends in /
+		#send a link to ?#!/register to whatever the email is
+		subject = "Confirm Email for New GroupThere Team " + str(temp_team.name) +"!"
+		link = '{base}?#!/confirmTeamEmail/{email}/{id}'.format(base=url_base,email=quote_plus(temp_team.email.lower()),id=quote_plus(temp_team.id))
+		if temp_team.carpooler_id != current_user.id:
+			carpooler = Carpooler.query.filter_by(id=temp_team.carpooler_id).first()
+		else:
+			carpooler = current_user
 
-	if second is False:
-		print("Sending second confirmation email for team! Team approved yet still no email confirmation!")
-		html_body= render_template('emails/confirmTeamEmail.html',link=link,team=temp_team,carpooler=carpooler)
-		text_message=render_template('emails/confirmTeamEmail.txt',link=link,team=temp_team,carpooler=carpooler)
-	else:
-		print("Sending first confirmation email for team!")
-		subject = "Your team has been approved! Confirm Email to start using GroupThere with Team " + str(temp_team.name) +"!"
-		html_body= render_template('emails/second_confirmTeamEmail.html',link=link,team=temp_team,carpooler=carpooler)
-		text_message=render_template('emails/second_confirmTeamEmail.txt',link=link,team=temp_team,carpooler=carpooler)
-	html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
-	emailer.send_html(email,html_message=html,subject=subject,text_message=text_message)
-	return "email sent!"
+		if second is False:
+			print("Sending second confirmation email for team! Team approved yet still no email confirmation!")
+			html_body= render_template('emails/confirmTeamEmail.html',link=link,team=temp_team,carpooler=carpooler)
+			text_message=render_template('emails/confirmTeamEmail.txt',link=link,team=temp_team,carpooler=carpooler)
+		else:
+			print("Sending first confirmation email for team!")
+			subject = "Your team has been approved! Confirm Email to start using GroupThere with Team " + str(temp_team.name) +"!"
+			html_body= render_template('emails/second_confirmTeamEmail.html',link=link,team=temp_team,carpooler=carpooler)
+			text_message=render_template('emails/second_confirmTeamEmail.txt',link=link,team=temp_team,carpooler=carpooler)
+		html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
+		emailer.send_html(email,html_message=html,subject=subject,text_message=text_message)
+		return "email sent!"
 
 #TODO: write second_confirmTeamEmail.html and .txt email
 #TODO: make {url_base}?#!/approveTeam/:team_id/:team_key ping {url_base}api/approve_team with params {team_id:,team_key:}
 # TODO: write admin_approve_team.html and .txt emails!
 def send_team_admin_approval_email(temp_team):
-	team_key = bcrypt.generate_password_hash(temp_team.name).decode('utf-8')
-	team_id = temp_team.id
+	with app.app_context():
+		team_key = bcrypt.generate_password_hash(temp_team.name).decode('utf-8')
+		team_id = temp_team.id
 
-	url_base = app.config['URL_BASE']#ends in /
-	link = '{base}?#!/adminApproveTeam/{team_id}/{team_key}'.format(base=url_base,team_id=quote_plus(team_id),team_key=quote_plus(team_key))
-	carpooler=Carpooler.query.filter_by(id=temp_team.carpooler_id).first()
-	subject = "Approve team " + str(temp_team.name)
-	html_body= render_template('emails/admin_approve_team.html',link=link,team=temp_team,carpooler=carpooler)
-	text_message=render_template('emails/admin_approve_team.txt',link=link,team=temp_team,carpooler=carpooler)
-	html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
-	emailer.self_send_html_body(html_body=html,subject=subject,text_message=text_message)
+		url_base = app.config['URL_BASE']#ends in /
+		link = '{base}?#!/adminApproveTeam/{team_id}/{team_key}'.format(base=url_base,team_id=quote_plus(team_id),team_key=quote_plus(team_key))
+		carpooler=Carpooler.query.filter_by(id=temp_team.carpooler_id).first()
+		subject = "Approve team " + str(temp_team.name)
+		html_body= render_template('emails/admin_approve_team.html',link=link,team=temp_team,carpooler=carpooler)
+		text_message=render_template('emails/admin_approve_team.txt',link=link,team=temp_team,carpooler=carpooler)
+		html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
+		emailer.self_send_html_body(html_body=html,subject=subject,text_message=text_message)
 
 def send_team_created_email(temp_team):
-	print("in send_team_email_confirmation")
-	email=temp_team.email.lower()
-	url_base = app.config['URL_BASE']#ends in /
-	subject = "(GroupThere) Your team is ready to roll!"
-	link = '{base}?#!/makePool'.format(base=url_base)
-	carpooler = Carpooler.query.filter_by(id=temp_team.carpooler_id).first()
+	with app.app_context():
+		print("in send_team_email_confirmation")
+		email=temp_team.email.lower()
+		url_base = app.config['URL_BASE']#ends in /
+		subject = "(GroupThere) Your team is ready to roll!"
+		link = '{base}?#!/makePool'.format(base=url_base)
+		carpooler = Carpooler.query.filter_by(id=temp_team.carpooler_id).first()
 
-	html_body= render_template('emails/team_created.html',link=link,team=temp_team,carpooler=carpooler)
-	text_message=render_template('emails/team_created.txt',link=link,team=temp_team,carpooler=carpooler)
+		html_body= render_template('emails/team_created.html',link=link,team=temp_team,carpooler=carpooler)
+		text_message=render_template('emails/team_created.txt',link=link,team=temp_team,carpooler=carpooler)
 
-	html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
-	emailer.send_html(email,html_message=html,subject=subject,text_message=text_message)
-	return "email sent!"
+		html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
+		emailer.send_html(email,html_message=html,subject=subject,text_message=text_message)
+		return "email sent!"
 
 @app.route('/api/confirm_team_email',methods=['POST'])
 def confirm_team_email():

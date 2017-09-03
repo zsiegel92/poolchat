@@ -1,0 +1,38 @@
+Hey, {{pool.eventEmail}},
+<br>
+<br>
+Your event, {{pool.poolame}} on {{pool.eventDateTime}}, has a new participant: {{carpooler.name}} has just joined. So far, {{pool.members | length}} people have joined this event!
+<br>
+<br>
+<b>Here's some information about their trip:</b>
+<br>
+<ul>
+	<li>Origin: {{trip.address}}.</li>
+	{% if trip.num_seats > 0 %}
+	<li>Number of seats in vehicle: {{trip.num_seats}}</li>
+	{% else %}
+	<li>They cannot drive!</li>
+	{%endif %}
+	<li>They can start their trip as early as {{trip.preWindow}} minutes before the event</li>
+	{% if trip.must_drive==1 %}
+	<li>They have to drive; they cannot catch a ride.</li>
+	{% else %}
+	<li>They are able to catch a ride.</li>
+	{% endif %}
+	{% if trip.on_time==1 %}
+	<li>They <b>have to</b> arrive on time! They are either an organizer, or have marked that they would not like to arrive late.</li>
+	{% else %}
+	<li>They can arrive up to {{pool.latenessWindow}} minutes late if necessary.</li>
+	{% endif %}
+</ul>
+<br>
+<br>
+<b>The current status code of your event is: '{{ 'OK' if instruction.success=='1' else 'uncertain' }}'</b>. If there aren't enough cars, for example, not everyone will be able to catch a ride.
+<br>
+<br>
+Please visit <a href="{{link}}">GroupThere</a> for more information and <b>a full tentative carpooling itinerary</b>.
+<br>
+<br>
+Best wishes,
+<br>
+GroupThere

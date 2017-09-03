@@ -1,9 +1,11 @@
-from GT_interactions import doGroupThere,post_optimization_update,get_all_pool_ids,email_aPool,doGroupThere_fromDB
+from GT_interactions import doGroupThere,post_optimization_update,doGroupThere_fromDB
 
-from flask import jsonify,json
+from flask import jsonify,json,render_template
 from flask_login import current_user, login_user, logout_user,login_required
 
 import numpy as np
+from dateutil.relativedelta import relativedelta
+
 
 from datetime import datetime
 from rq import Queue
@@ -11,12 +13,14 @@ from rq.job import Job
 from worker import conn
 q = Queue(connection=conn)
 
-from models import Carpooler,Pool, Trip
+from models import Carpooler,Pool, Trip,Instruction,Team
 from groupThere.GroupThere import GroupThere
+from helpers import findRelativeDelta
 
 from groupThere.MailParam import MailParam
 from groupThere.SystemParam import SystemParam
 from groupThere.helpers import sayname, generate_groups_fromParam, generate_model,optimizePulp,gen_assignment,gen_assignment_fromParams, test_groups,test_model,groupsToLists,shortTime#, generate_groups
+from emailer import Emailer
 
 from app import app,request,abort
 from database import db
@@ -151,12 +155,106 @@ def GT_results(job_key):
 @app.route("/email_all/", methods=['GET','POST'])
 @login_required
 def email_all_carpoolers(pool_id=None):
-	# emailer = Emailer(queue=q)
-	if request:
-		if request.method=="POST":
-			data = json.loads(request.data.decode())
-			pool_id = data["pool_id"]
-	pool_ids = get_all_pool_ids(pool_id)
-	for pool_id in pool_ids:
-		q.enqueue_call(func=email_aPool,kwargs={'pool_id':pool_id},result_ttl=5000)
-	return "Emails Enqueued.",200
+	with app.app_context():
+		# emailer = Emailer(queue=q)
+		if request:
+			if request.method=="POST":
+				data = json.loads(request.data.decode())
+				pool_id = data["pool_id"]
+		pool_ids = get_all_pool_ids(pool_id)
+		for pool_id in pool_ids:
+			q.enqueue_call(func=email_aPool,kwargs={'pool_id':pool_id},result_ttl=5000)
+		return "Emails Enqueued.",200
+
+
+def get_all_pool_ids(pool_id=None):
+	pool_ids=[]
+	if pool_id is not None:
+		pools = Pool.query.filter_by(id=pool_id)
+	else:
+		pools = Pool.query.all()
+	for pool in pools:
+		pool_ids.append(pool.id)
+	return pool_ids
+
+def email_aPool(pool_id,scheduler_frequency=60):
+	emailer=Emailer(q)
+	nowish = datetime.now() - relativedelta(minutes=int(scheduler_frequency/2))
+	pool=Pool.query.filter_by(id=pool_id).first()
+	instruction = Instruction.query.filter_by(pool_id=pool_id).order_by(Instruction.dateTime.desc()).first()
+	fireNotice = int(pool.fireNotice)
+	eventDateTime= pool.eventDateTime
+	eventEmail=pool.eventEmail
+	[date,time,fireDateTime] = findRelativeDelta(eventDateTime,fireNotice,mode='hours',delta_after=-1)
+
+	url_base = app.config['URL_BASE']#ends in /
+	link = url_base + '?#!/viewPool'
+	print("EXAMINING POOL: " + str(pool.poolName))
+
+	if (nowish> fireDateTime) and (not pool.noticeWentOut):
+		if not (pool.optimizedYet and pool.optimizationCurrent):
+			print("Instructions should be sent in the next hour!")
+			pass
+		else:
+			print("Emailing all members of pool " + str(pool.poolName))
+			pool.noticeWentOut = True
+			db.session.commit()
+			subject= "(GroupThere) Optimal solution for " + str(pool.poolName) + "!"
+			poolHTML = "<html><head></head><body>Hi, thanks for making {poolName},<br><br>Please visit <a href='{link}'>GroupThere</a> for a full solution!</body></html>".format(link=link,poolName=pool.poolName)
+			poolTXT = 'Thanks for making {poolName}.\n\nFor a full solution, please visit {link}'.format(link=link,poolName=pool.poolName)
+			emailer.send_html(eventEmail,html_message=poolHTML,subject=subject,text_message=poolTXT)
+			for trip in pool.members:
+				carpooler = trip.member
+				toAddress=carpooler.email
+
+				html_body= render_template('emails/solution.html',carpooler=carpooler,pool=pool,trip=trip,instruction=instruction,link=link)
+				text_message=render_template('emails/solution.txt',carpooler=carpooler,pool=pool,trip=trip,instruction=instruction,link=link)
+				html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
+				emailer.send_html(toAddress,html_message=html,subject=subject,text_message=text_message)
+
+	elif (nowish>fireDateTime):
+		print("Should have already fired a notice for pool " + str(pool.poolName) + "!")
+	else:
+		print("We do not yet have to fire a notice for pool " + str(pool.poolName) + "!")
+
+
+
+def do_all_gt(scheduler_frequency=60):
+	nowish = datetime.now() - relativedelta(minutes=int(scheduler_frequency/2))
+	pools = Pool.query.all()
+	for pool in pools:
+		pool_id=pool.id
+		poolName = pool.poolName
+		fireNotice = int(pool.fireNotice)
+		eventDateTime= pool.eventDateTime
+		[date,time,fireDateTime] = findRelativeDelta(eventDateTime,fireNotice,mode='hours',delta_after=-1)
+		print("EXAMINING POOL: " + str(poolName))
+
+		if (nowish> fireDateTime) and (not (pool.optimizedYet and pool.optimizationCurrent)):
+			print("TIME TO OPTIMIZE!")
+			q.enqueue_call(func=doGroupThere_fromDB,kwargs={'pool_id':pool_id},result_ttl=5000)
+			print("Enqueued optimization for pool " + str(poolName))
+
+		elif (nowish>fireDateTime):
+			print("Should have already optimized pool " + str(poolName) + "!")
+		else:
+			print("We do not yet have to optimize pool " + str(poolName) + "!")
+	return("All optimization enqueued.")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

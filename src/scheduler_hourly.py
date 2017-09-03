@@ -1,5 +1,4 @@
-from GT_interactions import do_all_gt
-from GTviews import email_all_carpoolers
+from GTviews import email_all_carpoolers,do_all_gt
 from app_factory import create_app
 # from rq import Queue
 # from rq.job import Job

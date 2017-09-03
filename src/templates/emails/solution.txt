@@ -1,0 +1,12 @@
+Hey, {{carpooler.name}},
+\n
+\n
+Carpooling for the event {{pool.poolName}} has been solved! Please visit GroupThere at the link below for all the details regarding your trip.
+\n
+\n
+{{link}}
+\n
+\n
+Thanks,
+\n
+GroupThere

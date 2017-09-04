@@ -43,6 +43,11 @@ sslify = SSLify(app)
 # 	from messengerbot import messenger #imported by interactions
 
 
+import logging
+logging.info('LOGGING FROM APP.PY USING logger.info')  # will not print anything
+# app.logger.log("LOGGING FROM APP.PY USING logger.log")
+
+
 from utils import KwargConverter
 app.url_map.converters['kwarg'] = KwargConverter
 

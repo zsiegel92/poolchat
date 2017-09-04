@@ -7,9 +7,26 @@ from flask import url_for
 import base64
 import models
 
+
+# import logging
+
+
+
+# gunicorn_error_logger = logging.getLogger('gunicorn.error')
+
+
+
+
+
 def create_app(name=__name__):
 	app = Flask(name)
 	app.config.from_object(os.environ['APP_SETTINGS'])
+
+	# app.logger.handlers.extend(gunicorn_error_logger.handlers)
+	# app.logger.setLevel(logging.DEBUG)
+	# app.logger.info('this will show in the log')
+	# app.logger=logging.getLogger()
+
 	db.init_app(app)
 	bcrypt.init_app(app)
 	login_manager.init_app(app)

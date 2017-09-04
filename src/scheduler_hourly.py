@@ -11,9 +11,11 @@ scheduler_frequency=60
 
 
 if __name__ == '__main__':
-	print("Trying to send email")
-	with create_app().app_context():
+	print("In scheduler_hourly.py")
+
+	tempApp=create_app()
+	with tempApp.app_context():
 		# send_test_email('zsiegel92@gmail.com')
 		do_all_gt(scheduler_frequency=scheduler_frequency)
 		email_all_carpoolers()
-		print("email sent!")
+		print("Finished scheduler_hourly.py")

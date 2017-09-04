@@ -2,7 +2,7 @@ from dateutil.relativedelta import relativedelta
 from operator import itemgetter
 
 def findRelativeDelta(dt,inputted_delta,mode='minutes',delta_after=-1):
-	print("in interactions.findRelativeDelta")
+	# print("in interactions.findRelativeDelta")
 	if mode not in ['minutes','hours','days']:
 		return "ERROR"
 	difDt = dt + relativedelta(**{mode:delta_after*int(inputted_delta)})

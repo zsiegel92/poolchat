@@ -3,11 +3,14 @@ from GT_interactions import doGroupThere,post_optimization_update,doGroupThere_f
 from flask import jsonify,json,render_template
 from flask_login import current_user, login_user, logout_user,login_required
 
+import sys
+
 import numpy as np
 from dateutil.relativedelta import relativedelta
+from datetime import datetime,timedelta, tzinfo
+ZERO = timedelta(0)
+HOUR = timedelta(hours=1)
 
-
-from datetime import datetime
 from rq import Queue
 from rq.job import Job
 from worker import conn
@@ -25,6 +28,7 @@ from emailer import Emailer
 from app import app,request,abort
 from database import db
 
+import logging
 
 
 
@@ -156,18 +160,22 @@ def GT_results(job_key):
 # @login_required
 def email_all_carpoolers(pool_id=None):
 	with app.app_context():
+		app.logger.warning("(email_all_carpoolers) logging using app.logger.info")
 		# emailer = Emailer(queue=q)
+		print("(email_all_carpoolers - print)")
 		if request:
 			if request.method=="POST":
 				data = json.loads(request.data.decode())
 				pool_id = data["pool_id"]
 		pool_ids = get_all_pool_ids(pool_id)
 		for pool_id in pool_ids:
+			print("email_all_carpoolers; enqueue for pool_id " + str(pool_id))
 			q.enqueue_call(func=email_aPool,kwargs={'pool_id':pool_id},result_ttl=5000)
 		return "Emails Enqueued.",200
 
 
 def get_all_pool_ids(pool_id=None):
+	print("in get_all_pool_ids")
 	pool_ids=[]
 	if pool_id is not None:
 		pools = Pool.query.filter_by(id=pool_id)
@@ -175,18 +183,30 @@ def get_all_pool_ids(pool_id=None):
 		pools = Pool.query.all()
 	for pool in pools:
 		pool_ids.append(pool.id)
+	print("returning " + str(pool_ids))
 	return pool_ids
+
+
+
 
 def email_aPool(pool_id,scheduler_frequency=60):
 	emailer=Emailer(q)
-	nowish = datetime.now() - relativedelta(minutes=int(scheduler_frequency/2))
+
 	pool=Pool.query.filter_by(id=pool_id).first()
+
+	print("(email_aPool - print) pool " + str(pool.poolName))
+
+	logging.info("(email_aPool) LOGGING FROM email_aPool using logging.info")
+	app.logger.info("(email_aPool) LOGGING FROM email_aPool using app.logger.info")
+
+
 	instruction = Instruction.query.filter_by(pool_id=pool_id).order_by(Instruction.dateTime.desc()).first()
 	fireNotice = int(pool.fireNotice)
 	eventDateTime= pool.eventDateTime
 	eventEmail=pool.eventEmail
 	[date,time,fireDateTime] = findRelativeDelta(eventDateTime,fireNotice,mode='hours',delta_after=-1)
-
+	# tzOffsetStr=fireDateTime.strftime('%z')
+	nowish = datetime.now(tz=fireDateTime.tzinfo) - relativedelta(minutes=int(scheduler_frequency/2))
 	url_base = app.config['URL_BASE']#ends in /
 	link = url_base + '?#!/viewPool'
 	print("EXAMINING POOL: " + str(pool.poolName))
@@ -220,14 +240,16 @@ def email_aPool(pool_id,scheduler_frequency=60):
 
 
 def do_all_gt(scheduler_frequency=60):
-	nowish = datetime.now() - relativedelta(minutes=int(scheduler_frequency/2))
+
 	pools = Pool.query.all()
 	for pool in pools:
+		print("do_all_gt; pool " + str(pool.poolName))
 		pool_id=pool.id
 		poolName = pool.poolName
 		fireNotice = int(pool.fireNotice)
 		eventDateTime= pool.eventDateTime
 		[date,time,fireDateTime] = findRelativeDelta(eventDateTime,fireNotice,mode='hours',delta_after=-1)
+		nowish = datetime.now(tz=fireDateTime.tzinfo) - relativedelta(minutes=int(scheduler_frequency/2))
 		print("EXAMINING POOL: " + str(poolName))
 
 		if (nowish> fireDateTime) and (not (pool.optimizedYet and pool.optimizationCurrent)):

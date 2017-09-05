@@ -51,11 +51,11 @@ Make sure $scope, $route, $routeParams are injected in controller -->
           <h2>Your Teams</h2>
           <div class="panel panel-default" ng-repeat="team in teams">
             <div class="panel-heading">
-              <h4 class="panel-title">
-              <a data-toggle="collapse" class="collapsed"data-parent="#teams_accordion" href="#collapse{{$index}}" onclick="return false;" style="text-align: right;">
-                {{team.name}}
+              <div class="panel-title">
+              <a data-toggle="collapse" class="collapsed" data-parent="#teams_accordion" href="#collapse{{$index}}" onclick="return false;" >
+                <h4>{{team.name}}</h4>
               </a>
-              </h4>
+              </div>
             </div>
             <div id="collapse{{$index}}" class="panel-collapse collapse">
               <div class="panel-body">
@@ -76,11 +76,11 @@ Make sure $scope, $route, $routeParams are injected in controller -->
           <h2> You can join the following teams: </h2>
           <div class="panel panel-default" ng-repeat="team in foreignTeams">
             <div class="panel-heading">
-              <h4 class="panel-title">
+              <div class="panel-title">
               <a data-toggle="collapse" class="collapsed" data-parent="#foreignTeams_accordion" href="#foreign_collapse{{$index}}" onclick="return false;">
-                {{team.name}}
+                <h4>{{team.name}}</h4>
               </a>
-              </h4>
+              </div>
             </div>
             <div id="foreign_collapse{{$index}}" class="panel-collapse collapse">
               <div class="panel-body">

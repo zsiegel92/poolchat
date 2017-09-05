@@ -152,7 +152,7 @@ def api_get_pool_info_for_user():
 	unjoined_pool_ids = list(set(team_pool_ids).difference(joined_pool_ids))
 
 
-	joined_pools =[{'id':trip.pool.id,'name':trip.pool.poolName,'date':trip.pool.eventDate,'time':trip.pool.eventTime,'address':trip.pool.eventAddress,'email':trip.pool.eventEmail,'fireNotice':trip.pool.fireNotice,'latenessWindow':trip.pool.latenessWindow,'dateTime':trip.pool.eventDateTime.isoformat(),'trip':{'address':trip.address,'num_seats':trip.num_seats,'preWindow':trip.preWindow,'on_time':trip.on_time,'must_drive':trip.must_drive},'teams':[team.to_dict() for team in trip.pool.teams]} for trip in current_user.pools]
+	joined_pools =[{'id':trip.pool.id,'name':trip.pool.poolName,'date':trip.pool.eventDate,'time':trip.pool.eventTime,'address':trip.pool.eventAddress,'email':trip.pool.eventEmail,'fireNotice':trip.pool.fireNotice,'latenessWindow':trip.pool.latenessWindow,'dateTime':trip.pool.eventDateTime.isoformat(),'members':[other_trip.member.name for other_trip in trip.pool.members],'trip':{'address':trip.address,'num_seats':trip.num_seats,'preWindow':trip.preWindow,'on_time':trip.on_time,'must_drive':trip.must_drive},'teams':[team.to_dict() for team in trip.pool.teams]} for trip in current_user.pools]
 	unjoined_pools=[{'id':pool.id,'name':pool.poolName,'date':pool.eventDate,'time':pool.eventTime,'address':pool.eventAddress,'email':pool.eventEmail,'fireNotice':pool.fireNotice,'latenessWindow':pool.latenessWindow,'dateTime':pool.eventDateTime.isoformat(),'teams':[poolTeam.to_dict() for poolTeam in pool.teams],'team_names':[poolTeam.name for poolTeam in pool.teams]} for team in current_user.teams for pool in team.pools if pool.id in unjoined_pool_ids]
 	carpooler={'name':current_user.name,'first':current_user.firstname,'last':current_user.lastname,'email':current_user.email}
 
@@ -218,6 +218,24 @@ def api_get_teams():
 	return jsonify({'teams':team_objects,'foreign_teams':foreign_team_objects,'self':selfDict,'message':message,'makePoolMessage':makePoolMessage}),200
 
 
+@app.route('/api/report_feedback',methods=['POST'])
+def api_report_feedback():
+	print("in api/report_feedback")
+
+	feedback_message=request.values.get('feedback_message')
+	if hasattr(current_user.is_anonymous,'__call__') and (not current_user.is_anonymous()):
+		name = current_user.name
+		email=current_user.email
+	else:
+		name = "Anonymous User"
+		email=request.values.get('email')
+
+	subject = "Feedback from GroupThere User " + str(name)
+
+	html_body = render_template('emails/feedback.html',feedback=feedback_message,email=email)
+	text_message = render_template('emails/feedback.txt',feedback=feedback_message,email=email)
+	emailer.self_send_html_body(html_body=html_body,subject=subject,text_message=text_message)
+	return "email sent!",200
 
 # @app.route('/', methods=['GET', 'POST'])
 # @login_required
@@ -254,8 +272,7 @@ def drop_table():
 	print("Dropping all tables")
 	rando=random.randint(1,10)
 	try:
-		if current_user.is_anonymous():
-
+		if hasattr(current_user.is_anonymous,'__call__') and (current_user.is_anonymous()):
 			id = "anonymousId"
 			return "must log in to drop tables.",302
 		else:

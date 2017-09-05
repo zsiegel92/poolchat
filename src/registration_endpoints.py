@@ -327,8 +327,8 @@ def send_team_admin_approval_email(temp_team):
 		subject = "Approve team " + str(temp_team.name)
 		html_body= render_template('emails/admin_approve_team.html',link=link,team=temp_team,carpooler=carpooler)
 		text_message=render_template('emails/admin_approve_team.txt',link=link,team=temp_team,carpooler=carpooler)
-		html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
-		emailer.self_send_html_body(html_body=html,subject=subject,text_message=text_message)
+		# html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
+		emailer.self_send_html_body(html_body=html_body,subject=subject,text_message=text_message)
 
 def send_team_created_email(temp_team):
 	with app.app_context():

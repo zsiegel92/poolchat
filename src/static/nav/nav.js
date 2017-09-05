@@ -14,6 +14,9 @@ angular.module('myApp.nav', ['ngRoute'])
   ['$scope', '$location', '$http','AuthService','$rootScope','$log',
   function ($scope, $location, $http, AuthService,$rootScope,$log) {
 
+    $scope.disabled=false;
+    $scope.contactForm ={};
+
     $log.log("Starting up navController");
 
 
@@ -43,6 +46,8 @@ angular.module('myApp.nav', ['ngRoute'])
     $scope.viewPool = function() {
       $location.path('/viewPool/');
     };
+
+
 
 }]);
 

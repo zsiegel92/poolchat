@@ -1,0 +1,7 @@
+Hey, GroupThere Admin,
+\n
+\n
+You have just gotten feedback from {{email}}. Here it is:
+\n
+\n
+{{feedback}}

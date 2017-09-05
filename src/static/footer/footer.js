@@ -30,6 +30,7 @@ angular.module('myApp.footer', ['ngRoute'])
           .then(function(response) {
             $scope.disabled = false;
             $scope.contactFormValues.textValue='';
+            $scope.contactForm.$setPristine();
             alert("Thanks for your feedback!");
           }).
           catch(function(response) {

@@ -29,11 +29,13 @@
           <li ng-class="navClass('login')"><a href='#!/login'>login</a></li>
           <li ng-class="navClass('register')"><a href='#!/register'>Register New User</a></li>
         </ul>
-        <button ng-show="logged_in" ng-click='logout()' class="btn btn-danger navbar-btn">logout</button>
+        <button ng-show="logged_in" ng-click='logout()' class="btn btn-danger navbar-btn">logout {{myEmail}}</button>
       </div>
     </nav>
+
     <!-- APP GOES HERE: -->
     <div class="container">
+
       <div ng-view>
       </div>
     </div>

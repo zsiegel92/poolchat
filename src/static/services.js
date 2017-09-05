@@ -1,11 +1,12 @@
 'use strict'
 
 angular.module('myApp').factory('AuthService',
-  ['$q', '$timeout', '$http','$log',
-  function ($q, $timeout, $http, $log) {
+  ['$q', '$timeout', '$http','$log','$rootScope',
+  function ($q, $timeout, $http, $log,$rootScope) {
 
     // create user variable
     var user = null;
+    var myEmail = null;
 
     // return available functions for use in controllers
     return ({
@@ -13,7 +14,9 @@ angular.module('myApp').factory('AuthService',
       login: login,
       logout: logout,
       register: register,
-      getUserStatus: getUserStatus
+      getUserStatus: getUserStatus,
+      requestMyEmail: requestMyEmail,
+      getMyEmail: getMyEmail
     });
 
     function isLoggedIn() {
@@ -36,6 +39,9 @@ angular.module('myApp').factory('AuthService',
           if(response.status === 200){
             $log.log("logged in")
             user = true;
+            $log.log("setting myEmail to " + String(email));
+            myEmail=email;
+            $rootScope.myEmail=email;
             return response;
           } else {
             $log.log("Error in services.Authservice.login");
@@ -83,6 +89,21 @@ angular.module('myApp').factory('AuthService',
 
     }
 
+    function requestMyEmail() {
+      return $http.post('/api/get_email/')
+      // handle success
+      .then(function (response) {
+        myEmail=response.data;
+      })
+      // handle error
+      .catch(function (response) {
+        $log.log(response);
+      });
+    }
+    function getMyEmail(){
+      return myEmail;
+    }
+
     function register(first,last,email, password,confirm,accept_tos) {
 
 // ,firstname,lastname,accept_tos
@@ -112,6 +133,7 @@ angular.module('myApp').factory('AuthService',
       // // return promise object
       // return deferred.promise;
     }
+
 
     function getUserStatus() {
       return $http.get('/api/status')

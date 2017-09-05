@@ -11,8 +11,11 @@ angular.module('myApp.nav', ['ngRoute'])
     });
 }])
 .controller('navController',
-  ['$scope', '$location', '$http','AuthService',
-  function ($scope, $location, $http,AuthService) {
+  ['$scope', '$location', '$http','AuthService','$rootScope','$log',
+  function ($scope, $location, $http, AuthService,$rootScope,$log) {
+
+    $log.log("Starting up navController");
+
 
     $scope.navClass = function (page) {
         var currentRoute = $location.path().substring(1) || 'index';

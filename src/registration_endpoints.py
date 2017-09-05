@@ -81,7 +81,12 @@ def api_request_team_codeword(team_id):
 		subject = "GroupThere user " + str(current_user.name) + " wants to join your team " + str(team.name) + "!"
 
 		url_base = app.config['URL_BASE']#ends in /
-		link = url_base + '?#!/approveTeamJoin/{new_user_id}/{team_id}'.format(new_user_id=quote_plus(current_user.id),team_id=quote_plus(team.id))
+		print("current_user.id: " + str(current_user.id))
+		print("team.id: " + str(team.id))
+		print("quote_plus(str(team.id)) is: " + str(quote_plus(str(team.id))))
+		print("quote_plus(str(current_user.id)) is: " + str(quote_plus(str(current_user.id))))
+
+		link = url_base + '?#!/approveTeamJoin/{new_user_id}/{team_id}'.format(new_user_id=quote_plus(str(current_user.id)),team_id=quote_plus(str(team.id)))
 		html_body= render_template('emails/request_join_team.html',team=team,link=link)
 		text_message=render_template('emails/request_join_team.txt',team=team,link=link)
 		html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
@@ -289,7 +294,7 @@ def send_team_email_confirmation(temp_team,second=False):
 		url_base = app.config['URL_BASE']#ends in /
 		#send a link to ?#!/register to whatever the email is
 		subject = "Confirm Email for New GroupThere Team " + str(temp_team.name) +"!"
-		link = '{base}?#!/confirmTeamEmail/{email}/{id}'.format(base=url_base,email=quote_plus(temp_team.email.lower()),id=quote_plus(temp_team.id))
+		link = '{base}?#!/confirmTeamEmail/{email}/{id}'.format(base=url_base,email=quote_plus(temp_team.email.lower()),id=quote_plus(str(temp_team.id)))
 		if temp_team.carpooler_id != current_user.id:
 			carpooler = Carpooler.query.filter_by(id=temp_team.carpooler_id).first()
 		else:

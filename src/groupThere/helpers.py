@@ -383,6 +383,24 @@ def gen_assignment(Aeq,x,name,email,array_duration,boolList_canBeLate,int_minsAv
 	return assignments
 
 
+
+def self_monitor_results(func):
+	def wrapper(*func_args, **func_kwargs):
+		print('function call ' + func.__name__ + '() with args ' + str(func_args[1:]) + ", and kwargs " + str(func_kwargs))
+		retval = func(*func_args,**func_kwargs)
+		print('function ' + func.__name__ + '() returns ' + repr(retval))
+		return retval
+	wrapper.__name__ = func.__name__
+	return wrapper
+def monitor_results(func):
+	def wrapper(*func_args, **func_kwargs):
+		print('function call ' + func.__name__ + '() with args ' + str(func_args) + ", and kwargs " + str(func_kwargs))
+		retval = func(*func_args,**func_kwargs)
+		print('function ' + func.__name__ + '() returns ' + repr(retval))
+		return retval
+	wrapper.__name__ = func.__name__
+	return wrapper
+
 class shortTime:
 	def __init__(self,durs,maxNumSeats,canBeLate,minsAvail,numCarSeats,durs_toEvent,latenessWindow,must_drive):
 		self.maxNumSeats=maxNumSeats
@@ -403,9 +421,10 @@ class shortTime:
 		ra.append([[1]])
 		for k in range(2,maxNumSeats+1):
 			ra.append([[1]+ra[-1][0]] +[[0]+chunk for chunk in ra[-1]])
+		print("routeAdders: " + str(list(map(np.array,ra))))
 		return list(map(np.array,ra))
 
-
+	@self_monitor_results
 	def returnFormattedGroup(self,group,verbose=True):
 		message =''
 		message+= "Formatting group " + str(group)
@@ -432,28 +451,25 @@ class shortTime:
 
 		if output[0]==False:
 			message+= "\n\nAssigned group infeasible!"
+			# message+= "\n{:<30}: ".format('drivers: ') + str(drs)
+			# message += "\n{:<30}: ".format('mandatory drivers') + str(mds)
+			# message += "\n{:<30}: ".format('group') + str(group)
+			# message += "\n{:<30}: ".format('int_minsAvailForTransit') + str(itemgetter(*group)(self.minsAvail))
+			# message += "\n{:<30}: ".format('numSeats') + str(itemgetter(*group)(self.numCarSeats))
 
-			message+= "\n{:<30}: ".format('drivers: ') + str(drs)
-			message += "\n{:<30}: ".format('mandatory drivers') + str(mds)
-			message += "\n{:<30}: ".format('group') + str(group)
-			message += "\n{:<30}: ".format('int_minsAvailForTransit') + str(itemgetter(*group)(self.minsAvail))
-			message += "\n{:<30}: ".format('numSeats') + str(itemgetter(*group)(self.numCarSeats))
+			# message += "\n{:<30}: ".format('must_drive') + str(itemgetter(*group)(self.must_drive))
+			# message += "\n{:<30}: ".format('canBeLate') + str(itemgetter(*group)(self.canBeLate))
+			# message += "\n{:<30}: ".format('durs to Event:') + str(itemgetter(*group)(self.durs_toEvent))
 
-			message += "\n{:<30}: ".format('must_drive') + str(itemgetter(*group)(self.must_drive))
-			message += "\n{:<30}: ".format('canBeLate') + str(itemgetter(*group)(self.canBeLate))
-			message += "\n{:<30}: ".format('durs to Event:') + str(itemgetter(*group)(self.durs_toEvent))
-
-			dists = {(i,j):self.durs[i,j] for i in group for j in group if (i<j)}
-			message += "\npairwise distances: "  + str(dists)
-			message += "\nReturning: " + str({'isPossible':output[0],'minTime':output[1],'bestOrder':group,'driver':output[3],'lateOk':output[4],'notLatePossible':output[5]})
-
-
+			# dists = {(i,j):self.durs[i,j] for i in group for j in group if (i<j)}
+			# message += "\npairwise distances: "  + str(dists)
+			# message += "\nReturning: " + str({'isPossible':output[0],'minTime':output[1],'bestOrder':group,'driver':output[3],'lateOk':output[4],'notLatePossible':output[5]})
 			return {'isPossible':output[0],'minTime':output[1],'bestOrder':group,'driver':output[3],'lateOk':output[4],'notLatePossible':output[5],'message':message,'bestTimes':output[6]}
 
 		return {'isPossible':output[0],'minTime':output[1],'bestOrder':tuple([output[3]]+list(output[2])),'driver':output[3],'lateOk':output[4],'notLatePossible':output[5],'message':message,'bestTimes':output[6]}
-
-
-	def getShortTimeGroup(self,drivers,participants,numPosDrivers,numParticipants,minimize_mode='human_hours',returnAll=False):
+	# minimize_mode='human_hours'
+	# @self_monitor_results
+	def getShortTimeGroup(self,drivers,participants,numPosDrivers,numParticipants,minimize_mode='car_hours',returnAll=False):
 		#drivers is a list of indices
 		#participants includes drivers
 		isPossible = False
@@ -462,6 +478,7 @@ class shortTime:
 		driver=None
 		lateOK=None
 		notLatePossible=None
+		bestTimes=None
 		for driver in drivers:
 			participants.remove(driver)
 			solution = self.getShortTimeOneDriver(driver,participants,numParticipants-1,minimize_mode=minimize_mode,returnAll=returnAll)
@@ -480,7 +497,11 @@ class shortTime:
 		return (isPossible,minTime,bestOrder,driver,lateOK,notLatePossible,bestTimes)
 
 
-	def getShortTimeOneDriver(self,driver,participants,numParticipantsNotDriver,minimize_mode='human_hours',returnAll=False):
+
+
+	# minimize_mode='human_hours'
+	# @self_monitor_results
+	def getShortTimeOneDriver(self,driver,participants,numParticipantsNotDriver,minimize_mode='car_hours',returnAll=False):
 		# minimize_mode='car_hours'
 		#drivers is an int
 		#participants & drivers=={}
@@ -519,6 +540,8 @@ class shortTime:
 			driverConstraint = driverConstraint + self.latenessWindow
 		else:
 			lateOK=False
+
+
 		minTime=-1
 		isPossible = False
 		bestOrder=[]
@@ -532,12 +555,15 @@ class shortTime:
 				if all((self.routeAdders[numParticipantsNotDriver+1]).dot(np.array(times)) < np.array([driverConstraint]+list(itemgetter(*perm)(constraints)))):
 					if minimize_mode=='human_hours':
 						minTime=sum((self.routeAdders[numParticipantsNotDriver+1]).dot(np.array(times)))
+					elif minimize_mode == "car_hours":
+						minTime=sum(times)
 					else:
 						minTime=sum(times)
+
 					isPossible = True
 					if returnAll:
 						bestOrder = perm[:]
-						bestTimes = times
+						bestTimes = times[:]
 
 
 		if returnAll:
@@ -553,5 +579,4 @@ class shortTime:
 			return (isPossible,minTime,bestOrder,driver,lateOK,notLatePossible,bestTimes)
 		else:
 			return (isPossible,minTime)
-
 

@@ -53,6 +53,7 @@ def mailParamsFromPool(pool):
 						signature = str(pool.signature),
 						latenessWindow= str(pool.latenessWindow)
 					)
+
 def systemParamFromPool(pool):
 	assert(pool is not None)
 	# email = [trip.member.email for trip in pool.members]

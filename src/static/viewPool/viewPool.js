@@ -142,6 +142,7 @@ angular.module('myApp.viewPool', ['ngRoute'])
             $log.log($scope.myAssignment);
             $log.log("Other assignments:");
             $log.log($scope.instruction.assignments);
+            $scope.errorText=undefined;
           }).
           catch(function(response) {
             $scope.disabled = false;
@@ -163,6 +164,7 @@ angular.module('myApp.viewPool', ['ngRoute'])
             $scope.disabled = false;
             $log.log("Re-Optimizing");
             $scope.resultText=response.data;
+            $scope.errorText=undefined;
           }).
           catch(function(response) {
             $scope.disabled = false;

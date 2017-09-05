@@ -5,7 +5,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
         <div class='col' style="float:left; width:50%;">
             <h1>Join a team!</h1>
             <form role='form' ng-show="foreignTeams" name="joinForm" ng-model="joinForm" ng-submit="join()">
-              <div ng-if="resultText">
+              <div class="alert alert-info" ng-if="resultText">
                 {{resultText}}
               </div>
               <select ng-model="joinForm.ngTeam" name="team" class="form-control">
@@ -37,6 +37,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
 
 
         <div class='col' style="float:right; width:50%">
+
           <h1>OUTPUT</h1>
               <!-- RESULT TEXT -->
 
@@ -44,7 +45,10 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                 <b> You are a member of the following teams: </b>
                 <ul>
                   <li ng-repeat="team in teams">{{team.name}}
-                  <ul> <li>Contact {{team.email}} with questions</li></ul>
+                  <ul>
+                    <li>Contact: {{team.email}}</li>
+                    <li>Codeword: {{team.codeword}}</li>
+                  </ul>
                   </li>
                 </ul>
               </div>

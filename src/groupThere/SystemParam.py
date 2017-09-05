@@ -24,8 +24,11 @@ class SystemParam:
 		self.headers_colNames = headers_colNames
 
 		self.minsAvail=minsAvail
+		if 'No' in self.must_drive:
+			self.must_drive=[True if ((int(val)>0) and (self.must_drive[idx]!='No')) else False for idx,val in enumerate(self.numberCarSeats)]
+		else:
+			self.must_drive = [True if ((int(val)>0) and (self.must_drive[idx]==1)) else False for idx,val in enumerate(self.numberCarSeats)]
 
-		self.must_drive=[True if ((int(val)>0) and (self.must_drive[idx]!='No')) else False for idx,val in enumerate(self.numberCarSeats)]
 
 		self.mailParam=mailParam
 
@@ -292,14 +295,16 @@ class SystemParam:
 
 	@sayname
 	def make_generate_groups_input(self):
-		boolList_canBeLate = list(map((lambda s: s!='No'),self.extra))
+		# boolList_canBeLate = list(map((lambda s: s!='No'),self.extra))
+		boolList_canBeLate = list(map((lambda s: s==1),self.extra))
 		if (self.minsAvail is not None):
 			int_minsAvailForTransit=self.minsAvail
 		elif (self.canLeaveAt is not None):
 			int_minsAvailForTransit = self.canLeaveToMinsAvailable(self.canLeaveAt,self.latenessWindow)
 
 		int_numCarSeats = list(map(int,self.numberCarSeats))
-		must_drive = list(map((lambda s: s!='No'),self.must_drive))
+		# must_drive = list(map((lambda s: s!='No'),self.must_drive))
+		must_drive = self.must_drive
 
 		#irrelevant if number seats is zero
 		for idx, val in enumerate(must_drive):

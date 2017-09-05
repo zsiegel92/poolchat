@@ -12,8 +12,10 @@ angular.module('myApp.makePool', ['ngRoute'])
 }])
 
 .controller('makePoolController',
-  ['$scope', '$location','$log', '$http','$filter','AuthService',
-  function ($scope, $location, $log, $http,$filter,AuthService) {
+  ['$scope', '$location','$log', '$http','$filter','AuthService','$rootScope',
+  function ($scope, $location, $log, $http,$filter,AuthService,$rootScope) {
+    $log.log('in makePool.js');
+
     $scope.presetting=false;
     // $log.log("tomorrow is: ");
     // $log.log(relativeDateText(1));
@@ -28,21 +30,9 @@ angular.module('myApp.makePool', ['ngRoute'])
       return date;
     };
 
-    var getEmail= function(){
-      $scope.disabled=true;
-      $http.post('/api/get_email/')
-                .then(function(response) {
-                  $scope.disabled = false;
-                  $log.log("User Email:");
-                  $log.log(response.data);
-                  $scope.poolForm.ngEmail=response.data;
-                }).
-                catch(function(response) {
-                  $scope.disabled = false;
-                  $log.log(response.data);
-                  $scope.resultText="error registering pool.";
-                });
-    };
+
+
+
 
 
     $scope.disabled = false;
@@ -101,7 +91,6 @@ angular.module('myApp.makePool', ['ngRoute'])
           return response;
         })
         .then(function(response) {
-          $log.log("sending to DOM");
           $scope.teams=response.data.teams;
 
           $scope.self=response.data.self;
@@ -217,8 +206,19 @@ angular.module('myApp.makePool', ['ngRoute'])
       });
   };
 
+
+
+  // Called in ng-init of $poolForm.ngEmail
+  $scope.setEmail=function(){
+    AuthService.requestMyEmail()
+        .then(function(){
+          $rootScope.myEmail=AuthService.getMyEmail();
+          $scope.poolForm.ngEmail= $rootScope.myEmail;
+        });
+  };
+
   $scope.getTeams();
-  getEmail();
+
 
 }]);
 

@@ -89,6 +89,8 @@ angular.module('myApp.joinTeam', ['ngRoute'])
         $log.log("Joined team!");
         $log.log(response.data);
         $scope.resultText=response.data;
+        alert("You have joined the team " + String($scope.joinForm.ngTeam));
+        $scope.joinForm.ngCodeword='';
         $scope.getTeams();
       }).
       catch(function(response) {

@@ -41,7 +41,11 @@ angular.module('myApp.confirmEmail', ['ngRoute'])
           $scope.result=response.data;
           if (response.status==200){
             $scope.resultText="Email confirmed! Start using GroupThere now!";
-            alert("Email confirmed! Please log into GroupThere now using " + String($scope.user_email));
+            alert("Email confirmed! You have been logged into GroupThere using " + String($scope.user_email));
+            $location.path('/');
+          } else if (response.status==201){
+            $scope.resultText="Email already confirmed.";
+            alert("Email already confirmed. For security, you have been logged out of GroupThere. Please login using " + String($scope.user_email));
             $location.path('/login/' + $scope.user_email);
           }
           else{

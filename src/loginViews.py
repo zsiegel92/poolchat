@@ -39,27 +39,6 @@ def redirect_back(endpoint, **values):
 	return redirect(target)
 
 
-# #TODO: register.html
-# #Form fields: username,email,password,confirm,accept_tos
-# @app.route('/register/', methods=['GET', 'POST'])
-# def register():
-# 	if 'email'in request.form:
-# 		form = RegistrationForm(request.form)
-# 		# email=request.form.email.data
-# 	else:
-# 		form = RegistrationForm(request.form)
-# 	if request.method == 'POST' and form.validate():
-# 		try:
-# 			carpooler = Carpooler(name=form.username.data, email=form.email.data,password=form.password.data)
-# 		except:
-# 			from werkzeug.datastructures import MultiDict
-# 			formb= RegistrationForm(formdata=MultiDict([('email',request.form['email']),('username',request.form['username']),('password',''),('confirm',''),('accept_tos',False)]))
-# 			#non-unique violation
-# 			return render_template('register.html',form=formb)
-# 		db.session.add(carpooler)
-# 		db.session.commit()
-# 		return redirect(url_for('login'))
-# 	return render_template('register.html', form=form)
 
 @app.route('/api/register', methods=['POST'])
 def api_register():
@@ -191,9 +170,14 @@ def confirm_email():
 	if carpooler is None:
 		return "Invalid Request",400
 	else:
-		carpooler.authenticated=True
-		db.session.commit()
-		return "Email Confirmed! Start using GroupThere now!",200
+		if carpooler.authenticated==False:
+			carpooler.authenticated=True
+			login_user(carpooler,remember=True)
+			db.session.commit()
+			return "Email Confirmed! Start using GroupThere now!",200
+		else:
+			logout_user()
+			return "Email already confirmed. Logged into GroupThere.",201
 
 ##TODO: login.html should have a form that displays all errors. No angular.
 #Form fields: email,password,remember_me
@@ -301,8 +285,16 @@ def logout():
 
 @app.route('/api/status',methods=['POST','GET'])
 def api_status():
+	print("api/status called!")
 	if hasattr(current_user.is_anonymous, '__call__'):
 		is_anonymous = not current_user.is_anonymous()
 	else:
 		is_anonymous= not current_user.is_anonymous
 	return jsonify({'status':is_anonymous})
+
+
+
+
+
+
+

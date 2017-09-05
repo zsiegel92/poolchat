@@ -190,10 +190,6 @@ def api_get_pool_info_for_user():
 
 
 
-
-# @app.route('/api/get_teams/',methods=['POST'])
-# @login_required
-# def api_get_teams():
 @app.route('/api/get_teams/',methods=['POST'])
 @login_required
 def api_get_teams():
@@ -205,7 +201,7 @@ def api_get_teams():
 	foreign_team_ids = [team.id for team in allTeams if team.id not in team_ids]
 
 	team_ids = [team.id for team in current_user.teams]
-	team_objects = [{'name':team.name,'id':team.id,'email':team.email} for team in current_user.teams]
+	team_objects = [{'name':team.name,'id':team.id,'email':team.email,'codeword':team.password} for team in current_user.teams]
 	foreign_team_ids = [team.id for team in allTeams if team.id not in team_ids]
 	foreign_team_objects=[{'name':team.name,'id':team.id} for team in allTeams if team.id not in team_ids]
 
@@ -321,6 +317,7 @@ def load_triggers():
 @app.route('/api/get_email/',methods=['POST'])
 @login_required
 def api_get_email():
+	print("Getting user email")
 	return getattr(current_user,'email',''),200
 
 

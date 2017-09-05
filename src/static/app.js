@@ -84,17 +84,28 @@ myApp.filter('relativeFromDate', ['$filter', function ($filter) {
 }]);
 
 
-myApp.run(function ($rootScope, $location, $route, AuthService) {
+myApp.run(function ($rootScope, $location, $route, AuthService,$log) {
   $rootScope.$on('$routeChangeStart',
     function (event, next, current) {
+
       AuthService.getUserStatus()
       .then(function(){
         var logged_in = AuthService.isLoggedIn();
         $rootScope.logged_in = logged_in;
+
+        if (logged_in){
+          AuthService.requestMyEmail()
+          .then(function(){
+            $rootScope.myEmail=AuthService.getMyEmail();
+          });
+        }
+
         if (!logged_in && next && next.access.restricted){
           $location.path('/login');
           $route.reload();
         }
       });
-  });
+
+
+    });
 });

@@ -112,11 +112,14 @@ angular.module('myApp.joinPool', ['ngRoute'])
    });
 
    $scope.confirmAddress = function(){
-    conf_address($scope.tripForm.ngAddress).then((response)=>{
+    if ($scope.tripForm.ngAddress && $scope.tripForm.ngAddress !=''){
+          conf_address($scope.tripForm.ngAddress).then((response)=>{
           $scope.address_confirmed=true;
           $scope.tripForm.ngAddress=response.formatted_address;
           $scope.trip_image_url=response.image_url;
     });
+    }
+
    };
 
 

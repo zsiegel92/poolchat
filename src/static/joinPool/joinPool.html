@@ -8,7 +8,7 @@
       <!-- ADDRESS -->
       <div class="form-group">
         <label>I will be going to the event from...<span class="invalid" ng-show="tripForm.address.$error.required">*Required!</span></label>
-        <input type="text" class="form-control" name="address" ng-model="tripForm.ngAddress" ng-change="!using_preset ? (confirmed ? unconfirm(): true) : un_preset();" ng-init="tripForm.ngAddress=oldAddress; using_preset=true;" required>
+        <input type="text" class="form-control" name="address" ng-model="tripForm.ngAddress" ng-change="!using_preset ? (confirmed ? unconfirm(): true) : un_preset();" ng-init="tripForm.ngAddress=oldAddress; using_preset=true; confirmAddress()" required>
       </div>
       <div >
         <div ng-if="past_addresses.length>0">

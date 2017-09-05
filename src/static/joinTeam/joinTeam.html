@@ -74,12 +74,12 @@ Make sure $scope, $route, $routeParams are injected in controller -->
           <div class="panel panel-default" ng-repeat="team in foreignTeams">
             <div class="panel-heading">
               <h4 class="panel-title">
-              <a data-toggle="collapse" data-parent="#foreignTeams_accordion" href="#collapse{{$index}}" onclick="return false;">
+              <a data-toggle="collapse" class="collapsed" data-parent="#foreignTeams_accordion" href="#foreign_collapse{{$index}}" onclick="return false;">
                 {{team.name}}
               </a>
               </h4>
             </div>
-            <div id="collapse{{$index}}" class="panel-collapse collapse">
+            <div id="foreign_collapse{{$index}}" class="panel-collapse collapse">
               <div class="panel-body">
                 <ul>
                   <li>To request access to this team, <button class='btn btn-default btn-xs' ng-click="request_access(team.id)" ng-disabled="disabled">click here</button>.</li>

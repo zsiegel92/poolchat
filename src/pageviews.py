@@ -88,9 +88,12 @@ def post_call_view_pool():
 
 @app.route('/api/re_optimize',methods=['POST'])
 @login_required
-def api_re_optimize():
-	pool_id=request.values.get('pool_id')
+def api_re_optimize(pool_id=None):
+	if pool_id is None:
+		pool_id=request.values.get('pool_id')
 	pool = Pool.query.filter_by(id=pool_id).first()
+	if pool is None:
+		return "No such trip!",404
 	if current_user not in [trip.member for trip in pool.members]:
 		return "Not a member of this pool! Access denied.",401
 	else:
@@ -128,6 +131,7 @@ def api_get_recent_instructions():
 
 			return jsonify(instruct),200
 		else:
+			api_re_optimize(pool_id=pool_id)
 			return "No instructions generated yet!",404
 
 

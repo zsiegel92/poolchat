@@ -7,6 +7,61 @@
         --accent-color: #d6abd0;
     }
 
+    /*@import url("https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css");*/
+    .panel-title > a:before {
+        float: right !important;
+        font-family: FontAwesome;
+        content:"\f196";/*"\f055"*/
+        padding-right: 5px;
+    }
+
+    .panel-title > a:not(.collapsed):before {
+       /* float: right !important;
+        font-fam*/ily: FontAwesome;
+        content:"\f147";/*"\f056"*/
+        /*padding-right: 5px;*/
+    }
+
+    /*replace the content value with the
+    corresponding value from the list below*/
+    /*--adjust (below space, before 'color', esp) as necessary--*/
+ /*   .element {
+        position: relative;
+    }
+
+
+
+    .element:before {
+        content: "\f100";
+        font-family: FontAwesome;
+        font-style: normal;
+        font-weight: normal;
+        text-decoration: inherit;
+
+        color: #000;
+        font-size: 18px;
+        padding-right: 0.5em;
+        position: absolute;
+        top: 10px;
+        left: 0;
+    }*/
+
+
+/*    .panel-title > a.collapsed:before {
+        float: right !important;
+        font-family: FontAwesome;
+        content:"\f055";
+        padding-right: 5px;
+    }*/
+
+
+
+/*    .panel-title > a:hover,
+    .panel-title > a:active,
+    .panel-title > a:focus  {
+        text-decoration:none;
+    }
+*/
 
     nav{
       font-family: 'Ubuntu', sans-serif;
@@ -74,6 +129,7 @@
 
     body {
       height:100%;
+      min-height:100%;
       width:100%;
       background-color: var(--background-color);
       /*background-color: #E288A0;*/
@@ -118,6 +174,13 @@
     }
 
 /* FOOTER STUFF */
+/*footer {
+    clear: both;
+    position: relative;
+    z-index: 10;
+    height: 3em;
+    margin-top: -3em;
+}*/
 
 .footer-distributed{
   background-color: #292c2f;
@@ -130,6 +193,7 @@
   padding: 50px 60px 40px;
   margin-top: 80px;
   overflow: hidden;
+  vertical-align: bottom;
 }
 
 /* Footer left */

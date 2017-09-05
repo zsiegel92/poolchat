@@ -26,6 +26,7 @@ from groupThere.SystemParam import SystemParam
 from groupThere.helpers import sayname, generate_groups_fromParam, generate_model,optimizePulp,gen_assignment,gen_assignment_fromParams, test_groups,test_model,groupsToLists,shortTime#, generate_groups
 
 from GT_manager import gt_fromBasicParams,gt_fromDistmattedParams
+from GIS_routines import gen_dist_row,gen_dist_col,gen_one_distance
 
 from app_factory import create_app
 
@@ -100,11 +101,20 @@ def addDistMatsFromPool(pool,params):
 
 	for i in range(n):
 		to_event_distance = Event_Distance.query.filter_by(pool_id=pool_id,carpooler_id = carpooler_ids[i]).first()
+		if to_event_distance is None:
+			get_trip_dists(carpooler_id=carpooler_ids[i],pool_id=pool.id)
+			to_event_distance = Event_Distance.query.filter_by(pool_id=pool_id,carpooler_id = carpooler_ids[i]).first()
+
 		to_event_distances[0,i]=to_event_distance.feet
 		to_event_durations[0,i]=to_event_distance.seconds
+
 		for j in range(n):
 			if (j!=i):
 				trip_distance = Trip_Distance.query.filter_by(pool_id=pool_id,from_carpooler_id=carpooler_ids[i],to_carpooler_id=carpooler_ids[j]).first()
+				if trip_distance is None:
+					get_trip_dists(carpooler_id=carpooler_ids[i],pool_id=pool.id)
+					trip_distance = Trip_Distance.query.filter_by(pool_id=pool_id,from_carpooler_id=carpooler_ids[i],to_carpooler_id=carpooler_ids[j]).first()
+
 				d_t[i,j]=trip_distance.feet
 				R_t[i,j]=trip_distance.seconds
 			else:
@@ -357,4 +367,64 @@ def do_all_gt(scheduler_frequency=60):
 	return("All optimization enqueued.")
 
 
+def get_trip_dists(carpooler_id,pool_id):
+	print("In get_trip_dists({carpooler_id},{pool_id})".format(carpooler_id=carpooler_id,pool_id=pool_id))
+	with current_app.app_context():
+		pool = Pool.query.filter_by(id=pool_id).first()
+		carpooler= Carpooler.query.filter_by(id=carpooler_id).first()
+		trip = Trip.query.filter_by(carpooler_id=carpooler_id,pool_id=pool_id).first()
+		if (pool is None) or (carpooler is None) or (trip is None):
+			print("Carpooler, or trip, or pool not found!")
+			assert(True==False) #Throw an informative exception ASAP!
+			# return "Carpooler, or trip, or pool not found!"
+		leaveTime=pool.eventDateTime - relativedelta(hours=1)
+		new_address = trip.address
+		dest = pool.eventAddress
+		others =[{'id':other_trip.carpooler_id,'address':other_trip.address} for other_trip in pool.members if (other_trip.carpooler_id !=carpooler.id)]
+
+		print("Generating Distance Objects")
+		from_new_address = gen_dist_row(new_address,others,leaveTime)
+		print("Got from_new_address!")
+		to_new_address=gen_dist_col(new_address,others,leaveTime)
+		print("Got to_new_address!")
+		to_event = gen_one_distance(new_address,dest,leaveTime)
+
+
+		for i in range(len(others)):
+			from_new_dist = Trip_Distance.query.filter_by(pool_id=pool.id,from_carpooler_id=carpooler.id,to_carpooler_id=from_new_address[i]['id']).first()
+			to_new_dist = Trip_Distance.query.filter_by(pool_id=pool.id,to_carpooler_id=carpooler.id,from_carpooler_id=from_new_address[i]['id']).first()
+			if from_new_dist is None:
+				from_new_dist = Trip_Distance()
+				from_new_dist.pool_id = pool.id
+				from_new_dist.from_carpooler_id = carpooler.id
+				from_new_dist.to_carpooler_id = from_new_address[i]['id']
+			if to_new_dist is None:
+				to_new_dist = Trip_Distance()
+				to_new_dist.pool_id = pool.id
+				to_new_dist.from_carpooler_id = to_new_address[i]['id']
+				to_new_dist.to_carpooler_id = carpooler.id
+
+			from_new_dist.feet = from_new_address[i]['distance']
+			from_new_dist.seconds = from_new_address[i]['duration']
+
+			to_new_dist.feet = to_new_address[i]['distance']
+			to_new_dist.seconds = to_new_address[i]['duration']
+
+			db.session.add(from_new_dist)
+			db.session.add(to_new_dist)
+
+
+		print("Processed all 'others'!")
+		to_event_dist = Event_Distance.query.filter_by(pool_id=pool.id,carpooler_id=carpooler.id).first()
+		if to_event_dist is None:
+			to_event_dist = Event_Distance()
+			to_event_dist.pool_id = pool.id
+			to_event_dist.carpooler_id = carpooler.id
+		to_event_dist.feet = to_event['distance']
+		to_event_dist.seconds = to_event['duration']
+		db.session.add(to_event_dist)
+		db.session.commit()
+
+		print("Committed to-event distance!")
+		return
 

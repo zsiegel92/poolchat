@@ -22,6 +22,98 @@
         /*padding-right: 5px;*/
     }
 
+
+
+/*MODAL MODAL MODAL*/
+/*https://github.com/adamalbrecht/ngModal*/
+.ng-modal {
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.ng-modal-overlay {
+  position: absolute;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000000;
+  opacity: 0.8;
+}
+.ng-modal-dialog {
+  z-index: 10000;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50%;
+  transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  -o-transform: translate(-50%, -50%);
+  background-color: #fff;
+  box-shadow: 4px 4px 80px #000;
+  -webkit-box-shadow: 4px 4px 80px #000;
+  -moz-box-shadow: 4px 4px 80px #000;
+  -ms-box-shadow: 4px 4px 80px #000;
+  -o-box-shadow: 4px 4px 80px #000;
+  padding: 10px;
+  overflow-y: scroll;
+}
+.ng-modal-dialog-content {
+  /*overflow: hidden;*/
+  height: 100%;
+}
+.ng-modal-close {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  cursor: pointer;
+  font-size: 120%;
+  padding: 5px;
+  display: inline-block;
+}
+.ng-modal-close-x {
+  font-weight: bold;
+  font-family: Arial, sans-serif;
+}
+.ng-modal-title {
+  font-weight: bold;
+  font-size: 200%;
+  display: block;
+  margin-bottom: 0px;
+  padding-bottom: 0px;
+  /*border-bottom: solid 1px #999;*/
+}
+.ng-modal-subtitle {
+  font-weight: bold;
+  font-size: 150%;
+  display: block;
+  margin-top: 4px;
+  padding-top: 3px;
+  /*border-bottom: solid 1px #999;*/
+}
+.ng-modal-subsubtitle{
+  font-weight: bold;
+  font-size: 100%;
+  display: block;
+  margin-top: 4px;
+  padding-top: 3px;
+  /*border-bottom: solid 1px #999;*/
+}
+.ng-modal-underline {
+  font-weight: bold;
+  font-size: 150%;
+  display: block;
+  margin-top: 10px;
+  padding-top: 7px;
+  border-bottom: solid 1px #999;
+}
+
     /*replace the content value with the
     corresponding value from the list below*/
     /*--adjust (below space, before 'color', esp) as necessary--*/

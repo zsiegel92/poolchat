@@ -115,6 +115,13 @@ angular.module('myApp.viewPool', ['ngRoute'])
       return new Date(Date.parse(dateStr));
     };
 
+
+
+    $scope.modalShown = false;
+    $scope.toggleModal = function() {
+      $scope.modalShown = !$scope.modalShown;
+    };
+
     $scope.getPoolInfoForUser();
 
     $scope.getPoolInstructions = function(ind) {
@@ -143,6 +150,7 @@ angular.module('myApp.viewPool', ['ngRoute'])
             $log.log("Other assignments:");
             $log.log($scope.instruction.assignments);
             $scope.errorText=undefined;
+            $scope.toggleModal();
           }).
           catch(function(response) {
             $scope.disabled = false;

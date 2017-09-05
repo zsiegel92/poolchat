@@ -205,7 +205,7 @@ def api_get_teams():
 	foreign_team_ids = [team.id for team in allTeams if team.id not in team_ids]
 
 	team_ids = [team.id for team in current_user.teams]
-	team_objects = [{'name':team.name,'id':team.id,'email':team.email,'codeword':team.password} for team in current_user.teams]
+	team_objects = [{'name':team.name,'id':team.id,'email':team.email,'codeword':team.password,'members':[{'name':member.name,'email':member.email} for member in team.members]} for team in current_user.teams]
 	foreign_team_ids = [team.id for team in allTeams if team.id not in team_ids]
 	foreign_team_objects=[{'name':team.name,'id':team.id} for team in allTeams if team.id not in team_ids]
 

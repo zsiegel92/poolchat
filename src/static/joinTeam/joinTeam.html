@@ -25,7 +25,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
       </div><!-- Column -->
       <div class='col' style="float:right; width:50%">
         <!-- RESULT TEXT -->
-<!--                 <div ng-if="teams">
+        <!--                 <div ng-if="teams">
           <b> You are a member of the following teams: </b>
           <ul>
             <li ng-repeat="team in teams">{{team.name}}
@@ -47,8 +47,6 @@ Make sure $scope, $route, $routeParams are injected in controller -->
             </li>
           </ul>
         </div> -->
-
-
         <div ng-if="teams && teams.length > 0" class="panel-group" id="teams_accordion">
           <h2>Your Teams</h2>
           <div class="panel panel-default" ng-repeat="team in teams">
@@ -64,6 +62,11 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                 <ul>
                   <li>Codeword: {{team.codeword}}</li>
                   <li>Contact: {{team.email}}</li>
+                  <li>Members
+                    <ul>
+                      <li ng-repeat="member in team.members"> {{member.name}} - {{member.email}}</li>
+                    </ul>
+                  </li>
                 </ul>
               </div>
             </div>
@@ -89,7 +92,6 @@ Make sure $scope, $route, $routeParams are injected in controller -->
             </div>
           </div>
         </div>
-
         </div> <!-- COLUMN -->
       </div>
     </div>

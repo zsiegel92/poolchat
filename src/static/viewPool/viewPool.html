@@ -21,7 +21,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                     {{(selectedPool_obj.members.length) < 1 ? 'Nobody is attending yet!' : ''}} <span ng-repeat="member in selectedPool_obj.members">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{member}}</span> {{(selectedPool_obj.members.length > 1) ? ' are attending' : ''}}{{(selectedPool_obj.members.length == 1) ? ' is attending' : ''}}</div>
                     <ul>
                         <li> Non-Organizers can arrive up to {{selectedPool_obj.latenessWindow}} minutes after {{selectedPool_obj.time}}</li>
-                        <li> Carpooling instructions will be sent out {{selectedPool_obj.fireNotice}}  hours before the event, in {{toDays(selectedPool_obj.seconds_til_instructions-counter)}} days, {{toHours(selectedPool_obj.seconds_til_instructions-counter)}} hours, {{toMinutes(selectedPool_obj.seconds_til_instructions-counter)}} minutes</li>
+                        <li> Carpooling instructions will be sent out {{selectedPool_obj.fireNotice}}  hours before the event<span ng-if="selectedPool_obj.noticeWentOut == false">, in {{toDays(selectedPool_obj.seconds_til_instructions-counter)}} days, {{toHours(selectedPool_obj.seconds_til_instructions-counter)}} hours, {{toMinutes(selectedPool_obj.seconds_til_instructions-counter)}} minutes </span> </li>
                     </ul>
                     For more information regarding this event, contact {{selectedPool_obj.email}}.
                 </div>
@@ -150,7 +150,8 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                                 <!-- <li> Carpooling instructions will be sent out {{pool.fireNotice}} hours before {{pool.time}} on {{pool.date}}</li> -->
                                 <h4 style="border-bottom: solid 1px #999;"></h4>
                                 <br>
-                                Carpooling instructions will be sent out {{pool.fireNotice}} hours before {{pool.time}} on {{pool.date}}, in  {{toDays(pool.seconds_til_instructions-counter)}} days, {{toHours(pool.seconds_til_instructions-counter)}} hours, and {{toMinutes(pool.seconds_til_instructions-counter)}} minutes<!-- , {{toSeconds(pool.seconds_til_instructions-counter)}} seconds -->
+                                Carpooling instructions will be sent out {{pool.fireNotice}} hours before {{pool.time}} on {{pool.date}}<span ng-if="pool.noticeWentOut == false">, in  {{toDays(pool.seconds_til_instructions-counter)}} days, {{toHours(pool.seconds_til_instructions-counter)}} hours, and {{toMinutes(pool.seconds_til_instructions-counter)}} minutes</span></div>
+                                <!-- , {{toSeconds(pool.seconds_til_instructions-counter)}} seconds -->
                                 <br>
                                 <button type="button" class="btn btn-md btn-info" ng-disabled="disabled" ng-click="getPoolInstructions($index)" >View most recent solution!</button>
                                 <div ng-show="waiting_for_instructions_text" class="alert alert-info">{{waiting_for_instructions_text}}</div>

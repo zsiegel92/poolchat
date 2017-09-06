@@ -4,7 +4,7 @@ import requests
 import random
 from flask import render_template,url_for,jsonify,json,make_response,send_from_directory
 from flask_login import current_user, login_user, logout_user,login_required
-
+from datetime import datetime
 
 
 from collections import OrderedDict
@@ -157,8 +157,8 @@ def api_get_pool_info_for_user():
 	unjoined_pool_ids = list(set(team_pool_ids).difference(joined_pool_ids))
 
 
-	joined_pools =[{'id':trip.pool.id,'name':trip.pool.poolName,'date':trip.pool.eventDate,'time':trip.pool.eventTime,'address':trip.pool.eventAddress,'email':trip.pool.eventEmail,'fireNotice':trip.pool.fireNotice,'latenessWindow':trip.pool.latenessWindow,'dateTime':trip.pool.eventDateTime.isoformat(),'members':[other_trip.member.name for other_trip in trip.pool.members],'trip':{'address':trip.address,'num_seats':trip.num_seats,'preWindow':trip.preWindow,'on_time':trip.on_time,'must_drive':trip.must_drive},'teams':[team.to_dict() for team in trip.pool.teams]} for trip in current_user.pools]
-	unjoined_pools=[{'id':pool.id,'name':pool.poolName,'date':pool.eventDate,'time':pool.eventTime,'address':pool.eventAddress,'email':pool.eventEmail,'fireNotice':pool.fireNotice,'latenessWindow':pool.latenessWindow,'dateTime':pool.eventDateTime.isoformat(),'teams':[poolTeam.to_dict() for poolTeam in pool.teams],'members':[other_trip.member.name for other_trip in pool.members],'team_names':[poolTeam.name for poolTeam in pool.teams]} for team in current_user.teams for pool in team.pools if pool.id in unjoined_pool_ids]
+	joined_pools =[{'id':trip.pool.id,'name':trip.pool.poolName,'date':trip.pool.eventDate,'time':trip.pool.eventTime,'address':trip.pool.eventAddress,'email':trip.pool.eventEmail,'fireNotice':trip.pool.fireNotice,'latenessWindow':trip.pool.latenessWindow,'dateTime':trip.pool.eventDateTime.isoformat(),'noticeWentOut':trip.pool.noticeWentOut,'members':[other_trip.member.name for other_trip in trip.pool.members],'trip':{'address':trip.address,'num_seats':trip.num_seats,'preWindow':trip.preWindow,'on_time':trip.on_time,'must_drive':trip.must_drive},'teams':[team.to_dict() for team in trip.pool.teams]} for trip in current_user.pools if trip.pool.eventDateTime > datetime.now(tz=trip.pool.eventDateTime.tzinfo)]
+	unjoined_pools=[{'id':pool.id,'name':pool.poolName,'date':pool.eventDate,'time':pool.eventTime,'address':pool.eventAddress,'email':pool.eventEmail,'fireNotice':pool.fireNotice,'latenessWindow':pool.latenessWindow,'dateTime':pool.eventDateTime.isoformat(),'noticeWentOut':pool.noticeWentOut,'teams':[poolTeam.to_dict() for poolTeam in pool.teams],'members':[other_trip.member.name for other_trip in pool.members],'team_names':[poolTeam.name for poolTeam in pool.teams]} for team in current_user.teams for pool in team.pools if ((pool.id in unjoined_pool_ids) and (pool.eventDateTime > datetime.now(tz=pool.eventDateTime.tzinfo))) ]
 	carpooler={'name':current_user.name,'first':current_user.firstname,'last':current_user.lastname,'email':current_user.email}
 
 	seen_ids = []
@@ -171,9 +171,11 @@ def api_get_pool_info_for_user():
 			unique_unjoined.append(pool)
 
 	eligible_pools=unique_unjoined
-	# for pool in eligible_pools:
-	# 	print("Can join a pool with dateTime " + str(pool['dateTime']))
-		# print("timezone is " + str(pool['dateTime'].utcoffset().total_seconds()))
+
+	joined_pools = sorted(joined_pools, key= lambda x: x['dateTime'])
+	eligible_pools=sorted(eligible_pools,key=lambda x: x['dateTime'])
+
+
 	return jsonify({'teams':teams,'joined_pools':joined_pools,'eligible_pools':eligible_pools,'carpooler':carpooler}),200
 
 

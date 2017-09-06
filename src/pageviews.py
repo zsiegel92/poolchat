@@ -126,7 +126,8 @@ def api_get_recent_instructions():
 				else:
 					if current_user.id == instruct['assignments'][i]['ids']:
 						my_ass=i
-
+					instruct['assignments'][i]['ids']=[instruct['assignments'][i]['ids']]
+					instruct['assignments'][i]['emails']=[instruct['assignments'][i]['emails']]
 			instruct['my_ass_index']=my_ass
 
 			return jsonify(instruct),200

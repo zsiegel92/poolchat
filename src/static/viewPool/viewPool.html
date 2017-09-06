@@ -4,357 +4,335 @@ Make sure $scope, $route, $routeParams are injected in controller -->
 <!-- <div class="container"> -->
 <div class="row">
     <div class='col' style="float:left; width:50%;">
-        <h2>Events You Can Join </h2>
+        <h2>Events Affiliated with Your Teams </h2>
         <div ng-if="pool_id_message">
             {{pool_id_message}}
         </div>
-        <form ng-show="eligible_pools" role='form' name="joinForm" ng-model="joinForm" ng-submit="goto_join()">
-            <select ng-change="selectedPool_obj=eligible_pools[joinForm.ngPool];" ng-model="joinForm.ngPool" name="pool" required>
-                <option ng-repeat="pool in eligible_pools"  ng-model="selectedPool" ng-value="{{$index}}">'{{pool.name}}' - with {{pool.team_names | joinBy:', '}}</option>
-                <!-- Try: {{team.name.join(', ')}} -->
-            </select>
-            <br>
-            <button type="submit" ng-click="" ng-init="" class="btn btn-primary" ng-disabled="joinForm.$invalid || disabled || (eligible_pools.length < 1)">Join Event!</button>
-        </form>
-        <div ng-show="eligible_pools.length<1">
-            <br>
-            There are no available events!
-            <br>
-            <a href='#!/makePool'>Create a new event ;) </a>
-        </div>
-        <span ng-show="eligible_pools.length>0"> <br> <a href='#!/makePool'>Make a new event</a></span>
-        <span> <br> <b><a href='#!/joinTeam'>Join a team (and access their events)</a></b> </span>
         <div ng-show="!joinForm.$dirty && eligible_pools.length>1">
             <h3> Please select an event!</h3>
         </div>
-
-
-        <div ng-show="joinForm.$dirty && joinForm.ngPool >=0">
-            <h3> Selected Event: </h3>
-            <ul>
-                <li> Event Name: '{{selectedPool_obj.name}}' with <span ng-repeat="team in selectedPool_obj.teams">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{team.name}}</span></li>
-                <li> Event Address: {{selectedPool_obj.address}} </li>
-                <li> {{selectedPool_obj.date }} at {{selectedPool_obj.time }}</li>
-                <li>Members: <span ng-show="selectedPool_obj.members.length<1">None yet!</span><span ng-repeat="member in selectedPool_obj.members">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{member}}</span></li>
-                <li> <b>Happening in  {{toDays(selectedPool_obj.seconds_til-counter)}} days, {{toHours(selectedPool_obj.seconds_til-counter)}} hours, {{toMinutes(selectedPool_obj.seconds_til-counter)}} minues, {{toSeconds(selectedPool_obj.seconds_til-counter)}} seconds</b></li>
-                <li> Event Contact Email: {{selectedPool_obj.email}} </li>
-                <li> Non-Organizers can arrive up to {{selectedPool_obj.latenessWindow}} minutes after {{selectedPool_obj.time}}</li>
-                <li> Carpooling instructions will be sent out {{selectedPool_obj.fireNotice}}  hours before {{selectedPool_obj.time}} on {{selectedPool_obj.date}}</li>
-                <li> <b>Instructions will be send out in  {{toDays(selectedPool_obj.seconds_til_instructions-counter)}} days, {{toHours(selectedPool_obj.seconds_til_instructions-counter)}} hours, {{toMinutes(selectedPool_obj.seconds_til_instructions-counter)}} minues, {{toSeconds(selectedPool_obj.seconds_til_instructions-counter)}} seconds</b></li>
-            </ul>
-        </div>
-
-
-<!-- ng-src="{{trip_image_url}}" -->
-<!-- <img class="img-responsive" alt="a" src="/assets/example/bg_10.jpg"> -->
-<!--         <div class="col-md-12" ng-show="joinForm.$dirty && joinForm.ngPool >=0">
-            <div class="row">
-              <div class="col-md-3">
-                <h3><span class="label label-info">{{selectedPool_obj.date }}<br>{{selectedPool_obj.time }}</span></h3>
-              </div>
-              <div class="col-md-9">
-                  <strong>'{{selectedPool_obj.name}}'</strong> with <span ng-repeat="team in selectedPool_obj.teams">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{team.name}}</span><br>
-                  <em>{{selectedPool_obj.address}}</em><br>
-                  <strong>Members: <span ng-show="selectedPool_obj.members.length<1">None yet!</span><span ng-repeat="member in selectedPool_obj.members">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{member}}</span></strong>
-                  <span class="small">in  {{toDays(selectedPool_obj.seconds_til-counter)}} days, {{toHours(selectedPool_obj.seconds_til-counter)}} hours, {{toMinutes(selectedPool_obj.seconds_til-counter)}} minues, {{toSeconds(selectedPool_obj.seconds_til-counter)}} seconds</span><br>
-                  <span>Non-Organizers can arrive up to {{selectedPool_obj.latenessWindow}} minutes after {{selectedPool_obj.time}}</span><br>
-                  <span>Carpooling instructions will be sent out {{selectedPool_obj.fireNotice}}  hours before {{selectedPool_obj.time}} on {{selectedPool_obj.date}}</span><br>
-                  <span>For more details, contact {{selectedPool_obj.email}}</span>
-              </div>
-            </div>
-            <div class="thumbnail">
-              <div class="overlay">
-                <i class="fa fa-share md"></i>
-              </div>
-              <img class="img-responsive" src="/static/img/beautiful_map/beautiful_map_200.jpg" alt="Trip Origin" style="width:100%;">
-            </div>
-        </div>
- -->
-
-
-  <!--       <div class="demo-card-event mdl-card mdl-shadow-2dp">
-          <div class="mdl-card__title mdl-card-expand">
-            <h4>
-              <strong>'{{selectedPool_obj.name}}'</strong> with <span ng-repeat="team in selectedPool_obj.teams">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{team.name}}</span><br>
-            </h4>
-              {{selectedPool_obj.date }} at {{selectedPool_obj.time }}<br>
-              <em>{{selectedPool_obj.address}}</em><br>
-              Members: <span ng-show="selectedPool_obj.members.length<1">None yet!</span><span ng-repeat="member in selectedPool_obj.members">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{member}}</span>
-
-
-          </div>
-          <div class="mdl-card__actions mdl-card-border">
-            <a class="mdl-button mdl-button-colored mdl-js-button mdl-js-ripple-effect">
-              Join now
-            </a>
-            <div class="mdl-layout-spacer"></div>
-            <i class="material-icons">event</i>
-          </div>
-        </div>
- -->
-
-
-
-
-
-
-
-
-
-
-
-        <div ng-if="resultText">
-            <h3> Query Status: </h3>
-            {{resultText}}
-        </div>
-        <div ng-if="errorText" class='alert alert-danger'>
-            <h3> Error: </h3>
-            {{errorText}}
-        </div>
-        </div><!-- Column -->
-        <div class='col' style="float:right; width:50%">
-            <!--                 <h2>Teams You're a Member Of </h2>
-            <ol>
-                <li ng-repeat="team in teams">
-                    <b> {{team.name}} </b>
+        <div ng-show="joinFormValues.ngPool >=0">
+            <div style="border:1px solid black; padding: 6px; margin: 3px;border-radius: 4px; width: 90%;">
+                <h3 style="text-align: center;border-bottom: solid 1px #999;">'{{selectedPool_obj.name}}' <br>
+                with <span ng-repeat="team in selectedPool_obj.teams">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{team.name}}</span></h3>
+                <h4>{{selectedPool_obj.address}}</h4>
+                <h4 style="border-bottom: solid 1px #999;">{{selectedPool_obj.date }} <span style="font-size:0.8em">at</span> {{selectedPool_obj.time }} <span style="font-size:0.8em">in  {{toDays(selectedPool_obj.seconds_til-counter)}} days, {{toHours(selectedPool_obj.seconds_til-counter)}} hours, {{toMinutes(selectedPool_obj.seconds_til-counter)}} minutes</span></h4>
+                <div style="border-bottom: solid 1px #999;">
+                    {{(selectedPool_obj.members.length) < 1 ? 'Nobody is attending yet!' : ''}} <span ng-repeat="member in selectedPool_obj.members">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{member}}</span> {{(selectedPool_obj.members.length > 1) ? ' are attending' : ''}}{{(selectedPool_obj.members.length == 1) ? ' is attending' : ''}}</div>
                     <ul>
-                        <li>  Contact Email: {{team.email}} </li>
-                        <li>  Codeword: '{{team.codeword}}' </li>
+                        <li> Non-Organizers can arrive up to {{selectedPool_obj.latenessWindow}} minutes after {{selectedPool_obj.time}}</li>
+                        <li> Carpooling instructions will be sent out {{selectedPool_obj.fireNotice}}  hours before the event, in {{toDays(selectedPool_obj.seconds_til_instructions-counter)}} days, {{toHours(selectedPool_obj.seconds_til_instructions-counter)}} hours, {{toMinutes(selectedPool_obj.seconds_til_instructions-counter)}} minutes</li>
                     </ul>
-                </li>
-            </ol> -->
-            <h2> Events You Have Already Joined </h2>
-            <div class="panel-group" id="joined_accordion">
-                <div class="panel panel-default" ng-repeat="pool in joined_pools">
-                    <div class="panel-heading">
-                        <div class="panel-title">
-                            <a data-toggle="collapse" class="collapsed" data-parent="#joined_accordion" href="#collapse{{$index}}" style="font-family: 'Roboto', sans-serif; font-weight: bold; color: black;" onclick="return false;">
-                                <h4>
-                                '{{pool.name}}' with <span ng-repeat="team in pool.teams">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{team.name}}</span>
-                                </h4>
-                                {{pool.date}} at {{pool.time}}
-                                <br> - {{toDays(pool.seconds_til-counter)}} days, {{toHours(pool.seconds_til-counter)}} hours, {{toMinutes(pool.seconds_til-counter)}} minutes -
-                            </a>
-                        </div>
-                    </div>
-                    <div id="collapse{{$index}}" class="panel-collapse collapse">
-                        <div class="panel-body">
-                            <h4 style="border-bottom: solid 1px #999;">         {{pool.address}}
-                            </h4>
-                            Non-Organizers can arrive up to {{pool.latenessWindow}} minutes after {{pool.time}}
-
-
-  <!--                           <ul>
-                                <li ng-repeat="member in pool.members">{{member}}</li>
-                            </ul> -->
-                            <br>
-                            <div style="border:1px solid black; padding: 5px; margin: 3px;border-radius: 4px;">
-                                Your Trip:
-                                <button type="button" class="btn btn-default" ng-click="goto_join($index)" > Edit </button>
-                                <ul>
-                                    <li>Origin: {{pool.trip.address}}</li>
-                                    <li>Maximum available time for the trip: {{pool.trip.preWindow}} minutes</li>
-                                    <li>Number of seats in your vehicle: {{pool.trip.num_seats}} </li>
-                                    <li>Have to drive: {{ pool.trip.must_drive | yesNo }} </li>
-                                    <li>Have to arrive exactly on time: {{ pool.trip.on_time | yesNo }}</li>
-                                </ul>
-                            </div>
-                            <br>
-                            Members: <span ng-repeat="member in pool.members">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{member}}</span>
-                            <br>
-                            Contact: {{pool.email}}
-                            <!-- <li> Carpooling instructions will be sent out {{pool.fireNotice}} hours before {{pool.time}} on {{pool.date}}</li> -->
-                            <h4 style="border-bottom: solid 1px #999;"></h4>
-                            <br>
-                            Carpooling instructions will be sent out {{pool.fireNotice}} hours before {{pool.time}} on {{pool.date}}, in  {{toDays(pool.seconds_til_instructions-counter)}} days, {{toHours(pool.seconds_til_instructions-counter)}} hours, and {{toMinutes(pool.seconds_til_instructions-counter)}} minutes<!-- , {{toSeconds(pool.seconds_til_instructions-counter)}} seconds -->
-                            <br>
-                            <button type="button" class="btn btn-md btn-info" ng-disabled="disabled" ng-click="getPoolInstructions($index)" >View most recent solution!</button>
-                            <div ng-show="waiting_for_instructions_text" class="alert alert-info">{{waiting_for_instructions_text}}</div>
-                            <div ng-show="waiting_for_instructions_error" class="alert alert-danger">{{waiting_for_instructions_error}}</div>
-
-
-                            <!--  <li> FOR TESTING: Generate a new solution now!<br>
-                            <button type="button" class="btn btn-default btn-xs" ng-click="redoPool($index)" >Re-Generate Solution</button></li> -->
-
-
-
-                        </div>
-                    </div>
+                    For more information regarding this event, contact {{selectedPool_obj.email}}.
                 </div>
             </div>
 
-            <!-- INSTRUCTION -->
-            <!-- ng-if="instruction"  -->
-            <modal-dialog show="modalShown" dialog-title="Instructions for '{{instruction_pool.name}}'" dialog-subtitle="{{instruction_pool.address}}" dialog-subsubtitle="{{instruction_pool.date}} at {{instruction_pool.time}}" dialog-subsubsubtitle="{{instruction.numel}} participants" width='90%' height='85%'>
-            <div style="border-bottom: solid 1px #999;">
-                <h5><b>Feasibility</b>: {{(instruction.success == 1) ? 'Everyone can get there!' : 'Not everyone can make it - invite some more drivers!!'}} </h5>
-                <h5><b>Group-wide car-minutes</b>: {{instruction.totalGroupTime}} (minimized)</h5>
+            <div style=>
+                <form ng-show="eligible_pools" role='form' name="joinForm" ng-model="joinFormValues" ng-submit="goto_join()">
+                    <select ng-change="selectedPool_obj=eligible_pools[joinFormValues.ngPool];" ng-model="joinFormValues.ngPool" name="pool" required>
+                        <!-- <option ng-repeat="pool in eligible_pools"  ng-model="selectedPool" ng-value="{{$index}}">'{{pool.name}}' - with {{pool.team_names | joinBy:', '}}</option> -->
+                        <option  ng-repeat="pool in eligible_pools"  ng-model="selectedPool" ng-value="{{$index}}">'{{pool.name}}' {{pool.date}}</option>
+                        <!-- Try: {{team.name.join(', ')}} -->
+                    </select>
+                    <br>
+                    <button type="submit" ng-click="" ng-init="" class="btn btn-primary" ng-disabled="joinForm.$invalid || disabled || (eligible_pools.length < 1)">Join Event!</button>
+                </form>
+                <div ng-show="eligible_pools.length<1">
+                    <br>
+                    There are no available events!
+                    <br>
+                    <a href='#!/makePool'>Create a new event ;) </a>
+                </div>
+                <span ng-show="eligible_pools.length>0"> <br> <a href='#!/makePool'>Make a new event</a></span>
+                <span> <br> <b><a href='#!/joinTeam'>Join a team (and access their events)</a></b> </span>
             </div>
-            <!-- MY ASSIGNMENT -->
-            <div ng-if="myAssignment">
-                <h4>
-                My ride assignment
-                </h4>
-                <ul>
-                    <li>Departure Time: {{myAssignment.departureTime | date : 'hh:mma'}} ({{myAssignment.leaveTimeMinutesAfterEventStart * -1}} minutes before the event starts)</li>
-                    <li> Arrival Time: {{myAssignment.arrivalTime | date : 'hh:mma'}} ({{myAssignment.arrivalMinutesAfterEventStart}} minutes late)</li>
-                    <li>Driver: {{instruction.names[myAssignment.driver]}} <ul><li>thank you for your {{myAssignment.minTime}} minutes of driving</li></ul></li>
-                    <li>Addresses and Contact Information (in optimal order):
-                        <ol>
-                            <li ng-repeat="ind in myAssignment.bestOrder">
-                                {{instruction.names[ind]}}
-                                <ul>
-                                    <li>
-                                        {{instruction.addresses[ind]}}
-                                        <span ng-if="!$first"> at {{myAssignment.bestTimes[$index-1] | relativeFromMins : myAssignment.departureTime | date : 'hh:mma'}}</span>
-                                        <span ng-if="$first"> at {{myAssignment.departureTime | date : 'hh:mma'}}</span>
-                                    </li>
-                                    <li>{{myAssignment.emails[$index]}}</li>
-                                    <!-- NOTE: CONSIDER SENDING ORDERED EMAIL ADDRESSES IN instruction -->
-                                </ul>
-                            </li>
-                            <li>
-                                Event:
-                                <ul>
-                                    <li>
-                                        {{instruction_pool.address}} at {{myAssignment.arrivalTime | date: 'hh:mma'}}
-                                    </li>
-                                    <li>
-                                        {{instruction_pool.email}}
-                                    </li>
-                                </ul>
-                            </li>
-                        </ol>
-                    </li>
-                    <li ng-if="myAssignment.lateOk==true">Everyone sharing this ride can arrive up to {{instruction_pool.latenessWindow}} minutes after the event begins.<span ng-if="myAssignment.notLatePossible==true"> The ride should be able to arrive on time, though.</span><span ng-if="myAssignment.notLatePossible==false"> This ride will arrive a bit late.</span></li>
-                    <li ng-if="myAssignment.lateOk==false">At least one person sharing this ride must arrive exactly on time - please be ready to go at the specified times.</li>
-                </ul>
+            <!-- ng-src="{{trip_image_url}}" -->
+            <!-- <img class="img-responsive" alt="a" src="/assets/example/bg_10.jpg"> -->
+            <!--         <div class="col-md-12" ng-show="joinForm.$dirty && joinForm.ngPool >=0">
+                <div class="row">
+                    <div class="col-md-3">
+                        <h3><span class="label label-info">{{selectedPool_obj.date }}<br>{{selectedPool_obj.time }}</span></h3>
+                    </div>
+                    <div class="col-md-9">
+                        <strong>'{{selectedPool_obj.name}}'</strong> with <span ng-repeat="team in selectedPool_obj.teams">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{team.name}}</span><br>
+                        <em>{{selectedPool_obj.address}}</em><br>
+                        <strong>Members: <span ng-show="selectedPool_obj.members.length<1">None yet!</span><span ng-repeat="member in selectedPool_obj.members">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{member}}</span></strong>
+                        <span class="small">in  {{toDays(selectedPool_obj.seconds_til-counter)}} days, {{toHours(selectedPool_obj.seconds_til-counter)}} hours, {{toMinutes(selectedPool_obj.seconds_til-counter)}} minues, {{toSeconds(selectedPool_obj.seconds_til-counter)}} seconds</span><br>
+                        <span>Non-Organizers can arrive up to {{selectedPool_obj.latenessWindow}} minutes after {{selectedPool_obj.time}}</span><br>
+                        <span>Carpooling instructions will be sent out {{selectedPool_obj.fireNotice}}  hours before {{selectedPool_obj.time}} on {{selectedPool_obj.date}}</span><br>
+                        <span>For more details, contact {{selectedPool_obj.email}}</span>
+                    </div>
+                </div>
+                <div class="thumbnail">
+                    <div class="overlay">
+                        <i class="fa fa-share md"></i>
+                    </div>
+                    <img class="img-responsive" src="/static/img/beautiful_map/beautiful_map_200.jpg" alt="Trip Origin" style="width:100%;">
+                </div>
             </div>
-            <div ng-if="!myAssignment">
-                <b>You are not currently part of a ride to this event. Feel free to check again with the button above. As folks join the event, you are more likely to find a ride.</b>
+            -->
+            <!--       <div class="demo-card-event mdl-card mdl-shadow-2dp">
+                <div class="mdl-card__title mdl-card-expand">
+                    <h4>
+                    <strong>'{{selectedPool_obj.name}}'</strong> with <span ng-repeat="team in selectedPool_obj.teams">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{team.name}}</span><br>
+                    </h4>
+                    {{selectedPool_obj.date }} at {{selectedPool_obj.time }}<br>
+                    <em>{{selectedPool_obj.address}}</em><br>
+                    Members: <span ng-show="selectedPool_obj.members.length<1">None yet!</span><span ng-repeat="member in selectedPool_obj.members">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{member}}</span>
+                </div>
+                <div class="mdl-card__actions mdl-card-border">
+                    <a class="mdl-button mdl-button-colored mdl-js-button mdl-js-ripple-effect">
+                        Join now
+                    </a>
+                    <div class="mdl-layout-spacer"></div>
+                    <i class="material-icons">event</i>
+                </div>
             </div>
-            <!-- OTHER ASSIGNMENTS -->
-            <div ng-repeat="ass in instruction.assignments">
-                <h4>
-                {{instruction.names[ass.driver]}}'s car
-                </h4>
-                <ul>
-                    <li>
-                        Departure Time: {{ass.departureTime | date : 'hh:mma'}} ({{ass.leaveTimeMinutesAfterEventStart * -1}} minutes before the event starts)
-                    </li>
-                    <li>
-                        Arrival Time: {{ass.arrivalTime | date : 'hh:mma'}} ({{ass.arrivalMinutesAfterEventStart}} minutes late)
-                    </li>
-                    <li>
-                        Driver: {{instruction.names[ass.driver]}}
+            -->
+            <div ng-if="resultText">
+                <h3> Query Status: </h3>
+                {{resultText}}
+            </div>
+            <div ng-if="errorText" class='alert alert-danger'>
+                <h3> Error: </h3>
+                {{errorText}}
+            </div>
+            </div><!-- Column -->
+            <div class='col' style="float:right; width:50%">
+                <!--                 <h2>Teams You're a Member Of </h2>
+                <ol>
+                    <li ng-repeat="team in teams">
+                        <b> {{team.name}} </b>
                         <ul>
-                            <li>
-                                thank you for your {{ass.minTime}} minutes of driving
-                            </li>
+                            <li>  Contact Email: {{team.email}} </li>
+                            <li>  Codeword: '{{team.codeword}}' </li>
                         </ul>
                     </li>
-                    <li>Addresses and Contact Information (in optimal order):
-                        <ol>
-                            <li ng-repeat="ind in ass.bestOrder">
-                                {{instruction.names[ind]}}
-                                <ul>
-                                    <li>
-                                        {{instruction.addresses[ind]}}
-                                        <span ng-if="!$first">
-                                            at {{ass.bestTimes[$index-1] | relativeFromMins : ass.departureTime | date : 'hh:mma'}}
-                                        </span>
-                                        <span ng-if="$first">
-                                            at {{ass.departureTime | date : 'hh:mma'}}
-                                        </span>
-                                    </li>
-                                    <li>{{ass.emails[$index]}}</li>
-                                    <!-- NOTE: CONSIDER SENDING ORDERED EMAIL ADDRESSES IN instruction -->
-                                </ul>
-                            </li>
-                            <li>
-                                Event:
-                                <ul>
-                                    <li>
-                                        {{instruction_pool.address}} at {{ass.arrivalTime | date: 'hh:mma'}}
-                                    </li>
-                                    <li>
-                                        {{instruction_pool.email}}
-                                    </li>
-                                </ul>
-                            </li>
-                        </ol>
-                    </li>
-                    <li ng-if="ass.lateOk==true">
-                        Everyone sharing this ride can arrive up to {{instruction_pool.latenessWindow}} minutes after the event begins.
-                        <span ng-if="ass.notLatePossible==true">
-                            The ride should be able to arrive on time, though.
-                        </span>
-                        <span ng-if="ass.notLatePossible==false">
-                            This ride will arrive a bit late.
-                        </span>
-                    </li>
-                    <li ng-if="ass.lateOk==false">
-                        At least one person sharing this ride must arrive exactly on time - please be ready to go at the specified times.
-                    </li>
-                </ul>
-            </div>
-            </modal-dialog> <!-- INSTRUCTION -->
-            </div> <!-- COLUMN -->
-        </div>
-        <!-- </div> -->
-        <!-- EVENT LIST -->
-        <!--             <div ng-if="joined_pools" class="container">
-            <div class="row">
-                <div class="[ col-xs-12 col-sm-offset-2 col-sm-8 ]">
-                    <ul class="event-list">
-                        <li ng-repeat="pool in joined_pools">
-                            <time datetime="{{asDateTime(pool.dateTime)}}">
-                            <span class="day">{{asDateTime(pool.dateTime) | date: 'dd'}}</span>
-                            <span class="month">{{asDateTime(pool.dateTime) | date: 'MMM'}}</span>
-                            <span class="year">{{asDateTime(pool.dateTime) | date: 'yyyy'}}</span>
-                            <span class="time">{{asDateTime(pool.dateTime) | date: 'hh:mma'}}</span>
-                            </time>
-                            <img alt="{{pool.name}}" src="/static/img/beautiful_map/beautiful_map_200.jpg" />
-                            <div class="info">
-                                <h2 class="title">{{pool.name}}</h2>
-                                <p class="desc">~ with <span ng-repeat="team in pool.teams">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{team.name}}</span> ~
-                                <ul>
-                                    <li> Event Address: {{pool.address}} </li>
-                                    <li> Event Contact Email: {{pool.email}} </li>
-                                    <li> Non-Organizers can arrive up to {{pool.latenessWindow}} minutes after {{pool.time}}</li>
-                                    <li> Carpooling instructions will be sent out {{pool.fireNotice}} hours before {{pool.time}} on {{pool.date}}</li>
-                                    <li><b>Your Trip:</b>
-                                        <ul>
-                                            <li>Your origin: {{pool.trip.address}}</li>
-                                            <li>Maximum available time for the trip: {{pool.trip.preWindow}} minutes</li>
-                                            <li>Number of seats in your vehicle: {{pool.trip.num_seats}} </li>
-                                            <li>Have to drive: {{ pool.trip.must_drive | yesNo }} </li>
-                                            <li>Have to arrive exactly on time: {{ pool.trip.on_time | yesNo }}</li>
-                                        </ul>
-                                    </li>
-                                </ul>
-                            </p>
+                </ol> -->
+                <h2> Events You Have Joined </h2>
+                <div class="panel-group" id="joined_accordion">
+                    <div class="panel panel-default" ng-repeat="pool in joined_pools">
+                        <div class="panel-heading">
+                            <div class="panel-title">
+                                <a data-toggle="collapse" class="collapsed" data-parent="#joined_accordion" href="#collapse{{$index}}" style="font-family: 'Roboto', sans-serif; font-weight: bold; color: black;" onclick="return false;">
+                                    <h4>
+                                    '{{pool.name}}' with <span ng-repeat="team in pool.teams">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{team.name}}</span>
+                                    </h4>
+                                    {{pool.date}} at {{pool.time}}
+                                    <br> - {{toDays(pool.seconds_til-counter)}} days, {{toHours(pool.seconds_til-counter)}} hours, {{toMinutes(pool.seconds_til-counter)}} minutes -
+                                </a>
+                            </div>
                         </div>
-                        <div class="social">
+                        <div id="collapse{{$index}}" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <h4 style="border-bottom: solid 1px #999;">         {{pool.address}}
+                                </h4>
+                                Non-Organizers can arrive up to {{pool.latenessWindow}} minutes after {{pool.time}}
+                                <!--                           <ul>
+                                    <li ng-repeat="member in pool.members">{{member}}</li>
+                                </ul> -->
+                                <br>
+                                <div style="border:1px solid black; padding: 5px; margin: 3px;border-radius: 4px;">
+                                    Your Trip:
+                                    <button type="button" class="btn btn-default" ng-click="goto_join($index)" > Edit </button>
+                                    <ul>
+                                        <li>Origin: {{pool.trip.address}}</li>
+                                        <li>Maximum available time for the trip: {{pool.trip.preWindow}} minutes</li>
+                                        <li>Number of seats in your vehicle: {{pool.trip.num_seats}} </li>
+                                        <li>Have to drive: {{ pool.trip.must_drive | yesNo }} </li>
+                                        <li>Have to arrive exactly on time: {{ pool.trip.on_time | yesNo }}</li>
+                                    </ul>
+                                </div>
+                                <br>
+                                Members: <span ng-repeat="member in pool.members">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{member}}</span>
+                                <br>
+                                Contact: {{pool.email}}
+                                <!-- <li> Carpooling instructions will be sent out {{pool.fireNotice}} hours before {{pool.time}} on {{pool.date}}</li> -->
+                                <h4 style="border-bottom: solid 1px #999;"></h4>
+                                <br>
+                                Carpooling instructions will be sent out {{pool.fireNotice}} hours before {{pool.time}} on {{pool.date}}, in  {{toDays(pool.seconds_til_instructions-counter)}} days, {{toHours(pool.seconds_til_instructions-counter)}} hours, and {{toMinutes(pool.seconds_til_instructions-counter)}} minutes<!-- , {{toSeconds(pool.seconds_til_instructions-counter)}} seconds -->
+                                <br>
+                                <button type="button" class="btn btn-md btn-info" ng-disabled="disabled" ng-click="getPoolInstructions($index)" >View most recent solution!</button>
+                                <div ng-show="waiting_for_instructions_text" class="alert alert-info">{{waiting_for_instructions_text}}</div>
+                                <div ng-show="waiting_for_instructions_error" class="alert alert-danger">{{waiting_for_instructions_error}}</div>
+                                <!--  <li> FOR TESTING: Generate a new solution now!<br>
+                                <button type="button" class="btn btn-default btn-xs" ng-click="redoPool($index)" >Re-Generate Solution</button></li> -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- INSTRUCTION -->
+                <!-- ng-if="instruction"  -->
+                <modal-dialog show="modalShown" dialog-title="Instructions for '{{instruction_pool.name}}'" dialog-subtitle="{{instruction_pool.address}}" dialog-subsubtitle="{{instruction_pool.date}} at {{instruction_pool.time}}" dialog-subsubsubtitle="{{instruction.numel}} participants" width='90%' height='85%'>
+                <div style="border-bottom: solid 1px #999;">
+                    <h5><b>Feasibility</b>: {{(instruction.success == 1) ? 'Everyone can get there!' : 'Not everyone can make it - invite some more drivers!!'}} </h5>
+                    <h5><b>Group-wide car-minutes</b>: {{instruction.totalGroupTime}} (minimized)</h5>
+                </div>
+                <!-- MY ASSIGNMENT -->
+                <div ng-if="myAssignment">
+                    <h4>
+                    My ride assignment
+                    </h4>
+                    <ul>
+                        <li>Departure Time: {{myAssignment.departureTime | date : 'hh:mma'}} ({{myAssignment.leaveTimeMinutesAfterEventStart * -1}} minutes before the event starts)</li>
+                        <li> Arrival Time: {{myAssignment.arrivalTime | date : 'hh:mma'}} ({{myAssignment.arrivalMinutesAfterEventStart}} minutes late)</li>
+                        <li>Driver: {{instruction.names[myAssignment.driver]}} <ul><li>thank you for your {{myAssignment.minTime}} minutes of driving</li></ul></li>
+                        <li>Addresses and Contact Information (in optimal order):
+                            <ol>
+                                <li ng-repeat="ind in myAssignment.bestOrder">
+                                    {{instruction.names[ind]}}
+                                    <ul>
+                                        <li>
+                                            {{instruction.addresses[ind]}}
+                                            <span ng-if="!$first"> at {{myAssignment.bestTimes[$index-1] | relativeFromMins : myAssignment.departureTime | date : 'hh:mma'}}</span>
+                                            <span ng-if="$first"> at {{myAssignment.departureTime | date : 'hh:mma'}}</span>
+                                        </li>
+                                        <li>{{myAssignment.emails[$index]}}</li>
+                                        <!-- NOTE: CONSIDER SENDING ORDERED EMAIL ADDRESSES IN instruction -->
+                                    </ul>
+                                </li>
+                                <li>
+                                    Event:
+                                    <ul>
+                                        <li>
+                                            {{instruction_pool.address}} at {{myAssignment.arrivalTime | date: 'hh:mma'}}
+                                        </li>
+                                        <li>
+                                            {{instruction_pool.email}}
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ol>
+                        </li>
+                        <li ng-if="myAssignment.lateOk==true">Everyone sharing this ride can arrive up to {{instruction_pool.latenessWindow}} minutes after the event begins.<span ng-if="myAssignment.notLatePossible==true"> The ride should be able to arrive on time, though.</span><span ng-if="myAssignment.notLatePossible==false"> This ride will arrive a bit late.</span></li>
+                        <li ng-if="myAssignment.lateOk==false">At least one person sharing this ride must arrive exactly on time - please be ready to go at the specified times.</li>
+                    </ul>
+                </div>
+                <div ng-if="!myAssignment">
+                    <b>You are not currently part of a ride to this event. Feel free to check again with the button above. As folks join the event, you are more likely to find a ride.</b>
+                </div>
+                <!-- OTHER ASSIGNMENTS -->
+                <div ng-repeat="ass in instruction.assignments">
+                    <h4>
+                    {{instruction.names[ass.driver]}}'s car
+                    </h4>
+                    <ul>
+                        <li>
+                            Departure Time: {{ass.departureTime | date : 'hh:mma'}} ({{ass.leaveTimeMinutesAfterEventStart * -1}} minutes before the event starts)
+                        </li>
+                        <li>
+                            Arrival Time: {{ass.arrivalTime | date : 'hh:mma'}} ({{ass.arrivalMinutesAfterEventStart}} minutes late)
+                        </li>
+                        <li>
+                            Driver: {{instruction.names[ass.driver]}}
                             <ul>
-                                <li class="facebook" style="width:33%;"><a href="#facebook"><span class="fa fa-facebook"></span></a></li>
-                                <li class="twitter" style="width:34%;"><a href="#twitter"><span class="fa fa-twitter"></span></a></li>
-                                <li class="google-plus" style="width:33%;"><a href="#google-plus"><span class="fa fa-google-plus"></span></a></li>
+                                <li>
+                                    thank you for your {{ass.minTime}} minutes of driving
+                                </li>
                             </ul>
-                        </div>
-                    </li>
-                </ul>
+                        </li>
+                        <li>Addresses and Contact Information (in optimal order):
+                            <ol>
+                                <li ng-repeat="ind in ass.bestOrder">
+                                    {{instruction.names[ind]}}
+                                    <ul>
+                                        <li>
+                                            {{instruction.addresses[ind]}}
+                                            <span ng-if="!$first">
+                                                at {{ass.bestTimes[$index-1] | relativeFromMins : ass.departureTime | date : 'hh:mma'}}
+                                            </span>
+                                            <span ng-if="$first">
+                                                at {{ass.departureTime | date : 'hh:mma'}}
+                                            </span>
+                                        </li>
+                                        <li>{{ass.emails[$index]}}</li>
+                                        <!-- NOTE: CONSIDER SENDING ORDERED EMAIL ADDRESSES IN instruction -->
+                                    </ul>
+                                </li>
+                                <li>
+                                    Event:
+                                    <ul>
+                                        <li>
+                                            {{instruction_pool.address}} at {{ass.arrivalTime | date: 'hh:mma'}}
+                                        </li>
+                                        <li>
+                                            {{instruction_pool.email}}
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ol>
+                        </li>
+                        <li ng-if="ass.lateOk==true">
+                            Everyone sharing this ride can arrive up to {{instruction_pool.latenessWindow}} minutes after the event begins.
+                            <span ng-if="ass.notLatePossible==true">
+                                The ride should be able to arrive on time, though.
+                            </span>
+                            <span ng-if="ass.notLatePossible==false">
+                                This ride will arrive a bit late.
+                            </span>
+                        </li>
+                        <li ng-if="ass.lateOk==false">
+                            At least one person sharing this ride must arrive exactly on time - please be ready to go at the specified times.
+                        </li>
+                    </ul>
+                </div>
+                </modal-dialog> <!-- INSTRUCTION -->
+                </div> <!-- COLUMN -->
             </div>
-        </div>
-    </div> -->
-    <!-- EVENT LIST -->
-    <!--     <ul>
-        <li ng-repeat="pool in joined_pools">
-            <time datetime="{{asDateTime(pool.dateTime)}}">
-            <span class="day">{{asDateTime(pool.dateTime) | date: 'dd'}}</span>
-            <span class="month">{{asDateTime(pool.dateTime) | date: 'MMM'}}</span>
-            <span class="year">{{asDateTime(pool.dateTime) | date: 'yyyy'}}</span>
-            <span class="time">{{asDateTime(pool.dateTime) | date: 'hh:mma'}}</span>
-            </time>
-        </li>
-    </ul> -->
+            <!-- </div> -->
+            <!-- EVENT LIST -->
+            <!--             <div ng-if="joined_pools" class="container">
+                <div class="row">
+                    <div class="[ col-xs-12 col-sm-offset-2 col-sm-8 ]">
+                        <ul class="event-list">
+                            <li ng-repeat="pool in joined_pools">
+                                <time datetime="{{asDateTime(pool.dateTime)}}">
+                                <span class="day">{{asDateTime(pool.dateTime) | date: 'dd'}}</span>
+                                <span class="month">{{asDateTime(pool.dateTime) | date: 'MMM'}}</span>
+                                <span class="year">{{asDateTime(pool.dateTime) | date: 'yyyy'}}</span>
+                                <span class="time">{{asDateTime(pool.dateTime) | date: 'hh:mma'}}</span>
+                                </time>
+                                <img alt="{{pool.name}}" src="/static/img/beautiful_map/beautiful_map_200.jpg" />
+                                <div class="info">
+                                    <h2 class="title">{{pool.name}}</h2>
+                                    <p class="desc">~ with <span ng-repeat="team in pool.teams">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{team.name}}</span> ~
+                                    <ul>
+                                        <li> Event Address: {{pool.address}} </li>
+                                        <li> Event Contact Email: {{pool.email}} </li>
+                                        <li> Non-Organizers can arrive up to {{pool.latenessWindow}} minutes after {{pool.time}}</li>
+                                        <li> Carpooling instructions will be sent out {{pool.fireNotice}} hours before {{pool.time}} on {{pool.date}}</li>
+                                        <li><b>Your Trip:</b>
+                                            <ul>
+                                                <li>Your origin: {{pool.trip.address}}</li>
+                                                <li>Maximum available time for the trip: {{pool.trip.preWindow}} minutes</li>
+                                                <li>Number of seats in your vehicle: {{pool.trip.num_seats}} </li>
+                                                <li>Have to drive: {{ pool.trip.must_drive | yesNo }} </li>
+                                                <li>Have to arrive exactly on time: {{ pool.trip.on_time | yesNo }}</li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </p>
+                            </div>
+                            <div class="social">
+                                <ul>
+                                    <li class="facebook" style="width:33%;"><a href="#facebook"><span class="fa fa-facebook"></span></a></li>
+                                    <li class="twitter" style="width:34%;"><a href="#twitter"><span class="fa fa-twitter"></span></a></li>
+                                    <li class="google-plus" style="width:33%;"><a href="#google-plus"><span class="fa fa-google-plus"></span></a></li>
+                                </ul>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div> -->
+        <!-- EVENT LIST -->
+        <!--     <ul>
+            <li ng-repeat="pool in joined_pools">
+                <time datetime="{{asDateTime(pool.dateTime)}}">
+                <span class="day">{{asDateTime(pool.dateTime) | date: 'dd'}}</span>
+                <span class="month">{{asDateTime(pool.dateTime) | date: 'MMM'}}</span>
+                <span class="year">{{asDateTime(pool.dateTime) | date: 'yyyy'}}</span>
+                <span class="time">{{asDateTime(pool.dateTime) | date: 'hh:mma'}}</span>
+                </time>
+            </li>
+        </ul> -->

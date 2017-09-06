@@ -69,17 +69,39 @@ angular.module('myApp.joinTeam', ['ngRoute'])
     });
   };
 
+  $scope.open_foreign = function(){
+    var idx = $scope.joinFormValues.ngTeam;
+    $log.log("Attempting to expand element " + String(idx));
+    var el=undefined;
+    for (var i = 0; i < $scope.foreignTeams.length; i++){
+      if (i != idx){
+        el = angular.element( document.querySelector( '#foreign_collapse' + String(i) ) );
+        if (el.hasClass('in')) { // hidden
+          $(el).collapse('hide');
+        }
+      }
+    }
+
+    var myEl = angular.element( document.querySelector( '#foreign_collapse' + String(idx) ) );
+    if (!angular.element(myEl).hasClass('in')) { // hidden
+          $(myEl).collapse('show');
+          // myEl.addClass('in');
+        }
+  };
+
+  $scope.joinFormValues={};
   $scope.join = function() {
     $scope.disabled = true;
-
-    $log.log("joining team " + $scope.joinForm.ngTeam);
-    $log.log("codeword: " + $scope.joinForm.ngCodeword);
+    // value changed from {{foreignTeam.name}} to {{$index}}
+    var newName = $scope.foreignTeams[$scope.joinFormValues.ngTeam].name;
+    $log.log("joining team " + newName);
+    $log.log("codeword: " + $scope.joinFormValues.ngCodeword);
 
     $http.post('/api/join_team/',
               $.param(
                 {
-                  teamname:$scope.joinForm.ngTeam,
-                  codeword:$scope.joinForm.ngCodeword
+                  teamname:newName,
+                  codeword:$scope.joinFormValues.ngCodeword
                 }
               ),
               {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
@@ -89,8 +111,8 @@ angular.module('myApp.joinTeam', ['ngRoute'])
         $log.log("Joined team!");
         $log.log(response.data);
         $scope.resultText=response.data;
-        alert("You have joined the team " + String($scope.joinForm.ngTeam));
-        $scope.joinForm.ngCodeword='';
+        alert("You have joined the team " + String(newName));
+        $scope.joinFormValues.ngCodeword='';
         $scope.getTeams();
       }).
       catch(function(response) {

@@ -1,6 +1,6 @@
 <div class="container">
   <div class="row">
-    <div class='col' style="float:left; width:50%;">
+    <div class='col' style="float:left; width:48%;">
       <h1>Create Event</h1>
       <div ng-show="error" class="alert alert-danger">{{errorMessage}}</div>
       <form class="form" name="poolForm" ng-model="poolForm" ng-submit="register()">
@@ -137,7 +137,7 @@
         <span ng-show="poolForm.$invalid || !address_confirmed || teamSelection.length ==0"> <b>This registration form is not complete! Ensure you have confirmed the address and affiliated at least one team.</b></span>
       </form>
       </div><!-- COLUMN -->
-      <div class='col' style="float:right; width:50%;">
+      <div class='col' style="float:right; width:48%;">
         <h2>Information</h2>
         <div ng-show="resultText" >{{resultText}} </div>
         <h3> Summary </h3>

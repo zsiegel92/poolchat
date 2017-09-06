@@ -2,58 +2,63 @@
 Make sure $scope, $route, $routeParams are injected in controller -->
 <div class="container">
   <div class="row">
-    <div class='col' style="float:left; width:50%;">
+    <div class='col' style="float:left; width:47%;">
       <h1>Join a team!</h1>
-      <form role='form' ng-show="foreignTeams" name="joinForm" ng-model="joinForm" ng-submit="join()">
+      <form role='form' ng-show="foreignTeams" name="joinForm" ng-model="joinFormValues" ng-submit="join()">
         <div class="alert alert-info" ng-if="resultText">
           {{resultText}}
         </div>
-        <select ng-model="joinForm.ngTeam" name="team" class="form-control">
-          <option ng-repeat="foreignTeam in foreignTeams"  value="{{foreignTeam.name}}">{{foreignTeam.name}}</option>
+        <select ng-change="open_foreign();" ng-model="joinFormValues.ngTeam" name="team" class="form-control">
+          <option ng-repeat="foreignTeam in foreignTeams"  ng-value="{{$index}}">{{foreignTeam.name}}</option>
         </select>
         <!-- PASSWORD -->
         <div class="form-group">
-          <label>Team CODE WORD</label>
+          <label>Team CODE WORD<span class="invalid small" ng-show="joinForm.codeword.$error.required">
+          Required!</span></label>
+          <input type="text" class="form-control" name="codeword" placeholder='shared code word' ng-model="joinFormValues.ngCodeword" required>
           <span>Everyone on a team uses the same codeword. Ask someone if you don't know it.</span>
-          <input type="text" class="form-control" name="codeword" placeholder='easy-to-remember code word' ng-model="joinForm.ngCodeword" required>
-          <span class="error" ng-show="joinForm.codeword.$error.required">
-          Required!</span>
         </div>
         <button type="submit" ng-click="" ng-init="" class="btn btn-primary" ng-disabled="joinForm.$invalid || disabled">Join Team</button>
       </form>
       <a href='#!/makeTeam'>Click here to create a new team!</a>
-      </div><!-- Column -->
-      <div class='col' style="float:right; width:50%">
-        <!-- RESULT TEXT -->
-        <!--                 <div ng-if="teams">
-          <b> You are a member of the following teams: </b>
-          <ul>
-            <li ng-repeat="team in teams">{{team.name}}
-              <ul>
-                <li>Contact: {{team.email}}</li>
-                <li>Codeword: {{team.codeword}}</li>
-              </ul>
-            </li>
-          </ul>
+      <br>
+      <br>
+
+      <!-- foreignTeams ACCORDION -->
+      <div ng-if="foreignTeams && foreignTeams.length > 0" class="panel-group panel-group" id="foreignTeams_accordion">
+          <div class="panel panel-default" ng-repeat="team in foreignTeams">
+            <div class="panel-heading">
+              <div class="panel-title">
+              <a data-toggle="collapse" class="collapsed" data-parent="#foreignTeams_accordion" href="#foreign_collapse{{$index}}" ng-click="joinFormValues.ngTeam=$index;" onclick="return false;">
+                <span>Request access to {{team.name}}</span>
+              </a>
+              </div>
+            </div>
+            <div id="foreign_collapse{{$index}}" class="panel-collapse collapse">
+              <div class="panel-body">
+                <ul>
+                  <li>To request access to this team (without the codeword), <button class='btn btn-default btn-xs' ng-click="request_access(team.id)" ng-disabled="disabled">click here</button>.</li>
+                  <li ng-if="access_request_feedback[team.id]"> {{access_request_feedback[team.id]}} </li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
-        <div ng-if="foreignTeams">
-          <b> You can join the following teams: </b>
-          <ul>
-            <li ng-repeat="team in foreignTeams">{{team.name}}
-              <ul>
-                <li>To request access to this team, <button class='btn btn-default btn-xs' ng-click="request_access(team.id)" ng-disabled="disabled">click here</button>.</li>
-                <li ng-if="access_request_feedback[team.id]"> {{access_request_feedback[team.id]}} </li>
-              </ul>
-            </li>
-          </ul>
-        </div> -->
+
+
+
+      </div><!-- Column -->
+      <div class='col' style="float:right; width:47%">
+
+
+        <!-- teams accordion -->
         <div ng-if="teams && teams.length > 0" class="panel-group" id="teams_accordion">
           <h2>Your Teams</h2>
           <div class="panel panel-default" ng-repeat="team in teams">
             <div class="panel-heading">
               <div class="panel-title">
               <a data-toggle="collapse" class="collapsed" data-parent="#teams_accordion" href="#collapse{{$index}}" onclick="return false;" >
-                <h4>{{team.name}}</h4>
+                <h4>{{team.name ? team.name : '' }}</h4>
               </a>
               </div>
             </div>
@@ -72,26 +77,9 @@ Make sure $scope, $route, $routeParams are injected in controller -->
             </div>
           </div>
         </div>
-        <div ng-if="foreignTeams && foreignTeams.length > 0" class="panel-group" id="foreignTeams_accordion">
-          <h2> You can join the following teams: </h2>
-          <div class="panel panel-default" ng-repeat="team in foreignTeams">
-            <div class="panel-heading">
-              <div class="panel-title">
-              <a data-toggle="collapse" class="collapsed" data-parent="#foreignTeams_accordion" href="#foreign_collapse{{$index}}" onclick="return false;">
-                <h4>{{team.name}}</h4>
-              </a>
-              </div>
-            </div>
-            <div id="foreign_collapse{{$index}}" class="panel-collapse collapse">
-              <div class="panel-body">
-                <ul>
-                  <li>To request access to this team, <button class='btn btn-default btn-xs' ng-click="request_access(team.id)" ng-disabled="disabled">click here</button>.</li>
-                  <li ng-if="access_request_feedback[team.id]"> {{access_request_feedback[team.id]}} </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
+
+
+
         </div> <!-- COLUMN -->
       </div>
     </div>

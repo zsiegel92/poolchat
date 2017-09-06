@@ -61,6 +61,7 @@ angular.module('myApp.viewPool', ['ngRoute'])
 
 
 
+
     $scope.getPoolInfoForUser = function() {
       $log.log("Getting pool info");
       $http.post('api/get_pool_info_for_user')
@@ -72,7 +73,9 @@ angular.module('myApp.viewPool', ['ngRoute'])
           $scope.rawResponse= response.data;
           if ($scope.eligible_pools.length >0){
             $log.log("There is an eligible pool!");
-            // $scope.joinForm.ngPool=0; //Prevents form from being invalid due to 'required', but fails to actually select a pool on menu.
+            $scope.joinFormValues={};
+            $scope.joinFormValues.ngPool=0; //Prevents form from being invalid due to 'required', but fails to actually select a pool on menu.
+            $scope.selectedPool_obj=$scope.eligible_pools[$scope.joinFormValues.ngPool];
           }
           else{
             $log.log("There are no eligible pools!");
@@ -123,7 +126,7 @@ angular.module('myApp.viewPool', ['ngRoute'])
             $log.log("Checking whether re-route requested.")
             for (var i = 0; i < $scope.eligible_pools.length; i++) {
               if ($scope.eligible_pools[i].id == go_to_pool_id){
-                $scope.joinForm.ngPool=i;
+                $scope.joinFormValues.ngPool=i;
                 $scope.goto_join();
               }
             }
@@ -131,6 +134,7 @@ angular.module('myApp.viewPool', ['ngRoute'])
        })
         .catch(function(response) {
           $scope.errorText=response.data;
+          $log.log(response.data);
           $log.log("Error in getPoolInfo calling api/get_pool_info API");
         });
     };
@@ -225,7 +229,7 @@ angular.module('myApp.viewPool', ['ngRoute'])
       }
       else{
         $log.log("Joining a new pool!");
-        var pool = $scope.eligible_pools[$scope.joinForm.ngPool];
+        var pool = $scope.eligible_pools[$scope.joinFormValues.ngPool];
         var repeat = false;
         var pth = '/joinPool/' + f(pool.id) +'/name/'+ f(pool.name) + '/address/' + f(pool.address) + '/date/' + f(pool.date) + '/time/' + f(pool.time) + '/dateTime/' + f(pool.dateTime) + '/email/' + f(pool.email) + '/notice/' + f(pool.fireNotice) + "/latenessWindow/" + f(pool.latenessWindow) +"/carpooler/cpname/" + f(cp.name) + '/cpfirst/' + f(cp.first) + '/cplast/' + f(cp.last) + '/cpemail/' + f(cp.email) + '/past_addresses/' + f(JSON.stringify($scope.past_addresses)) + '/max_seats/' + f($scope.max_num_seats) + '/ever_must_drive/' + f($scope.ever_must_drive) + '/ever_organizer/' + f($scope.ever_organizer) + '/' + f(repeat);
       }

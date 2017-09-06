@@ -109,7 +109,11 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                             <br>
                             Carpooling instructions will be sent out {{pool.fireNotice}} hours before {{pool.time}} on {{pool.date}}, in  {{toDays(pool.seconds_til_instructions-counter)}} days, {{toHours(pool.seconds_til_instructions-counter)}} hours, and {{toMinutes(pool.seconds_til_instructions-counter)}} minues<!-- , {{toSeconds(pool.seconds_til_instructions-counter)}} seconds -->
                             <br>
-                            <button type="button" class="btn btn-md btn-info" ng-click="getPoolInstructions($index)" >View most recent solution!</button>
+                            <button type="button" class="btn btn-md btn-info" ng-disabled="disabled" ng-click="getPoolInstructions($index)" >View most recent solution!</button>
+                            <span ng-show="waiting_for_instructions_text" class="alert alert-info">{{waiting_for_instructions_text}}</span>
+                            <span ng-show="waiting_for_instructions_error" class="alert alert-danger">{{waiting_for_instructions_error}}</span>
+
+
                             <!--  <li> FOR TESTING: Generate a new solution now!<br>
                             <button type="button" class="btn btn-default btn-xs" ng-click="redoPool($index)" >Re-Generate Solution</button></li> -->
 
@@ -119,6 +123,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                     </div>
                 </div>
             </div>
+
             <!-- INSTRUCTION -->
             <!-- ng-if="instruction"  -->
             <modal-dialog show="modalShown" dialog-title="Instructions for '{{instruction_pool.name}}'" dialog-subtitle="{{instruction_pool.address}}" dialog-subsubtitle="{{instruction_pool.date}} at {{instruction_pool.time}}" dialog-subsubsubtitle="{{instruction.numel}} participants" width='90%' height='85%'>

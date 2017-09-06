@@ -150,6 +150,8 @@ angular.module('myApp.viewPool', ['ngRoute'])
     $scope.getPoolInfoForUser();
 
     $scope.getPoolInstructions = function(ind) {
+      $scope.disabled=true;
+      $scope.waiting_for_instructions_text="Fetching instructions. Please wait.";
       var pool = $scope.joined_pools[ind];
       $scope.instruction_pool =$scope.joined_pools[ind];
       $scope.current_instruction=ind;
@@ -163,6 +165,8 @@ angular.module('myApp.viewPool', ['ngRoute'])
 
           .then(function(response) {
             $scope.disabled = false;
+            $scope.waiting_for_instructions_error=undefined;
+            $scope.waiting_for_instructions_text=undefined;
             $log.log("Getting instruction information");
             $log.log(response.data);
             $scope.instruction = response.data;
@@ -178,6 +182,8 @@ angular.module('myApp.viewPool', ['ngRoute'])
             $scope.toggleModal();
           }).
           catch(function(response) {
+            $scope.waiting_for_instructions_text=undefined;
+            $scope.waiting_for_instructions_error="Error obtaining instructions. Please try again.";
             $scope.disabled = false;
             $scope.errorText=response.data;
           });

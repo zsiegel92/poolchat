@@ -39,7 +39,7 @@ angular.module('myApp.makePool', ['ngRoute'])
     $scope.address_confirmed=false;
 
     $scope.now =new Date();
-    $scope.minNumberDays=3;
+    $scope.minNumberDays=2;
     $scope.minDate = relativeDateTime($scope.minNumberDays);
     $scope.nextYear=relativeDateTime(365);
 

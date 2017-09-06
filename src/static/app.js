@@ -113,6 +113,14 @@ myApp.filter('relativedate', ['$filter', function ($filter) {
   };
 }]);
 
+myApp.filter('relativedateISO', ['$filter', function ($filter) {
+  return function (rel, format) {
+    let date = new Date();
+    date.setDate(date.getDate() + rel);
+    return $filter('date')(date, format || 'yyyy-MM-dd')
+  };
+}]);
+
 myApp.filter('yesNo', function() {
     return function(input) {
         return input ? 'yes' : 'no';

@@ -33,7 +33,12 @@
         /*padding-right: 5px;*/
     }
 
-
+    .thinBorder {
+      border:1px solid black;
+      padding: 5px;
+      margin: 3px;
+      border-radius: 4px;
+    }
 /*MODAL MODAL MODAL*/
 /*https://github.com/adamalbrecht/ngModal*/
 .ng-modal {

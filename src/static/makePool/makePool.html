@@ -3,30 +3,32 @@
     <div class='col' style="float:left; width:48%;">
       <h1>Create Event</h1>
       <div ng-show="error" class="alert alert-danger">{{errorMessage}}</div>
-      <form class="form" name="poolForm" ng-model="poolForm" ng-submit="register()">
-        <h2>Affiliated Teams</h2>
-        <b>Which teams are affiliated with this event?</b>
-        <br>
-        <span>
-          <span class="form-group" ng-repeat="team in teams">
-            <label>
-              <input type="checkbox" name="selectedTeams[$index]" ng-model="poolForm.selectedTeams[$index]" ng-init="true" value="{{team.name}}" ng-checked="teamSelection.indexOf(team.name) > -1" ng-click="toggleSelection(team)">
-              {{team.name}}
-            </label>
+      <form class="form" name="poolFormForm" ng-model="poolForm" ng-submit="register()">
+        <div class='thinBorder'><!-- Teams div -->
+          <h2>Affiliated Teams</h2>
+          <b>Which teams are affiliated with this event?</b>
+          <br>
+          <span>
+            <span class="form-group" ng-repeat="team in teams">
+              <label>
+                <input type="checkbox" name="selectedTeams[$index]" ng-model="poolForm.selectedTeams[$index]" ng-init="true" value="{{team.name}}" ng-checked="teamSelection.indexOf(team.name) > -1" ng-click="toggleSelection(team)">
+                {{team.name}}
+              </label>
+            </span>
           </span>
-        </span>
-        <br>
-        <ul ng-show="teamSelection.length > 0">
-          <li ng-repeat="teamName in teamSelection"> Members of team <b>{{teamName}}</b> will be able to join this event!</li>
-        </ul>
-        <span ng-show="teamSelection.length ==0 && teams.length >0 "> <b> NOBODY will be able to join this event! Select at least one team.</b> </span>
-        <div class="errorBorder" ng-show="teams.length == 0 "> <div class="padded"><b> You are not a member of any teams, so you cannot make events! <br>Please <a href='#!/joinTeam'>join a team.</a></b> or <a href='#!/makeTeam'>create a new team.</a></b></div></div>
+          <br>
+          <ul ng-show="teamSelection.length > 0">
+            <li ng-repeat="teamName in teamSelection"> Members of team <b>{{teamName}}</b> will be able to join this event!</li>
+          </ul>
+          <span ng-show="teamSelection.length ==0 && teams.length >0 "> <b> NOBODY will be able to join this event! Select at least one team.</b> </span>
+          <div class="errorBorder" ng-show="teams.length == 0 "> <div class="padded"><b> You are not a member of any teams, so you cannot make events! <br>Please <a href='#!/joinTeam'>join a team.</a></b> or <a href='#!/makeTeam'>create a new team.</a></b></div></div>
+        </div><!-- Teams div -->
         <h2>Event Information</h2>
         <!-- NAME -->
         <div class="form-group">
           <label>Event Name</label>
           <input type="text" class="form-control" name="name" ng-model="poolForm.ngName" required>
-          <span class="invalid" ng-show="poolForm.name.$error.required">
+          <span class="invalid" ng-show="poolFormForm.name.$error.required">
           Required!</span>
         </div>
         <!-- CONTACT EMAIL -->
@@ -45,18 +47,18 @@
           <br>
           <a href='#!/makeTeam'>(Create a new team)</a>
           <br>
-          <span class="invalid" ng-show="poolForm.email.$error.required">
+          <span class="invalid" ng-show="poolFormForm.email.$error.required">
           Required!</span>
-          <span class="invalid" ng-show="poolForm.email.$error.email">Valid Email Required!</span>
+          <span class="invalid" ng-show="poolFormForm.email.$error.email">Valid Email Required!</span>
           <br>
-          <span class="invalid" ng-show="poolForm.email.$error.pattern">Email should match &ltemail &gt@&ltdomain&gt.&ltext&gt</span>
+          <span class="invalid" ng-show="poolFormForm.email.$error.pattern">Email should match &ltemail &gt@&ltdomain&gt.&ltext&gt</span>
         </div>
         <!-- ADDRESS -->
         <div class="form-group">
           <label>Event Address</label>
           <input type="text" class="form-control" name="address" ng-model="poolForm.ngAddress" ng-change="address_confirmed=false;" required>
         </div>
-        <span class="invalid" ng-show="poolForm.address.$error.required">
+        <span class="invalid" ng-show="poolFormForm.address.$error.required">
         Required!</span>
         <div>
           <button ng-click='confirmAddress()' class="btn btn-default" ng-disabled="!poolForm.ngAddress || disabled || address_confirmed"><span ng-if="!address_confirmed">Confirm Address</span> <span ng-if="address_confirmed">Address Confirmed (edit if necessary)</span></button>
@@ -70,19 +72,21 @@
           class='form-control'
           name='date'
           ng-init="initial.ngDate=minDate;"
-          min="{{minNumberDays | relativedate}}"
-          max="{{365 | relativedate}}"
-          ng-required="!poolForm.date.$pristine">
+          min="{{minNumberDays | relativedateISO}}"
+          max="{{365 | relativedateISO}}"
+          ng-required="!poolFormForm.date.$pristine">
+          <!-- ng-min="{{minNumberDays | relativedateISO}}" -->
+          <!-- ng-max="{{365 | relativedateISO}}" -->
           <!-- value="{{minDate | date: 'yyyy-MM-dd'}}" -->
           <!--             <span class="error" ng-show="poolForm.date.$error">
           Not a valid date!</span> -->
-          <span class="invalid" ng-show="poolForm.date.$error.max">
+          <span class="invalid" ng-show="poolFormForm.date.$error.max">
           <b>Date cannot be more than 1 year hence!</b></span>
-          <span class="invalid" ng-show="poolForm.date.$error.min">
-          <b>Date must be at least {{minNumberDays}} in the future!</b></span>
-          <span class="invalid" ng-show="poolForm.date.$error.required">
+          <span class="invalid" ng-show="poolFormForm.date.$error.min">
+          <b>Date must be at least {{minNumberDays}} days in the future!</b></span>
+          <span class="invalid" ng-show="poolFormForm.date.$error.required">
           <b>Must enter a date!</b></span>
-          <span class="invalid" ng-show="poolForm.date.$error.date">
+          <span class="invalid" ng-show="poolFormForm.date.$error.date">
           <b>Must be a valid date!</b></span>
         </div>
         <!-- TIME -->
@@ -90,7 +94,7 @@
           <label>Event Time</label>
           <input type="time"
           ng-model="initial.ngTime"
-          name="poolForm.time"
+          name="time"
           placeholder="HH:mm:ss"
           value="14:30:00"
           required="true">
@@ -132,9 +136,9 @@
         <!-- BUTTON -->
         <!-- BUTTON -->
         <div>
-          <button type="submit" class="btn btn-primary" ng-disabled="poolForm.$invalid || disabled || !address_confirmed || teamSelection.length ==0">Create Event</button>
+          <button type="submit" class="btn btn-primary" ng-disabled="poolFormForm.$invalid || disabled || !address_confirmed || teamSelection.length ==0">Create Event</button>
         </div>
-        <span ng-show="poolForm.$invalid || !address_confirmed || teamSelection.length ==0"> <b>This registration form is not complete! Ensure you have confirmed the address and affiliated at least one team.</b></span>
+        <span ng-show="poolFormForm.$invalid || !address_confirmed || teamSelection.length ==0"> <b>This registration form is not complete! Ensure you have confirmed the address and affiliated at least one team.</b></span>
       </form>
       </div><!-- COLUMN -->
       <div class='col' style="float:right; width:48%;">
@@ -172,13 +176,6 @@
             <span ng-show="poolForm.ngLatenessWindow==0"> <b>Neither participants nor organizers can arrive late</b>. Everyone must arrive at {{initial.ngTime | date:'hh:mma'}}. </span>
           </li>
         </ul>
-
-
-
-
-
-
-
         </div><!-- COLUMN -->
       </div>
     </div>

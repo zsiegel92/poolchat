@@ -3,7 +3,7 @@ import unittest
 import json
 
 with modified_environ(APP_SETTINGS='config.TestingConfig'):
-	from app import app, db,models
+	from app import app, db,models, ts
 
 
 class AppTestCase(unittest.TestCase):
@@ -17,6 +17,10 @@ class AppTestCase(unittest.TestCase):
 		with app.app_context():
 			db.drop_all()
 		# pass
+
+	def getUser(self,email):
+		with app.app_context():
+			return models.Carpooler.query.filter_by(email=email).first()
 
 	def test_empty_db(self):
 		rv = self.app.get('/')
@@ -38,14 +42,33 @@ class AppTestCase(unittest.TestCase):
 
 	def register(self,firstName,lastName,email,password):
 		args = {'firstName':firstName,'lastName': lastName,'email':email,'confirm':password,'password':password,'accept_tos':'true'}
-		print("api/register called")
+		print("/api/register call")
 		rv= self.app.post('/api/register',data=args,follow_redirects=True,content_type='application/x-www-form-urlencoded')
-		print("/api/register returned")
+		print("/api/register return")
+		return rv
+
+	def authenticate(self,email):
+		cp = self.getUser(email)
+		email = cp.email.lower()
+		token=ts.dumps(email,salt='email-confirm-key')
+		print("/api/confirm_email call")
+		rv = self.app.post('/api/confirm_email',data={'email':email,'token':token},follow_redirects=True)
+		print("/api/confirm_email return")
 		return rv
 
 	def test_register(self):
-		rv = self.register('Zach','Siegel','zsiegel92@gmail.com','masterp123')
+		firstName='Zach'
+		email='zsiegel92@gmail.com'
+		lastName='Siegel'
+		password='masterp123'
+		rv = self.register(firstName,lastName,email,password)
 		assert('200' in rv.status)
+		cp=self.getUser(email)
+		assert(cp.authenticated==False)
+		self.authenticate(email)
+		cp=self.getUser(email)
+		assert(cp.authenticated==True)
+
 
 
 	def test_login_logout(self):

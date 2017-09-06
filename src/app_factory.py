@@ -15,7 +15,19 @@ import models
 # gunicorn_error_logger = logging.getLogger('gunicorn.error')
 
 
-
+# def create_testing_app(name=__name__):
+# 	testapp=Flask(name)
+# 	testapp.config.from_object("config.TestingConfig")
+# 	# testdb=gen_db()
+# 	testdb=db
+# 	#in config.TestingConfig,
+# 	# SQLALCHEMY_DATABASE_URI = "postgresql://localhost/testing"
+# 	testdb.init_app(testapp)
+# 	bcrypt.init_app(testapp)
+# 	login_manager.init_app(testapp)
+# 	with testapp.app_context():
+# 		testdb.create_all()
+# 	return testapp
 
 
 def create_app(name=__name__):

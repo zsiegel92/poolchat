@@ -66,3 +66,20 @@ class DevelopmentConfig(Config):
 
 class TestingConfig(Config):
 	TESTING = True
+	SQLALCHEMY_DATABASE_URI = "postgresql://localhost/testing"
+	print("Setting SQLALCHEMY_DATABASE_URI TO " + str(SQLALCHEMY_DATABASE_URI))
+	APP_NAME = "GroupThere"
+	DEVELOPMENT = True
+	DEBUG = True
+	SECRET_KEY = 'masterfulCarpoolingDev'
+	MESSENGER_PLATFORM_ACCESS_TOKEN=os.environ.get('MESSENGER_PLATFORM_ACCESS_TOKEN') #Zach and Friends
+	SQLALCHEMY_TRACK_MODIFICATIONS = False
+	GMAPS_STATIC_API_TOKEN = 'AIzaSyDpWUPSNr1RW4MsWWEcXMJiX1ZN3ZTqpU0'
+	GMAPS_GEOCODE_API_TOKEN='AIzaSyBZOMnco4p7dC-OLv1f1xI-txujDoSCrms'
+	#GroupThere
+	DISTMAT_API_KEY='AIzaSyDn-zSmuif-Mf8z16Pm1MLYp41zYcFoaX0'
+	GEOCODE_API_KEY='AIzaSyBZOMnco4p7dC-OLv1f1xI-txujDoSCrms'
+	EMAIL = str(os.environ.get('EMAIL'))
+	EMAIL_PASSWORD = str(os.environ.get('EMAIL_PASSWORD'))
+	SEND_FILE_MAX_AGE_DEFAULT = 0#seconds
+	URL_BASE='https://poolchat.ngrok.io/'

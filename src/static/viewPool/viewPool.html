@@ -8,9 +8,9 @@ Make sure $scope, $route, $routeParams are injected in controller -->
         <div ng-if="pool_id_message">
             {{pool_id_message}}
         </div>
-        <div ng-show="!joinForm.$dirty && eligible_pools.length>1">
+ <!--        <div ng-show="!joinForm.$dirty && eligible_pools.length>1">
             <h3> Please select an event!</h3>
-        </div>
+        </div> -->
         <div ng-show="joinFormValues.ngPool >=0">
             <div style="border:1px solid black; padding: 6px; margin: 3px;border-radius: 4px; width: 90%;">
                 <h3 style="text-align: center;border-bottom: solid 1px #999;">'{{selectedPool_obj.name}}' <br>

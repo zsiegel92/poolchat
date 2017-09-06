@@ -157,7 +157,7 @@ def api_get_pool_info_for_user():
 
 
 	joined_pools =[{'id':trip.pool.id,'name':trip.pool.poolName,'date':trip.pool.eventDate,'time':trip.pool.eventTime,'address':trip.pool.eventAddress,'email':trip.pool.eventEmail,'fireNotice':trip.pool.fireNotice,'latenessWindow':trip.pool.latenessWindow,'dateTime':trip.pool.eventDateTime.isoformat(),'members':[other_trip.member.name for other_trip in trip.pool.members],'trip':{'address':trip.address,'num_seats':trip.num_seats,'preWindow':trip.preWindow,'on_time':trip.on_time,'must_drive':trip.must_drive},'teams':[team.to_dict() for team in trip.pool.teams]} for trip in current_user.pools]
-	unjoined_pools=[{'id':pool.id,'name':pool.poolName,'date':pool.eventDate,'time':pool.eventTime,'address':pool.eventAddress,'email':pool.eventEmail,'fireNotice':pool.fireNotice,'latenessWindow':pool.latenessWindow,'dateTime':pool.eventDateTime.isoformat(),'teams':[poolTeam.to_dict() for poolTeam in pool.teams],'team_names':[poolTeam.name for poolTeam in pool.teams]} for team in current_user.teams for pool in team.pools if pool.id in unjoined_pool_ids]
+	unjoined_pools=[{'id':pool.id,'name':pool.poolName,'date':pool.eventDate,'time':pool.eventTime,'address':pool.eventAddress,'email':pool.eventEmail,'fireNotice':pool.fireNotice,'latenessWindow':pool.latenessWindow,'dateTime':pool.eventDateTime.isoformat(),'teams':[poolTeam.to_dict() for poolTeam in pool.teams],'members':[other_trip.member.name for other_trip in pool.members],'team_names':[poolTeam.name for poolTeam in pool.teams]} for team in current_user.teams for pool in team.pools if pool.id in unjoined_pool_ids]
 	carpooler={'name':current_user.name,'first':current_user.firstname,'last':current_user.lastname,'email':current_user.email}
 
 	seen_ids = []
@@ -170,8 +170,8 @@ def api_get_pool_info_for_user():
 			unique_unjoined.append(pool)
 
 	eligible_pools=unique_unjoined
-	for pool in eligible_pools:
-		print("Can join a pool with dateTime " + str(pool['dateTime']))
+	# for pool in eligible_pools:
+	# 	print("Can join a pool with dateTime " + str(pool['dateTime']))
 		# print("timezone is " + str(pool['dateTime'].utcoffset().total_seconds()))
 	return jsonify({'teams':teams,'joined_pools':joined_pools,'eligible_pools':eligible_pools,'carpooler':carpooler}),200
 

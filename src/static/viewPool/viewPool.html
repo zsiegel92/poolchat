@@ -27,23 +27,82 @@ Make sure $scope, $route, $routeParams are injected in controller -->
         <div ng-show="!joinForm.$dirty && eligible_pools.length>1">
             <h3> Please select an event!</h3>
         </div>
+
+
         <div ng-show="joinForm.$dirty && joinForm.ngPool >=0">
             <h3> Selected Event: </h3>
             <ul>
                 <li> Event Name: '{{selectedPool_obj.name}}' with <span ng-repeat="team in selectedPool_obj.teams">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{team.name}}</span></li>
-                <!-- {{team.name}}{{$last ? '': ', '}} -->
                 <li> Event Address: {{selectedPool_obj.address}} </li>
-                <li> Event Date: {{selectedPool_obj.date }} </li>
-                <li> Event Time: {{selectedPool_obj.time }} </li>
-                <li> Event DateTime: {{selectedPool_obj.dateTime | date:'medium' }} </li>
+                <li> {{selectedPool_obj.date }} at {{selectedPool_obj.time }}</li>
+                <li>Members: <span ng-show="selectedPool_obj.members.length<1">None yet!</span><span ng-repeat="member in selectedPool_obj.members">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{member}}</span></li>
                 <li> <b>Happening in  {{toDays(selectedPool_obj.seconds_til-counter)}} days, {{toHours(selectedPool_obj.seconds_til-counter)}} hours, {{toMinutes(selectedPool_obj.seconds_til-counter)}} minues, {{toSeconds(selectedPool_obj.seconds_til-counter)}} seconds</b></li>
                 <li> Event Contact Email: {{selectedPool_obj.email}} </li>
                 <li> Non-Organizers can arrive up to {{selectedPool_obj.latenessWindow}} minutes after {{selectedPool_obj.time}}</li>
                 <li> Carpooling instructions will be sent out {{selectedPool_obj.fireNotice}}  hours before {{selectedPool_obj.time}} on {{selectedPool_obj.date}}</li>
                 <li> <b>Instructions will be send out in  {{toDays(selectedPool_obj.seconds_til_instructions-counter)}} days, {{toHours(selectedPool_obj.seconds_til_instructions-counter)}} hours, {{toMinutes(selectedPool_obj.seconds_til_instructions-counter)}} minues, {{toSeconds(selectedPool_obj.seconds_til_instructions-counter)}} seconds</b></li>
-                <!-- <li> Notice given for carpooling instructions: {{selectedPool_obj.fireNotice}} hours</li> -->
             </ul>
         </div>
+
+
+<!-- ng-src="{{trip_image_url}}" -->
+<!-- <img class="img-responsive" alt="a" src="/assets/example/bg_10.jpg"> -->
+<!--         <div class="col-md-12" ng-show="joinForm.$dirty && joinForm.ngPool >=0">
+            <div class="row">
+              <div class="col-md-3">
+                <h3><span class="label label-info">{{selectedPool_obj.date }}<br>{{selectedPool_obj.time }}</span></h3>
+              </div>
+              <div class="col-md-9">
+                  <strong>'{{selectedPool_obj.name}}'</strong> with <span ng-repeat="team in selectedPool_obj.teams">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{team.name}}</span><br>
+                  <em>{{selectedPool_obj.address}}</em><br>
+                  <strong>Members: <span ng-show="selectedPool_obj.members.length<1">None yet!</span><span ng-repeat="member in selectedPool_obj.members">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{member}}</span></strong>
+                  <span class="small">in  {{toDays(selectedPool_obj.seconds_til-counter)}} days, {{toHours(selectedPool_obj.seconds_til-counter)}} hours, {{toMinutes(selectedPool_obj.seconds_til-counter)}} minues, {{toSeconds(selectedPool_obj.seconds_til-counter)}} seconds</span><br>
+                  <span>Non-Organizers can arrive up to {{selectedPool_obj.latenessWindow}} minutes after {{selectedPool_obj.time}}</span><br>
+                  <span>Carpooling instructions will be sent out {{selectedPool_obj.fireNotice}}  hours before {{selectedPool_obj.time}} on {{selectedPool_obj.date}}</span><br>
+                  <span>For more details, contact {{selectedPool_obj.email}}</span>
+              </div>
+            </div>
+            <div class="thumbnail">
+              <div class="overlay">
+                <i class="fa fa-share md"></i>
+              </div>
+              <img class="img-responsive" src="/static/img/beautiful_map/beautiful_map_200.jpg" alt="Trip Origin" style="width:100%;">
+            </div>
+        </div>
+ -->
+
+
+  <!--       <div class="demo-card-event mdl-card mdl-shadow-2dp">
+          <div class="mdl-card__title mdl-card-expand">
+            <h4>
+              <strong>'{{selectedPool_obj.name}}'</strong> with <span ng-repeat="team in selectedPool_obj.teams">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{team.name}}</span><br>
+            </h4>
+              {{selectedPool_obj.date }} at {{selectedPool_obj.time }}<br>
+              <em>{{selectedPool_obj.address}}</em><br>
+              Members: <span ng-show="selectedPool_obj.members.length<1">None yet!</span><span ng-repeat="member in selectedPool_obj.members">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{member}}</span>
+
+
+          </div>
+          <div class="mdl-card__actions mdl-card-border">
+            <a class="mdl-button mdl-button-colored mdl-js-button mdl-js-ripple-effect">
+              Join now
+            </a>
+            <div class="mdl-layout-spacer"></div>
+            <i class="material-icons">event</i>
+          </div>
+        </div>
+ -->
+
+
+
+
+
+
+
+
+
+
+
         <div ng-if="resultText">
             <h3> Query Status: </h3>
             {{resultText}}
@@ -107,11 +166,11 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                             <!-- <li> Carpooling instructions will be sent out {{pool.fireNotice}} hours before {{pool.time}} on {{pool.date}}</li> -->
                             <h4 style="border-bottom: solid 1px #999;"></h4>
                             <br>
-                            Carpooling instructions will be sent out {{pool.fireNotice}} hours before {{pool.time}} on {{pool.date}}, in  {{toDays(pool.seconds_til_instructions-counter)}} days, {{toHours(pool.seconds_til_instructions-counter)}} hours, and {{toMinutes(pool.seconds_til_instructions-counter)}} minues<!-- , {{toSeconds(pool.seconds_til_instructions-counter)}} seconds -->
+                            Carpooling instructions will be sent out {{pool.fireNotice}} hours before {{pool.time}} on {{pool.date}}, in  {{toDays(pool.seconds_til_instructions-counter)}} days, {{toHours(pool.seconds_til_instructions-counter)}} hours, and {{toMinutes(pool.seconds_til_instructions-counter)}} minutes<!-- , {{toSeconds(pool.seconds_til_instructions-counter)}} seconds -->
                             <br>
                             <button type="button" class="btn btn-md btn-info" ng-disabled="disabled" ng-click="getPoolInstructions($index)" >View most recent solution!</button>
-                            <span ng-show="waiting_for_instructions_text" class="alert alert-info">{{waiting_for_instructions_text}}</span>
-                            <span ng-show="waiting_for_instructions_error" class="alert alert-danger">{{waiting_for_instructions_error}}</span>
+                            <div ng-show="waiting_for_instructions_text" class="alert alert-info">{{waiting_for_instructions_text}}</div>
+                            <div ng-show="waiting_for_instructions_error" class="alert alert-danger">{{waiting_for_instructions_error}}</div>
 
 
                             <!--  <li> FOR TESTING: Generate a new solution now!<br>

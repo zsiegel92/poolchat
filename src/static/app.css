@@ -487,7 +487,58 @@
 
 
 
+/*event 'demo card' attempt in viewPool*/
+.demo-card-event.mdl-card {
+  /*width: 100%;*/
+  background: #3E4EB8;
+}
+.demo-card-event > .mdl-card__actions {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.demo-card-event > .mdl-card__title {
+  /*align-items: flex-start;*/
+}
+.demo-card-event > .mdl-card__title > h4 {
+  /*margin-top: 0;*/
+}
+.demo-card-event > .mdl-card__actions {
+  /*display: flex;*/
+  /*box-sizing:border-box;*/
+  /*align-items: center;*/
+}
+.demo-card-event > .mdl-card__title,
+.demo-card-event > .mdl-card__actions,
+.demo-card-event > .mdl-card__actions > .mdl-button {
+  color: #fff;
+}
 
+
+
+
+/*Event 'Overlay' attempt in viewPool*/
+.overlay:hover {
+opacity: 1;
+cursor: pointer;
+}
+.overlay {
+position: absolute;
+width: 100%;
+height: 100%;
+opacity: 0;
+transition: all 0.35s ease;
+-webkit-transition: all 0.35s ease;
+-moz-transition: all 0.35s ease;
+-o-transition: all 0.35s ease;
+-ms-transition: all 0.35s ease;
+border-radius: inherit;
+left: 0;
+top: 0;
+bottom: 0;
+right: 0;
+}
+.overlay {
+background-color: rgba(33,154,200,0.75);
+}
 
 
 

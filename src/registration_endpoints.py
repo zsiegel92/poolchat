@@ -151,11 +151,45 @@ def api_create_pool():
 
 			db.session.commit()
 		print(message)
+		q.enqueue_call(func=send_notify_teams_new_event,kwargs = {'creator_id':current_user.id,'pool_id':pool.id,'team_ids':team_ids},result_ttl=5000)
 		return "Pool added to database.", 200
 	else:
 		return "Pool already in database",409
 
+def send_notify_teams_new_event(creator_id,pool_id,team_ids):
+	print("in registration_endpionts.notify_teams_new_event")
+	with app.app_context():
+		pool = Pool.query.filter_by(id=pool_id).first()
+		creator = Carpooler.query.filter_by(id=creator_id).first()
+		if pool is None or creator is None:
+			print("ERROR IN notify_teams_new_event")
+			assert(True==False)
+			return "ERROR!"
 
+		subject = "(GroupThere) - " + str(creator.name) +" has just invited you to " + str(pool.poolName) + "!"
+		url_base = app.config['URL_BASE']#ends in /
+
+		link = '{base}?#!/viewPool/join_pool/{pool_id}'.format(base=url_base,pool_id=pool_id)
+
+		# eventEmail = pool.eventEmail
+		notified_ids = []
+		team_names=[]
+		team_contacts=[]
+		for team_id in team_ids:
+			team = Team.query.filter_by(id=team_id).first()
+			if team is not None:
+				team_names.append(team.name)
+				team_contacts.append(team.email)
+				for member in team.members:
+					if member.id not in notified_ids:
+						notified_ids.append(member.id)
+		for id in notified_ids:
+			member = Carpooler.query.filter_by(id=id).first()
+			html_body = render_template('emails/invite_to_event.html',link=link,creator=creator,member=member,pool=pool,team_names=team_names,team_contacts=team_contacts)
+			text_message = render_template('emails/invite_to_event.txt',link=link,creator=creator,member=member,pool=pool,team_names=team_names,team_contacts=team_contacts)
+			html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
+			emailer.send_html(member.email,html_message=html,subject=subject,text_message=text_message)
+		return "email sent!"
 
 
 @app.route('/api/create_trip/',methods=['POST'])

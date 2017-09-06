@@ -8,12 +8,16 @@ angular.module('myApp.viewPool', ['ngRoute'])
       templateUrl: 'static/viewPool/viewPool.html',
       controller: 'viewPoolController',
       access: {restricted: true}
+    })
+    .when('/viewPool/join_pool/:go_to_pool_id?', {
+      templateUrl: 'static/viewPool/viewPool.html',
+      controller: 'viewPoolController',
+      access: {restricted: true}
     });
 }])
 .controller('viewPoolController',
   ['$scope', '$location', 'AuthService','$route', '$routeParams','$log','$http','$window','$timeout','$filter',
   function ($scope, $location, AuthService,$route,$routeParams,$log,$http,$window,$timeout,$filter) {
-
 
 
     var hours=0;
@@ -45,6 +49,17 @@ angular.module('myApp.viewPool', ['ngRoute'])
     // };
 
     $scope.past_addresses=[];
+
+
+
+      // call after $scope.eligible_pools is defined
+      var f = $window.decodeURIComponent;
+      var r = $routeParams;
+      var go_to_pool_id = f(r.go_to_pool_id);
+
+
+
+
 
     $scope.getPoolInfoForUser = function() {
       $log.log("Getting pool info");
@@ -103,6 +118,16 @@ angular.module('myApp.viewPool', ['ngRoute'])
 
           $log.log("Successfully queried for teams, joined_pools, and eligible_pools!");
           $log.log(response.data);
+
+          if (go_to_pool_id){
+            $log.log("Checking whether re-route requested.")
+            for (var i = 0; i < $scope.eligible_pools.length; i++) {
+              if ($scope.eligible_pools[i].id == go_to_pool_id){
+                $scope.joinForm.ngPool=i;
+                $scope.goto_join();
+              }
+            }
+          }
        })
         .catch(function(response) {
           $scope.errorText=response.data;
@@ -205,5 +230,6 @@ angular.module('myApp.viewPool', ['ngRoute'])
       // $location.path($window.encodeURIComponent(pth));
       $location.path(pth);
   };
+
 
 }]);

@@ -1,0 +1,30 @@
+Hey, {{member.name}},
+<br>
+<br>
+{{creator.name}} has just created an event called {{pool.poolName}}, and you can <a href='{{link}}'>join on GroupThere</a>.
+<br>
+<br>
+<ul>
+	<li>Date: {{pool.eventDate}}</li>
+	<li>Time: {{pool.eventTime}}</li>
+	<li>Location: {{pool.eventAddress}}</li>
+	<li>Non-organizers can arrive up to {{pool.latenessWindow}} minutes after the designated event start time</li>
+	<li>Carpooling instructions will be sent out by GroupThere {{pool.fireNotice}} hours before the event.</li>
+	<li>For more information about this event, please contact {{pool.eventEmail}}</li>
+</ul>
+<br>
+<br>
+You were invited because you are a member of at least one team affiliated with this event. The following teams are affiliated with this event:
+<ul>
+{% for team_name in team_names %}
+<li> {{team_name}} can be reached at {{team_contacts[loop.index]}}</li>
+{% endfor %}
+</ul>
+<br>
+<br>
+Feel free to <a href='{{link}}'>join on GroupThere</a> whenever you're ready.
+<br>
+<br>
+Thanks so much,
+<br>
+GroupThere

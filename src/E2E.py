@@ -1,26 +1,42 @@
-from utils import modified_environ
-import unittest
-import json
 
-with modified_environ(APP_SETTINGS='config.TestingConfig'):
-	from app import app, db,models, ts
+import unittest
+
+
+
+import json
+# from utils import modified_environ
+# with modified_environ(APP_SETTINGS='config.TestingConfig'):
+# 	from app import app, db,models, ts
+if __name__!='__main__':
+	from manage import app, db, models, ts
+else:
+	from utils import modified_environ
+	with modified_environ(APP_SETTINGS='config.TestingConfig'):
+		from app import app, db,models, ts
+
 
 
 class AppTestCase(unittest.TestCase):
 	def setUp(self):
-		self.app=app.test_client()
-		with app.app_context():
+		self.app = app.test_client()
+		with app.test_request_context():
+			db.drop_all()
 			db.create_all()
 
+	def drop(self):
+		with app.test_request_context():
+			db.session.commit()
+			db.drop_all()
+			db.create_all()
 
 	def tearDown(self):
-		with app.app_context():
-			db.drop_all()
-		# pass
+		# self.drop()
+		pass
 
 	def getUser(self,email):
 		with app.app_context():
 			return models.Carpooler.query.filter_by(email=email).first()
+
 
 	def test_empty_db(self):
 		rv = self.app.get('/')
@@ -43,6 +59,7 @@ class AppTestCase(unittest.TestCase):
 		rv= self.app.post('/api/login',data=args,follow_redirects=True,content_type='application/x-www-form-urlencoded')
 		print("/api/login return")
 		return rv
+
 	def logout(self,session_id=None):
 		print("/api/logout/ call")
 		rv = self.app.post('/api/logout/',follow_redirects=True)
@@ -66,27 +83,58 @@ class AppTestCase(unittest.TestCase):
 		print("/api/confirm_email return")
 		return rv
 
-	def test_register(self):
-		firstName='Zach'
-		email='zsiegel92@gmail.com'
-		lastName='Siegel'
+	def test_register_and_login(self):
+		numTestUsers=2
+		baseFirst='Zach'
+		baseLast='Siegel'
 		password='masterp123'
-		rv = self.register(firstName,lastName,email,password)
-		assert('200' in rv.status)
-		cp=self.getUser(email)
-		assert(cp.authenticated==False)
-		self.authenticate(email)
-		cp=self.getUser(email)
-		assert(cp.authenticated==True)
-		rv= self.login(email,password)
-		assert('200' in rv.status)
-		rv= self.logout()
-		print(rv.data)
+		emails=['zsiegel92@gmail.com','thesouroaf@gmail.com','grouptherela@gmail.com','grouptherenow@gmail.com','ifnotnowcarpooling@gmail.com','grouptherecarpool@gmail.com','grouptheretest@gmail.com']
+		emails=emails[:numTestUsers]
+		for i,email in enumerate(emails):
+			firstName=baseFirst + "_"+ str(i)
+			lastName=baseLast+ "_"+ str(i)
+			rv = self.register(firstName,lastName,email,password)
+			assert('200' in rv.status)
+			cp=self.getUser(email)
+			assert(cp.authenticated==False)
+			self.authenticate(email)
+			cp=self.getUser(email)
+			assert(cp.authenticated==True)
+			rv= self.login(email,password)
+			assert('200' in rv.status)
+			rv= json.loads(self.app.post('/api/status').data)
+			assert(rv['status'] is True)
+			rv= self.logout()
+			assert('200' in rv.status)
+			rv = self.login(email + 'x', password)
+			assert('200' not in rv.status)
+			rv = self.login(email , str(password) + 'x')
+			assert('200' not in rv.status)
+			rv= self.logout()
+			assert('200' in rv.status)
+		all_users = models.Carpooler.query.all()
+		assert(len(all_users) == len(emails))
+
+		firstName=baseFirst + "_"+ str(0)
+		lastName=baseLast+ "_"+ str(0)
+		email = emails[0]
+		rv = self.login(email,password)
+		rvdata= json.loads(self.app.post('/api/status').data)
+		assert(rvdata['status'] is True)
 
 
-	def test_login_logout(self):
-		pass
+
+
+
+suite = unittest.defaultTestLoader.loadTestsFromTestCase(AppTestCase)
+def run_all_tests():
+	unittest.TextTestRunner(verbosity=2).run(suite)
+	print("RAN ALL TESTS!")
+
+def main():
+	# unittest.main()
+	run_all_tests()
 
 if __name__=='__main__':
-	unittest.main()
+	main()
 

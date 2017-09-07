@@ -70,7 +70,12 @@ class TestingConfig(Config):
 	print("Setting SQLALCHEMY_DATABASE_URI TO " + str(SQLALCHEMY_DATABASE_URI))
 	APP_NAME = "GroupThere"
 	DEVELOPMENT = True
-	DEBUG = True
+	debugging = os.environ.get('FLASKDEBUG')
+	if debugging=='True':
+		DEBUG = True
+	else:
+		DEBUG= False
+
 	SECRET_KEY = 'masterfulCarpoolingDev'
 	MESSENGER_PLATFORM_ACCESS_TOKEN=os.environ.get('MESSENGER_PLATFORM_ACCESS_TOKEN') #Zach and Friends
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -82,4 +87,5 @@ class TestingConfig(Config):
 	EMAIL = str(os.environ.get('EMAIL'))
 	EMAIL_PASSWORD = str(os.environ.get('EMAIL_PASSWORD'))
 	SEND_FILE_MAX_AGE_DEFAULT = 0#seconds
-	URL_BASE='https://poolchat.ngrok.io/'
+	# URL_BASE='https://poolchat.ngrok.io/'
+	URL_BASE='http://localhost:5000/'

@@ -37,6 +37,8 @@ class Emailer:
 
 	@classmethod
 	def direct_email(cls,sent_to,sent_from,password,message="",subject="",error=False):
+		if sent_from=='':
+			return
 		print("in Emailer.direct_email")
 		if sent_to.split("@")[-1]== 'notARealThing.com':
 
@@ -68,11 +70,13 @@ class Emailer:
 
 	@classmethod
 	def send_from_server(cls,fromAddress,password,toAddress,message):
-			server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-			server.ehlo()
-			server.login(fromAddress, password)
-			server.sendmail(fromAddress, toAddress, message)
-			server.close()
+		if fromAddress=='':
+			return
+		server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+		server.ehlo()
+		server.login(fromAddress, password)
+		server.sendmail(fromAddress, toAddress, message)
+		server.close()
 
 	def send_html_body(self,toAddress,html_body,subject="",text_message=""):
 		print("in Emailer.send_html_body")

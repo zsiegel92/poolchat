@@ -37,11 +37,21 @@ class AppTestCase(unittest.TestCase):
 		data= json.loads(rv.data)
 		assert(data['status']==False)
 
-	def login(self,username,password,remember_me=False):
-		pass
+	def login(self,email,password):
+		args={'email':email,'password':password,'remember_me':True}
+		print("/api/login call")
+		rv= self.app.post('/api/login',data=args,follow_redirects=True,content_type='application/x-www-form-urlencoded')
+		print("/api/login return")
+		return rv
+	def logout(self,session_id=None):
+		print("/api/logout/ call")
+		rv = self.app.post('/api/logout/',follow_redirects=True)
+		print("/api/logout/ return")
+		return rv
+
 
 	def register(self,firstName,lastName,email,password):
-		args = {'firstName':firstName,'lastName': lastName,'email':email,'confirm':password,'password':password,'accept_tos':'true'}
+		args = {'firstName':firstName,'lastName': lastName,'email':email,'confirm':password,'password':password,'accept_tos':True}
 		print("/api/register call")
 		rv= self.app.post('/api/register',data=args,follow_redirects=True,content_type='application/x-www-form-urlencoded')
 		print("/api/register return")
@@ -68,7 +78,10 @@ class AppTestCase(unittest.TestCase):
 		self.authenticate(email)
 		cp=self.getUser(email)
 		assert(cp.authenticated==True)
-
+		rv= self.login(email,password)
+		assert('200' in rv.status)
+		rv= self.logout()
+		print(rv.data)
 
 
 	def test_login_logout(self):

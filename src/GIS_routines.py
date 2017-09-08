@@ -28,7 +28,7 @@ emailForm=wtforms_ext.EmailForm(ng_click='getCarpoolerInfo()')
 # docs for gmaps https://developers.google.com/maps/documentation/distance-matrix/intro#traffic-model
 #origin is a string, leaveTime is datetime, others is list as [{id:,address:},...]
 def gen_dist_row(origin,others,leaveTime):
-	print("In gen_dist_row")
+	print("In gen_dist_row - origin: " + str(origin) + ". Others: " + str(others))
 	n = len(others)
 	numAtATime=10
 	distances=[]
@@ -44,6 +44,22 @@ def gen_dist_row(origin,others,leaveTime):
 		# pessimistic
 
 		matrix = gmaps.distance_matrix([origin],dests,mode='driving',language='en',avoid='tolls',units='imperial',departure_time=leaveTime,traffic_model='best_guess')
+
+		matrixOK=False
+		print("GOT DISTANCE MATRIX!")
+		rows = matrix.get('rows')
+		if (rows is not None) and hasattr(rows,'__iter__'):
+			print("Number of rows: " + str(len(rows)))
+			elems0 = rows[0].get('elements')
+			if (elems0 is not None) and hasattr(elems0,'__iter__'):
+				print("Number of elements in row 0: " + str(len(elems0)))
+				matrixOK=True
+			else:
+				print("ERROR! Row 0 has no elements!")
+		else:
+			print("ERROR! NO ROWS!")
+		if matrixOK is False:
+			return
 
 		# if ((matrix.get('rows') is not None) and (len(matrix.get('rows'))>0)):
 		if (last-first)>1:

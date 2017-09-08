@@ -106,6 +106,10 @@ def addDistMatsFromPool(pool,params):
 			print("to_event_distances are None! for " + str(i) + " out of " + str(n))
 			get_trip_dists(carpooler_id=carpooler_ids[i],pool_id=pool.id)
 			to_event_distance = Event_Distance.query.filter_by(pool_id=pool_id,carpooler_id = carpooler_ids[i]).first()
+			if to_event_distance is None:
+				print("(GT_interactions.addDistMatsFromPool) TRIED TO FILL MISSING DISTANCES, BUT STILL NO DISTANCES IN DATABASE.")
+				print("RETURNING params WITHOUT DIST MATS")
+				return params
 
 		to_event_distances[0,i]=to_event_distance.feet
 		to_event_durations[0,i]=to_event_distance.seconds
@@ -146,7 +150,11 @@ def doGroupThere_fromDB(pool_id=None):
 				mailParam=mailParamsFromPool(pool)
 				params = systemParamFromPool(pool)
 				params = addDistMatsFromPool(pool,params)
-				print("Got dist mats from pool")
+				if params.dists_to_event['Distances'] is not None:
+					print("Got dist mats from pool")
+				else:
+					print("(GT_interactions.doGroupThere_fromDB) DISTANCE MATRICES NONEXISTANT. TERMINATING.")
+					return
 				params = gt_fromDistmattedParams(params,mailParam)
 				print("did gt from distmatted params")
 				#SHOULD DO SOME DATABASE MAINTENENCE HERE, OR AT LEAST ENQUEUE IT
@@ -395,7 +403,9 @@ def get_trip_dists(carpooler_id,pool_id):
 		to_new_address=gen_dist_col(new_address,others,leaveTime)
 		print("Got to_new_address!")
 		to_event = gen_one_distance(new_address,dest,leaveTime)
-
+		if (from_new_address is None) or (to_new_address is None) or (to_event is None):
+			print("(GT_interactions.get_trip_dists) DISTANCE MATRIX FAILURE! RETURNING WITHOUT GENERATING DISTANCES.")
+			return
 
 		for i in range(len(others)):
 			from_new_dist = Trip_Distance.query.filter_by(pool_id=pool.id,from_carpooler_id=carpooler.id,to_carpooler_id=from_new_address[i]['id']).first()

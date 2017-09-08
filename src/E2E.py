@@ -14,15 +14,79 @@ else:
 	with modified_environ(APP_SETTINGS='config.TestingConfig'):
 		from app import app, db,models, ts
 
-numTestUsers=7
+numTestUsers=20
 baseFirst='Zach'
 baseLast='Siegel'
 password='masterp123'
 emails=['zsiegel92@gmail.com','thesouroaf@gmail.com','grouptherela@gmail.com','grouptherenow@gmail.com','ifnotnowcarpooling@gmail.com','grouptherecarpool@gmail.com','grouptheretest@gmail.com']
-emails=emails[:numTestUsers]
 
 
-addresses=["153 N New Hampshire Ave, LA, CA 90004","3103 Livonia Ave, LA, CA 90034","1131 Elden Avenue, Los Angeles, CA 90006","3560 Hughes Ave, Los Angeles, CA 90034","3970 Sepulveda Blvd, Culver City, CA 90230","3970 Sepulveda Blvd, Culver City, CA 90230","5922 N Figueroa St, Los Angeles, CA 93759 W 27th St, Los Angeles, CA 90018-2309","3759 W 27th St, Los Angeles, CA 90018-2309","1829 7th St, Santa Monica, CA 90401","2559 Ocean Front Walk, Santa Monica, CA 90401","3640 S Sepulveda Blvd, Los Angeles, CA 90034"]
+
+addresses=[
+	  "153 N New Hampshire Ave, LA, CA 90004",
+	  "3103 Livonia Ave, LA, CA 90034",
+	  "1131 Elden Avenue, Los Angeles, CA 90006",
+	  "3560 Hughes Ave, Los Angeles, CA 90034",
+	  "3970 Sepulveda Blvd, Culver City, CA 90230",
+	  "3970 Sepulveda Blvd, Culver City, CA 90230",
+	  "5922 N Figueroa St, Los Angeles, CA 93759 W",
+	  "27th St, Los Angeles, CA 90018-2309",
+	  "3759 W 27th St, Los Angeles, CA 90018-2309",
+	  "1829 7th St, Santa Monica, CA 90401",
+	  "2559 Ocean Front Walk, Santa Monica, CA 90401",
+	  "3640 S Sepulveda Blvd, Los Angeles, CA 90034",
+	  "8339 W 3rd St, Los Angeles, CA 90048",
+	  "4207 Lockwood Ave Los Angeles, CA 90029",
+	  "4230 Burns Ave Los Angeles, CA 90029",
+	  "317 S Broadway, Los Angeles, CA 90013",
+	  "1441 S Bedford St, LA, CA 90035",
+	  "1459 W 54th St, LA, CA",
+	  "519 E 7th St, LA, CA",
+	  "128 E Avenue 42, LA, CA 90031",
+	  "448 S Alexandria Ave, Los Angeles, CA 90020",
+	  "448 S Alexandria Ave, Los Angeles, CA 90020",
+	  "4437 Radium Drive, Los Angeles, CA",
+	  "710 Santiago Ave, Long Beach, CA",
+	  "2755 California Ave, Signal Hill, CA 90755",
+	  "2723 Alta St, Los Angeles, CA 90031",
+	  "3205 Glendale Blvd, Los Angeles, CA 90039",
+	  "3205 Glendale Blvd, Los Angeles, CA 90039",
+	  "9006 Darby Ave, Northridge, CA 91325",
+	  "9723 Eton Ave, Chatsworth, CA 91311",
+	  "505 Georgina Ave, Santa Monica, CA 90402",
+	  "1250 N June St, Los Angeles, CA 90038",
+	  "1850 N College Pl, Long Beach, CA"
+	]
+if numTestUsers<len(addresses):
+	addresses = addresses[:numTestUsers]
+else:
+	count = 0
+	while len(addresses)<numTestUsers:
+		addresses.append(addresses[count % len(addresses)])
+		count+=1
+
+
+if numTestUsers<len(emails):
+	emails=emails[:numTestUsers]
+else:
+	count = 0
+	while len(emails)<numTestUsers:
+		emails.append('bb'+  str(count) + str(emails[count % len(emails)]))
+		count+=1
+
+firsts=[]
+lasts=[]
+for i in range(len(emails)):
+	firsts.append(baseFirst+ "_" + str(i))
+	lasts.append(baseLast+ "_" + str(i))
+
+
+
+
+
+
+
+
 addresses=addresses[:numTestUsers]
 
 class AppTestCase(unittest.TestCase):
@@ -126,8 +190,8 @@ class AppTestCase(unittest.TestCase):
 
 	def test_1_register_and_login(self):
 		for i,email in enumerate(emails):
-			firstName=baseFirst + "_"+ str(i)
-			lastName=baseLast+ "_"+ str(i)
+			firstName=firsts[i]
+			lastName=lasts[i]
 			rv = self.register(firstName,lastName,email,password)
 			assert('200' in rv.status)
 			cp=self.getUser(email)

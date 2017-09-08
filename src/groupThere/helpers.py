@@ -431,51 +431,42 @@ class shortTime:
 
 		if len(group)==1:
 			i = group[0]
-			#lateOk should be T/F
-			#is canBeLate T/F or 1/0?
 			return {'isPossible':True,'minTime':self.durs_toEvent[i],'bestOrder':[i],'driver':i,'lateOk':bool(self.canBeLate[i]),'notLatePossible':bool(self.durs_toEvent[i]<=self.minsAvail[i]),'bestTimes':[self.durs_toEvent[i]]}
 
 		drs = [i for i in group if self.numCarSeats[i] >= len(group)]
+
+		message+=" && drivers are " + str(drs)
+
 		mds = 0
 		for i in group:
 			if self.must_drive[i]:
+				message += " && " + str(i) + " is manditory"
 				drs=[i]
 				mds +=1
 		if mds > 1:
-			message += "\nERROR: MULTIPLE MANDITORY DRIVERS IN GROUP"
+			message += " && ERROR: MULTIPLE MANDITORY DRIVERS IN GROUP"
+
+
 
 		output= self.getShortTimeGroup(drs,group,len(drs),len(group),returnAll=True)
 
-		message += "\nOutput of self.getShortTime is " + str(output)
+		message += " && Output of self.getShortTime is " + str(output)
 
 
 		if output[0]==False:
-			message+= "\n\nAssigned group infeasible!"
-			# message+= "\n{:<30}: ".format('drivers: ') + str(drs)
-			# message += "\n{:<30}: ".format('mandatory drivers') + str(mds)
-			# message += "\n{:<30}: ".format('group') + str(group)
-			# message += "\n{:<30}: ".format('int_minsAvailForTransit') + str(itemgetter(*group)(self.minsAvail))
-			# message += "\n{:<30}: ".format('numSeats') + str(itemgetter(*group)(self.numCarSeats))
-
-			# message += "\n{:<30}: ".format('must_drive') + str(itemgetter(*group)(self.must_drive))
-			# message += "\n{:<30}: ".format('canBeLate') + str(itemgetter(*group)(self.canBeLate))
-			# message += "\n{:<30}: ".format('durs to Event:') + str(itemgetter(*group)(self.durs_toEvent))
-
-			# dists = {(i,j):self.durs[i,j] for i in group for j in group if (i<j)}
-			# message += "\npairwise distances: "  + str(dists)
-			# message += "\nReturning: " + str({'isPossible':output[0],'minTime':output[1],'bestOrder':group,'driver':output[3],'lateOk':output[4],'notLatePossible':output[5]})
+			message+= " && Assigned group infeasible!"
 			return {'isPossible':output[0],'minTime':output[1],'bestOrder':group,'driver':output[3],'lateOk':output[4],'notLatePossible':output[5],'message':message,'bestTimes':output[6]}
 
 		return {'isPossible':output[0],'minTime':output[1],'bestOrder':tuple([output[3]]+list(output[2])),'driver':output[3],'lateOk':output[4],'notLatePossible':output[5],'message':message,'bestTimes':output[6]}
 	# minimize_mode='human_hours'
 	# @self_monitor_results
 	def getShortTimeGroup(self,drivers,participants,numPosDrivers,numParticipants,minimize_mode='car_hours',returnAll=False):
-		#drivers is a list of indices
+		#drivers is a list of indices (but is it a list of indices wrt participants? Or base indices?)
 		#participants includes drivers
 		isPossible = False
 		minTime = -1
 		bestOrder=None
-		driver=None
+		bestDriver=None
 		lateOK=None
 		notLatePossible=None
 		bestTimes=None
@@ -489,12 +480,12 @@ class shortTime:
 					minTime=solution[1]
 					if returnAll:
 						bestOrder = solution[2]
-						driver = solution[3]
+						bestDriver = solution[3]
 						lateOK = bool(solution[4])
 						notLatePossible= bool(solution[5])
 						bestTimes = solution[6]
 		#Note: bestOrder does not include driver.
-		return (isPossible,minTime,bestOrder,driver,lateOK,notLatePossible,bestTimes)
+		return (isPossible,minTime,bestOrder,bestDriver,lateOK,notLatePossible,bestTimes)
 
 
 

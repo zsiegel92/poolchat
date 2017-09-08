@@ -26,13 +26,14 @@ def use_test_config(func):
 	def wrap(*args, **kwargs):
 		with test_env():
 			app.config.from_object(os.environ['APP_SETTINGS'])
-			db.init_app(app)
-			db.app=app
-			bcrypt.init_app(app)
-			login_manager.init_app(app)
-			manager.app=app
+			# db.init_app(app)
+			# db.app=app
+			# bcrypt.init_app(app)
+			# login_manager.init_app(app)
+			# manager.app=app
 			return func(*args, **kwargs)
-	return wrap
+	with test_env():
+		return wrap
 def use_keeptest_config(func):
 	@wraps(func)
 	def wrap(*args, **kwargs):
@@ -44,8 +45,8 @@ def use_keeptest_config(func):
 			login_manager.init_app(app)
 			manager.app=app
 			return func(*args, **kwargs)
-	return wrap
-
+	with keep_env():
+		return wrap
 
 testing=False
 for arg in sys.argv:
@@ -100,7 +101,8 @@ def testkeepserver():
 	atexit.register(testrecreate)
 	E2E.run_all_tests()
 	print("RUNNING A SERVER")
-	run_a_server(app,use_reloader=False)
+	with keep_env():
+		run_a_server(app,use_reloader=False)
 
 
 @manager.command

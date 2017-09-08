@@ -25,7 +25,7 @@ from models import  Carpooler,Pool, Trip,Team,TempTeam,Trip_Distance,Event_Dista
 
 
 
-from app import app,request,abort
+from app import app,ts,request,abort
 from database import db
 from emailer import Emailer
 emailer=Emailer(q)
@@ -352,7 +352,8 @@ def send_team_email_confirmation(temp_team,second=False):
 # TODO: write admin_approve_team.html and .txt emails!
 def send_team_admin_approval_email(temp_team):
 	with app.app_context():
-		team_key = bcrypt.generate_password_hash(temp_team.name).decode('utf-8')
+		# team_key = bcrypt.generate_password_hash(temp_team.name).decode('utf-8')
+		team_key= ts.dumps(temp_team.name,salt='team-confirm-key')
 		team_id = temp_team.id
 
 		url_base = app.config['URL_BASE']#ends in /
@@ -411,9 +412,13 @@ def api_admin_approve_team():
 	if temp_team is None:
 		msg= "No such team! team_id is " + str(team_id)
 		return jsonify({'message':msg,"team_name":"undefined"}),404
-
-	if not bcrypt.check_password_hash(team_key,temp_team.name):
+	try:
+		teamName=ts.loads(team_key,salt='team-confirm-key',max_age=86400)
+		assert(teamName==temp_team.name)
+	except:
 		return jsonify({'message':"Incorrect link!","team_name":"undefined"}),404
+	# if not bcrypt.check_password_hash(team_key,temp_team.name):
+	# 	return jsonify({'message':"Incorrect link!","team_name":"undefined"}),404
 	else:
 		temp_team.approved=True
 		db.session.commit()

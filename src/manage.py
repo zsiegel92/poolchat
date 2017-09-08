@@ -22,29 +22,27 @@ def keep_env():
 	return modified_environ(**testing_runserver_env_dict)
 
 def use_test_config(func):
-	with test_env():
-		app.config.from_object(os.environ['APP_SETTINGS'])
-		db.init_app(app)
-		db.app=app
-		bcrypt.init_app(app)
-		login_manager.init_app(app)
-	manager.app=app
 	@wraps(func)
 	def wrap(*args, **kwargs):
 		with test_env():
+			app.config.from_object(os.environ['APP_SETTINGS'])
+			db.init_app(app)
+			db.app=app
+			bcrypt.init_app(app)
+			login_manager.init_app(app)
+			manager.app=app
 			return func(*args, **kwargs)
 	return wrap
 def use_keeptest_config(func):
-	with keep_env():
-		app.config.from_object(os.environ['APP_SETTINGS'])
-		db.init_app(app)
-		db.app=app
-		bcrypt.init_app(app)
-		login_manager.init_app(app)
-	manager.app=app
 	@wraps(func)
 	def wrap(*args, **kwargs):
 		with keep_env():
+			app.config.from_object(os.environ['APP_SETTINGS'])
+			db.init_app(app)
+			db.app=app
+			bcrypt.init_app(app)
+			login_manager.init_app(app)
+			manager.app=app
 			return func(*args, **kwargs)
 	return wrap
 
@@ -54,6 +52,7 @@ for arg in sys.argv:
 	if 'test' in arg:
 		testing = True
 
+
 if testing:
 	print("Flask Manager in Testing Mode")
 	with test_env():
@@ -62,7 +61,8 @@ else:
 	print("Flask Manager in Regular Mode")
 	from app import app,ts
 
-import E2E
+
+
 
 manager = Manager(app)
 migrate = Migrate(app, db)
@@ -73,13 +73,12 @@ manager.add_command('db', MigrateCommand)
 
 
 
-
 # source: https://github.com/smurfix/flask-script/blob/master/flask_script/commands.py
 @manager.command
 @use_test_config
 def testserver():
 	# with test_keep_env():
-	run_a_server(app,port=5001)
+	run_a_server(app)
 
 @manager.command
 @use_test_config
@@ -96,27 +95,27 @@ def test():
 @manager.command
 @use_keeptest_config
 def testkeepserver():
+	import E2E
 	import atexit
 	atexit.register(testrecreate)
 	E2E.run_all_tests()
-	# db.session.commit()
-	# manager.run()
-	# use_reloader=False
-	print("RUNING A SERVER")
-	run_a_server(app,port=5001,use_reloader=False)
-	# testshell()
-	# testserver()
+	print("RUNNING A SERVER")
+	run_a_server(app,use_reloader=False)
+
 
 @manager.command
 @use_keeptest_config
 def testkeepshell():
+	import E2E
 	import atexit
 	atexit.register(testrecreate)
 	E2E.run_all_tests()
 	testshell()
 
 
-def run_a_server(some_app,port=5000,use_reloader=None,use_debugger=False):
+def run_a_server(some_app,port=None,use_reloader=None,use_debugger=None):
+	if port is None:
+		port = app.config.get('SERVERPORT',5000)
 	server=  Server(port=port,host='127.0.0.1',use_reloader=use_reloader,use_debugger=use_debugger)
 	server(app=some_app,host=server.host,port=server.port,use_debugger=server.use_debugger,use_reloader=server.use_reloader,threaded=server.threaded,processes=server.processes,passthrough_errors=server.passthrough_errors)
 

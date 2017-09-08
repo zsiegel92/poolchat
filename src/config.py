@@ -46,9 +46,36 @@ class StagingConfig(Config):
 	DEVELOPMENT = True
 	DEBUG = False
 
+class TestingConfig(Config):
+	TESTING = True
+	SQLALCHEMY_DATABASE_URI = "postgresql://localhost/testing"
+	print("Setting SQLALCHEMY_DATABASE_URI TO " + str(SQLALCHEMY_DATABASE_URI))
+	APP_NAME = "GroupThere"
+	DEVELOPMENT = True
+	debugging = os.environ.get('FLASKDEBUG')
+	if debugging=='True':
+		DEBUG = True
+	else:
+		DEBUG= False
+	SERVERPORT=5001
+	SECRET_KEY = 'masterfulCarpoolingDev'
+	MESSENGER_PLATFORM_ACCESS_TOKEN=os.environ.get('MESSENGER_PLATFORM_ACCESS_TOKEN') #Zach and Friends
+	SQLALCHEMY_TRACK_MODIFICATIONS = False
+	GMAPS_STATIC_API_TOKEN = 'AIzaSyDpWUPSNr1RW4MsWWEcXMJiX1ZN3ZTqpU0'
+	GMAPS_GEOCODE_API_TOKEN='AIzaSyBZOMnco4p7dC-OLv1f1xI-txujDoSCrms'
+	#GroupThere
+	DISTMAT_API_KEY='AIzaSyDn-zSmuif-Mf8z16Pm1MLYp41zYcFoaX0'
+	GEOCODE_API_KEY='AIzaSyBZOMnco4p7dC-OLv1f1xI-txujDoSCrms'
+	EMAIL = str(os.environ.get('EMAIL'))
+	EMAIL_PASSWORD = str(os.environ.get('EMAIL_PASSWORD'))
+	SEND_FILE_MAX_AGE_DEFAULT = 0#seconds
+	# URL_BASE='https://poolchat.ngrok.io/'
+	URL_BASE='http://localhost:' + str(SERVERPORT) + '/'
+	print("setting URL_BASE to " + str(URL_BASE))
 
 class DevelopmentConfig(Config):
 	APP_NAME = "GroupThere"
+	SERVERPORT=5000
 	DEVELOPMENT = True
 	DEBUG = True
 	SECRET_KEY = 'masterfulCarpoolingDev'
@@ -63,29 +90,4 @@ class DevelopmentConfig(Config):
 	EMAIL_PASSWORD = str(os.environ.get('EMAIL_PASSWORD'))
 	SEND_FILE_MAX_AGE_DEFAULT = 0#seconds
 	URL_BASE='https://poolchat.ngrok.io/'
-
-class TestingConfig(Config):
-	TESTING = True
-	SQLALCHEMY_DATABASE_URI = "postgresql://localhost/testing"
-	print("Setting SQLALCHEMY_DATABASE_URI TO " + str(SQLALCHEMY_DATABASE_URI))
-	APP_NAME = "GroupThere"
-	DEVELOPMENT = True
-	debugging = os.environ.get('FLASKDEBUG')
-	if debugging=='True':
-		DEBUG = True
-	else:
-		DEBUG= False
-
-	SECRET_KEY = 'masterfulCarpoolingDev'
-	MESSENGER_PLATFORM_ACCESS_TOKEN=os.environ.get('MESSENGER_PLATFORM_ACCESS_TOKEN') #Zach and Friends
-	SQLALCHEMY_TRACK_MODIFICATIONS = False
-	GMAPS_STATIC_API_TOKEN = 'AIzaSyDpWUPSNr1RW4MsWWEcXMJiX1ZN3ZTqpU0'
-	GMAPS_GEOCODE_API_TOKEN='AIzaSyBZOMnco4p7dC-OLv1f1xI-txujDoSCrms'
-	#GroupThere
-	DISTMAT_API_KEY='AIzaSyDn-zSmuif-Mf8z16Pm1MLYp41zYcFoaX0'
-	GEOCODE_API_KEY='AIzaSyBZOMnco4p7dC-OLv1f1xI-txujDoSCrms'
-	EMAIL = str(os.environ.get('EMAIL'))
-	EMAIL_PASSWORD = str(os.environ.get('EMAIL_PASSWORD'))
-	SEND_FILE_MAX_AGE_DEFAULT = 0#seconds
-	# URL_BASE='https://poolchat.ngrok.io/'
-	URL_BASE='http://localhost:5000/'
+	print("setting URL_BASE to " + str(URL_BASE))

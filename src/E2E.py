@@ -1,6 +1,6 @@
 
 import unittest
-
+from encryption import bcrypt
 
 
 import json
@@ -83,6 +83,18 @@ class AppTestCase(unittest.TestCase):
 		print("/api/confirm_email return")
 		return rv
 
+	def make_team(self,name,email,codeword):
+		print("/api/create_team/ call")
+		rv=self.app.post('/api/create_team/',data={'email':email,'name':name,'codeword':codeword},follow_redirects=True,content_type='application/x-www-form-urlencoded')
+		print("/api/create_team/ return")
+		return rv
+
+	def approve_team(self,temp_team_id,team_key):
+		print("/api/admin_approve_team call")
+		rv = self.app.post('/api/admin_approve_team',data={'team_id':temp_team_id,'team_key':team_key})
+		print("/api/admin_approve_team return")
+		return rv
+
 	def test_register_and_login(self):
 		numTestUsers=2
 		baseFirst='Zach'
@@ -115,14 +127,24 @@ class AppTestCase(unittest.TestCase):
 		all_users = models.Carpooler.query.all()
 		assert(len(all_users) == len(emails))
 
+		#login first user
 		firstName=baseFirst + "_"+ str(0)
 		lastName=baseLast+ "_"+ str(0)
 		email = emails[0]
 		rv = self.login(email,password)
 		rvdata= json.loads(self.app.post('/api/status').data)
 		assert(rvdata['status'] is True)
-
-
+		#create team
+		teamName='testing1'
+		rv=self.make_team(name=teamName,email=email,codeword='testing1')
+		assert('20' in rv.status)
+		#approve team
+		temp_team = models.TempTeam.query.filter_by(name=teamName).first()
+		assert(temp_team is not None)
+		team_key = ts.dumps(temp_team.name,salt='team-confirm-key')
+		rv = self.approve_team(temp_team.id,team_key)
+		# team_id = temp_team.id
+		assert('20' in rv.status)
 
 
 

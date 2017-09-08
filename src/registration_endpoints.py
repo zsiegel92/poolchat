@@ -229,6 +229,10 @@ def api_cancel_trip():
 @app.route('/api/create_trip/',methods=['POST'])
 @login_required
 def api_create_trip():
+
+	print("in /api/create_trip, request.form is")
+	print(request.form)
+
 	tripform = wtforms_ext.tripForm(request.form)
 
 	if tripform.validate():

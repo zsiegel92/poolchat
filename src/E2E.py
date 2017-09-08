@@ -14,7 +14,7 @@ else:
 	with modified_environ(APP_SETTINGS='config.TestingConfig'):
 		from app import app, db,models, ts
 
-numTestUsers=2
+numTestUsers=7
 baseFirst='Zach'
 baseLast='Siegel'
 password='masterp123'
@@ -218,11 +218,11 @@ class AppTestCase(unittest.TestCase):
 		pool = models.Pool.query.filter_by(id=pool_id).first()
 		for i,email in enumerate(emails):
 			address=addresses[i]
-			must_drive=False
-			num_seats=4
-			on_time= False
-			preWindow=30
-			resubmit=False
+			must_drive='false'
+			num_seats='4'
+			on_time= 'false'
+			preWindow='30'
+			resubmit='false'
 
 			self.login(email,password)
 			rv= json.loads(self.app.post('/api/status').data)
@@ -253,7 +253,7 @@ def run_all_tests():
 	print("Teams: " + ", ".join([str((team.id, team.name, team.email,team.password)) for team in teams]))
 	print("TRIPS:")
 	for trip in trips:
-		print("--- pool{}, {}, {}, {}, {}, {}, {}".format(trip.pool_id, trip.carpooler_id,trip.address,trip.preWindow,trip.num_seats,bool(trip.on_time),bool(trip.must_drive)))
+		print("--- pool{}, {}, {}, {}, {}, {}, {}".format(trip.pool_id, trip.carpooler_id,trip.address,trip.preWindow,trip.num_seats,str(trip.on_time),str(trip.must_drive)))
 
 
 def main():

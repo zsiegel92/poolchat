@@ -93,7 +93,7 @@ def api_re_optimize(pool_id=None):
 		pool_id=request.values.get('pool_id')
 	pool = Pool.query.filter_by(id=pool_id).first()
 	if pool is None:
-		return "No such trip!",404
+		return "No such event!",404
 	if current_user not in [trip.member for trip in pool.members]:
 		return "Not a member of this pool! Access denied.",401
 	else:

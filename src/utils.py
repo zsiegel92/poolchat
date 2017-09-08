@@ -32,3 +32,7 @@ def modified_environ(*remove, **update):
 	finally:
 		env.update(update_after)
 		[env.pop(k) for k in remove_after]
+
+testing_env_dict={"APP_SETTINGS":"config.TestingConfig","EMAIL":''}#
+def test_env():
+	return modified_environ(**testing_env_dict)

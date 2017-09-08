@@ -100,8 +100,10 @@ def addDistMatsFromPool(pool,params):
 	to_event_distances=np.zeros((1,n))
 
 	for i in range(n):
+		print("Getting distances for carpooler " + str(i) + " out of " + str(n))
 		to_event_distance = Event_Distance.query.filter_by(pool_id=pool_id,carpooler_id = carpooler_ids[i]).first()
 		if to_event_distance is None:
+			print("to_event_distances are None! for " + str(i) + " out of " + str(n))
 			get_trip_dists(carpooler_id=carpooler_ids[i],pool_id=pool.id)
 			to_event_distance = Event_Distance.query.filter_by(pool_id=pool_id,carpooler_id = carpooler_ids[i]).first()
 
@@ -144,7 +146,9 @@ def doGroupThere_fromDB(pool_id=None):
 				mailParam=mailParamsFromPool(pool)
 				params = systemParamFromPool(pool)
 				params = addDistMatsFromPool(pool,params)
+				print("Got dist mats from pool")
 				params = gt_fromDistmattedParams(params,mailParam)
+				print("did gt from distmatted params")
 				#SHOULD DO SOME DATABASE MAINTENENCE HERE, OR AT LEAST ENQUEUE IT
 				print("Successfully did groupthere! (doGroupThere_fromDB)")
 				print(params)
@@ -374,10 +378,13 @@ def get_trip_dists(carpooler_id,pool_id):
 		carpooler= Carpooler.query.filter_by(id=carpooler_id).first()
 		trip = Trip.query.filter_by(carpooler_id=carpooler_id,pool_id=pool_id).first()
 		if (pool is None) or (carpooler is None) or (trip is None):
-			print("Carpooler, or trip, or pool not found!")
+			print("carpooler: {}, trip: {}, pool: {}".format(carpooler,trip,pool))
 			assert(True==False) #Throw an informative exception ASAP!
 			# return "Carpooler, or trip, or pool not found!"
 		leaveTime=pool.eventDateTime - relativedelta(hours=1)
+		print("pool.eventDateTime is: " + str(pool.eventDateTime))
+		print("leaveTime is: " + str(leaveTime))
+
 		new_address = trip.address
 		dest = pool.eventAddress
 		others =[{'id':other_trip.carpooler_id,'address':other_trip.address} for other_trip in pool.members if (other_trip.carpooler_id !=carpooler.id)]

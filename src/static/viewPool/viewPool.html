@@ -240,7 +240,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                                         <li>
                                             {{instruction.addresses[ind]}}
                                             <span ng-if="!$first">
-                                                at {{ass.bestTimes[$index-1] | relativeFromMins : ass.departureTime | date : 'hh:mma'}}
+                                                at {{ass.bestTimes.slice(0,$index).reduce(add,0) | relativeFromMins : ass.departureTime | date : 'hh:mma'}}
                                             </span>
                                             <span ng-if="$first">
                                                 at {{ass.departureTime | date : 'hh:mma'}}

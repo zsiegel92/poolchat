@@ -139,6 +139,9 @@ angular.module('myApp.viewPool', ['ngRoute'])
         });
     };
 
+    $scope.add = function(a, b) {
+      return a + b;
+    };
 
     $scope.asDateTime = function(dateStr) {
       return new Date(Date.parse(dateStr));

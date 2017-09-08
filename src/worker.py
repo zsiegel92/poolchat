@@ -4,8 +4,8 @@ import sys
 import redis
 from rq import Worker, Queue, Connection
 listen = ['default']
-redis_url = os.getenv('REDISTOGO_URL', 'redis://localhost:6379')
-conn = redis.from_url(redis_url)
+
+
 
 
 from utils import test_env
@@ -18,14 +18,15 @@ if testing:
 	print("Worker in Testing Mode")
 	with test_env():
 		from app_factory import create_app
+		redis_url = os.getenv('REDISTOGO_URL', 'redis://localhost:6380')
 else:
 	print("Worker in Regular Mode")
 	from app_factory import create_app
+	redis_url = os.getenv('REDISTOGO_URL', 'redis://localhost:6379')
 
 
-# from app_factory import create_app
+conn = redis.from_url(redis_url)
 
-# print("Hello from worker.py")
 
 def main():
 	with create_app().app_context():

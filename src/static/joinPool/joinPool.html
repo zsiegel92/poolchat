@@ -87,7 +87,7 @@
           <div align="center">
             <img src="/static/img/beautiful_map/beautiful_map_200.jpg" ng-src="{{trip_image_url}}" alt="Trip Origin" style="width:200px;height:200px;">
           </div>
-          <h2>Your Trip:</h2>
+          <h2>Your Trip: <button ng-click="cancel_trip()" type="button" class="btn btn-danger btn-xs" ng-if="resubmit && (resubmit==true)">CANCEL TRIP</button></h2>
           <ul>
             <li ng-show="tripForm.ngAddress"> I'll be coming from {{tripForm.ngAddress}}</li>
             <li ng-show="tripForm.ngNumSeats >0"> My vehicle has {{tripForm.ngNumSeats}} {{(tripForm.ngNumSeats >1) ? 'seats' : 'seat'}} (including driver).</li>

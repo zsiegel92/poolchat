@@ -171,7 +171,7 @@ angular.module('myApp.viewPool', ['ngRoute'])
             $scope.disabled = false;
             $scope.waiting_for_instructions_error=undefined;
             $scope.waiting_for_instructions_text=undefined;
-            $log.log("Getting instruction information");
+            $log.log("Full instruction information:");
             $log.log(response.data);
             $scope.instruction = response.data;
             if ($scope.instruction.my_ass_index > -1){

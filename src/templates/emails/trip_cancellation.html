@@ -1,0 +1,15 @@
+Hey, {{pool.eventEmail}},
+<br>
+<br>
+Your event, {{pool.poolame}} on {{pool.eventDateTime}}, has had an update: {{carpooler.name}} has cancelled their trip. At this moment, {{pool.members | length}} people are part of this event!
+<br>
+<br>
+<b>The current status of your event is: '{{ 'OK' if instruction.success=='1' else 'uncertain' }}'</b>. If there aren't enough cars, for example, not everyone will be able to catch a ride.
+<br>
+<br>
+Please <a href="{{link}}">visit GroupThere</a> for more information and a full tentative carpooling itinerary.
+<br>
+<br>
+Best wishes,
+<br>
+GroupThere

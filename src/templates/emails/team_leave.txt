@@ -1,0 +1,24 @@
+Hey, team administrator,
+\n
+\n
+{{carpooler.name}} just left {{team.name}}. They can be reached at {{carpooler.email}}.
+\n
+\n
+At this moment, {{team.members | length}} people are part of this team; there are {{team.pools | length}} events associated with this team to-date.
+\n
+\n
+To invite more folks to join this team, send them to this link:
+\n
+\n
+{{link}}
+\n
+\n
+If you give someone the codeword "{{team.password}}", they will be able to join immediately; otherwise, you will have to approve their request to join.
+\n
+\n
+Please visit GroupThere to look over your teams, at {{link}}
+\n
+\n
+Best wishes,
+\n
+GroupThere

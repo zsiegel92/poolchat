@@ -11,8 +11,8 @@ angular.module('myApp.joinPool', ['ngRoute'])
     });
 }])
 
-.controller('joinPoolController',['$scope', '$location', 'AuthService','$route', '$routeParams','$log','$http','$filter','$window','$q',
-  function ($scope, $location, AuthService,$route,$routeParams,$log,$http,$filter,$window,$q){
+.controller('joinPoolController',['$scope','$rootScope','$location', 'AuthService','$route', '$routeParams','$log','$http','$filter','$window','$q',
+  function ($scope, $rootScope,$location, AuthService,$route,$routeParams,$log,$http,$filter,$window,$q){
 
     var f = $window.decodeURIComponent;
     var r = $routeParams;
@@ -174,6 +174,48 @@ angular.module('myApp.joinPool', ['ngRoute'])
           $scope.resultText="Error registering Trip.";
         }
       });
+  };
+
+
+
+                // {
+                //   address:$scope.tripForm.ngAddress,
+                //   num_seats:$scope.tripForm.ngNumSeats,
+                //   preWindow:$scope.tripForm.ngPreWindow,
+                //   on_time:$scope.tripForm.ngOn_time,
+                //   must_drive:$scope.tripForm.ngMust_drive,
+                //   pool_id:$scope.pool.id,
+                //   resubmit:$scope.resubmit
+                // }
+
+  $scope.cancel_trip = function(){
+    $scope.disabled=true;
+    var r = confirm("Are you sure you'd like to cancel your trip?");
+    if(r==true){
+       $http.post('/api/cancel_trip/',
+                $.param(
+                  {
+                    pool_id:$scope.pool.id
+                  }
+                ),
+                {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+      .then(function(response){
+        var baseURL = $location.$$absUrl.replace($location.$$url, '');
+        $scope.disabled = false;
+        $scope.resultText=response.data;
+        alert("You have cancelled your trip to " + $scope.pool.name + " on " + $scope.pool.date + "! "+ $scope.pool.email + " has been notified of the change. Visit " + baseURL + "/viewPool to see other events you can join.");
+          $location.path('/viewPool');
+      })
+      .catch(function(response){
+        $scope.disabled=false;
+        $log.log(response.data);
+        alert("Something went wrong! You are still listed as an atendee of this event. Please try again later if this is unacceptable.");
+      });
+    }
+    else{
+
+    }
+
   };
 
 

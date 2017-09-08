@@ -755,6 +755,13 @@ background-color: rgba(33,154,200,0.75);
   /*END EVENT LIST STUFF*/
 
 
-
-
-
+/*FLASH CONTAINER*/
+.flash {
+ position: absolute;
+ top: auto;
+ left: 0;
+ width: 100%;
+ display: none;
+ }
+.flash-inner {
+ }

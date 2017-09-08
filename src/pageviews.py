@@ -197,6 +197,7 @@ def api_get_pool_info_for_user():
 
 
 
+
 @app.route('/api/get_teams/',methods=['POST'])
 @login_required
 def api_get_teams():
@@ -212,7 +213,6 @@ def api_get_teams():
 	foreign_team_ids = [team.id for team in allTeams if team.id not in team_ids]
 	foreign_team_objects=[{'name':team.name,'id':team.id} for team in allTeams if team.id not in team_ids]
 
-	print("foreign_team_ids: " + str(foreign_team_ids))
 	if (foreign_team_ids is None) or (len(foreign_team_ids)==0):
 		foreign_team_ids = []
 		foreign_team_names = []

@@ -15,10 +15,10 @@ Make sure $scope, $route, $routeParams are injected in controller -->
         <div class="form-group">
           <label>Team CODE WORD<span class="invalid small" ng-show="joinForm.codeword.$error.required">
           Required!</span></label>
-          <input type="text" class="form-control" name="codeword" placeholder='shared code word' ng-model="joinFormValues.ngCodeword" required>
+          <input type="text" class="form-control" name="codeword" placeholder='shared code word' ng-model="joinFormValues.ngCodeword" ng-required="joinForm.$dirty">
           <span>Everyone on a team uses the same codeword. Ask someone if you don't know it.</span>
         </div>
-        <button type="submit" ng-click="" ng-init="" class="btn btn-primary" ng-disabled="joinForm.$invalid || disabled">Join Team</button>
+        <button type="submit" ng-click="" ng-init="" class="btn btn-primary" ng-disabled="joinForm.$pristine || joinForm.$invalid || disabled">Join Team</button>
       </form>
       <a href='#!/makeTeam'>Click here to create a new team!</a>
       <br>
@@ -73,6 +73,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                     </ul>
                   </li>
                 </ul>
+                <button ng-click="leave_team($index)" type="button" class="btn btn-danger btn-xs">leave team</button>
               </div>
             </div>
           </div>

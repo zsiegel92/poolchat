@@ -129,4 +129,43 @@ angular.module('myApp.joinTeam', ['ngRoute'])
 
   $scope.getTeams();
 
+  $scope.leave_team = function(ind){
+    $scope.disabled=true;
+    var leaveTeam = $scope.teams[ind];
+    var r = confirm("Are you sure you'd like to leave team " + String(leaveTeam.name) + '?');
+    if (r===true){
+       $http.post('/api/leave_team/',
+                $.param(
+                  {
+                    team_id:leaveTeam.id
+                  }
+                ),
+                {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+      .then(function(response){
+        var baseURL = $location.$$absUrl.replace($location.$$url, '');
+        $scope.disabled = false;
+        $scope.resultText=response.data;
+        alert("You have left team " + leaveTeam.name + "! "+ leaveTeam.email + " has been notified of the change. Visit " + baseURL + "/joinTeam to manage your teams.");
+          $location.path('/joinTeam');
+          $scope.getTeams();
+      })
+      .catch(function(response){
+        $scope.disabled=false;
+        $log.log(response.data);
+        alert("Something went wrong! You are still a member of team " + String() + ". Please try again later if this is unacceptable.");
+        $location.path('/joinTeam');
+        $scope.getTeams();
+      });
+    }
+    else{
+
+    }
+
+  };
+
+
+
+
+
+
 }]);

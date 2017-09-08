@@ -14,11 +14,11 @@ Make sure $scope, $route, $routeParams are injected in controller -->
         <div ng-show="joinFormValues.ngPool >=0">
             <div style="border:1px solid black; padding: 6px; margin: 3px;border-radius: 4px; width: 90%;">
                 <h3 style="text-align: center;border-bottom: solid 1px #999;">'{{selectedPool_obj.name}}' <br>
-                with <span ng-repeat="team in selectedPool_obj.teams">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{team.name}}</span></h3>
+                with <span ng-repeat="team in selectedPool_obj.teams track by $index">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{team.name}}</span></h3>
                 <h4>{{selectedPool_obj.address}}</h4>
                 <h4 style="border-bottom: solid 1px #999;">{{selectedPool_obj.date }} <span style="font-size:0.8em">at</span> {{selectedPool_obj.time }} <span style="font-size:0.8em">in  {{toDays(selectedPool_obj.seconds_til-counter)}} days, {{toHours(selectedPool_obj.seconds_til-counter)}} hours, {{toMinutes(selectedPool_obj.seconds_til-counter)}} minutes</span></h4>
                 <div style="border-bottom: solid 1px #999;">
-                    {{(selectedPool_obj.members.length) < 1 ? 'Nobody is attending yet!' : ''}} <span ng-repeat="member in selectedPool_obj.members">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{member}}</span> {{(selectedPool_obj.members.length > 1) ? ' are attending' : ''}}{{(selectedPool_obj.members.length == 1) ? ' is attending' : ''}}</div>
+                    {{(selectedPool_obj.members.length) < 1 ? 'Nobody is attending yet!' : ''}} <span ng-repeat="member in selectedPool_obj.members track by $index">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{member}}</span> {{(selectedPool_obj.members.length > 1) ? ' are attending' : ''}}{{(selectedPool_obj.members.length == 1) ? ' is attending' : ''}}</div>
                     <ul>
                         <li> Non-Organizers can arrive up to {{selectedPool_obj.latenessWindow}} minutes after {{selectedPool_obj.time}}</li>
                         <li> Carpooling instructions will be sent out {{selectedPool_obj.fireNotice}}  hours before the event<span ng-if="selectedPool_obj.noticeWentOut == false">, in {{toDays(selectedPool_obj.seconds_til_instructions-counter)}} days, {{toHours(selectedPool_obj.seconds_til_instructions-counter)}} hours, {{toMinutes(selectedPool_obj.seconds_til_instructions-counter)}} minutes </span> </li>
@@ -144,7 +144,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                                     </ul>
                                 </div>
                                 <br>
-                                Members: <span ng-repeat="member in pool.members">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{member}}</span>
+                                Members: <span ng-repeat="member in pool.members track by $index">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{member}}</span>
                                 <br>
                                 Contact: {{pool.email}}
                                 <!-- <li> Carpooling instructions will be sent out {{pool.fireNotice}} hours before {{pool.time}} on {{pool.date}}</li> -->
@@ -180,7 +180,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                         <li>Driver: {{instruction.names[myAssignment.driver]}} <ul><li>thank you for your {{myAssignment.minTime}} minutes of driving</li></ul></li>
                         <li>Addresses and Contact Information (in optimal order):
                             <ol>
-                                <li ng-repeat="ind in myAssignment.bestOrder">
+                                <li ng-repeat="ind in myAssignment.bestOrder track by $index">
                                     {{instruction.names[ind]}}
                                     <ul>
                                         <li>
@@ -234,7 +234,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                         </li>
                         <li>Addresses and Contact Information (in optimal order):
                             <ol>
-                                <li ng-repeat="ind in ass.bestOrder">
+                                <li ng-repeat="ind in ass.bestOrder track by $index">
                                     {{instruction.names[ind]}}
                                     <ul>
                                         <li>

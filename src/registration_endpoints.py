@@ -21,7 +21,7 @@ q = Queue(connection=conn)
 
 from encryption import bcrypt
 
-from models import  Carpooler,Pool, Trip,Team,TempTeam,Trip_Distance,Event_Distance,Instruction
+from models import  Carpooler,Pool, Trip,Team,TempTeam,Trip_Distance,Event_Distance,Instruction,team_membership,team_affiliation
 
 
 
@@ -192,6 +192,40 @@ def send_notify_teams_new_event(creator_id,pool_id,team_ids):
 		return "email sent!"
 
 
+@app.route('/api/leave_team/',methods=['POST'])
+@login_required
+def api_leave_team():
+	team_id = request.values.get('team_id')
+	if team_id is  None:
+		return "Invalid request!",404
+	team = Team.query.filter_by(id=team_id).first()
+	if team is None:
+		return "No such team!",404
+	if team not in current_user.teams:
+		return "You are already not a member of this team!",400
+	current_user.teams.remove(team)
+	db.session.commit()
+	q.enqueue_call(func=send_team_leave_notice,kwargs={'team_id':team_id,'carpooler_id':current_user.id},result_ttl=5000)
+	return "You are no longer a member of team " + str(team.name) + "!",200
+
+@app.route('/api/cancel_trip/',methods=['POST'])
+@login_required
+def api_cancel_trip():
+	pool_id = request.values.get("pool_id")
+	trip = Trip.query.filter_by(pool_id=pool_id,carpooler_id=current_user.id).first()
+	if trip is None:
+		return "No such event found!",404
+	else:
+		db.session.delete(trip)
+		Trip_Distance.query.filter_by(pool_id=pool_id,from_carpooler_id=current_user.id).delete()
+		Trip_Distance.query.filter_by(pool_id=pool_id,to_carpooler_id=current_user.id).delete()
+		Event_Distance.query.filter_by(pool_id=pool_id,carpooler_id=current_user.id).delete()
+		db.session.commit()
+		q.enqueue_call(func=doGroupThere_fromDB,kwargs={'pool_id':pool_id},result_ttl=5000)
+		q.enqueue_call(func=send_trip_cancellation_notice,kwargs={'pool_id':pool_id,'carpooler_id':current_user.id},result_ttl=5000)
+		return "Cancelled trip!",200
+
+
 @app.route('/api/create_trip/',methods=['POST'])
 @login_required
 def api_create_trip():
@@ -315,8 +349,36 @@ def send_pool_trip_update(pool_id,carpooler_id):
 		emailer.send_html(email,html_message=html,subject=subject,text_message=text_message)
 		return "email sent!"
 
+def send_trip_cancellation_notice(pool_id,carpooler_id):
+	with app.app_context():
+		pool=Pool.query.filter_by(id=pool_id).first()
+		carpooler = Carpooler.query.filter_by(id=carpooler_id).first()
+		instruction = Instruction.query.filter_by(pool_id = pool_id).order_by(Instruction.dateTime.desc()).first()
+		if carpooler is None or pool is None:
+			return "Please try logging in again!",404
+		email = pool.eventEmail
+		url_base = app.config['URL_BASE']#ends in /
+		subject = "(GroupThere) - " + str(pool.poolName) +" member " + str(carpooler.name) + " has cancelled their trip."
+		link = '{base}?#!/viewPool'.format(base=url_base)
+		html_body = render_template('emails/trip_cancellation.html',link=link,carpooler=carpooler,pool=pool,instruction=instruction)
+		text_message = render_template('emails/trip_cancellation.txt',link=link,carpooler=carpooler,pool=pool,instruction=instruction)
+		emailer.send_html_body(email,html_body=html_body,subject=subject,text_message=text_message)
+		return "email sent!"
 
-
+def send_team_leave_notice(team_id,carpooler_id):
+	with app.app_context():
+		team=Team.query.filter_by(id=team_id).first()
+		carpooler = Carpooler.query.filter_by(id=carpooler_id).first()
+		if carpooler is None or team is None:
+			return "Please try logging in again!",404
+		email = team.email
+		url_base = app.config['URL_BASE']#ends in /
+		subject = "(GroupThere) " + str(carpooler.name) + " has left team " + str(team.name) + "."
+		link = '{base}?#!/joinTeam'.format(base=url_base)
+		html_body = render_template('emails/team_leave.html',link=link,carpooler=carpooler,team=team)
+		text_message = render_template('emails/team_leave.txt',link=link,carpooler=carpooler,team=team)
+		emailer.send_html_body(email,html_body=html_body,subject=subject,text_message=text_message)
+		return "email sent!"
 
 
 def send_team_email_confirmation(temp_team,second=False):

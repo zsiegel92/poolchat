@@ -185,7 +185,8 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                                     <ul>
                                         <li>
                                             {{instruction.addresses[ind]}}
-                                            <span ng-if="!$first"> at {{myAssignment.bestTimes[$index-1] | relativeFromMins : myAssignment.departureTime | date : 'hh:mma'}}</span>
+
+                                            <span ng-if="!$first"> at {{myAssignment.bestTimes.slice(0,$index).reduce(add,0) | relativeFromMins : myAssignment.departureTime | date : 'hh:mma'}}</span>
                                             <span ng-if="$first"> at {{myAssignment.departureTime | date : 'hh:mma'}}</span>
                                         </li>
                                         <li>{{myAssignment.emails[$index]}}</li>
@@ -234,7 +235,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                         </li>
                         <li>Addresses and Contact Information (in optimal order):
                             <ol>
-                                <li ng-repeat="ind in ass.bestOrder track by $index">
+                                <li ng-repeat="ind in ass.bestOrder">
                                     {{instruction.names[ind]}}
                                     <ul>
                                         <li>

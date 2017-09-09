@@ -155,6 +155,8 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                 </div>
                 <!-- OTHER ASSIGNMENTS -->
                 <div ng-show="other_instructions" ng-repeat="ass in instruction.assignments">
+                    <br>
+                    <br>
                     <h4 style="border-bottom: solid 1px #999;">
                     {{instruction.names[ass.driver]}}'s Car <span style="font-size:0.8em"> departs at {{ass.departureTime | date : 'hh:mma'}} ({{ass.leaveTimeMinutesAfterEventStart * -1}} minutes before the event starts) </span>
                     </h4>

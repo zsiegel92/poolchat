@@ -404,6 +404,7 @@ def get_trip_dists(carpooler_id,pool_id):
 		print("Got to_new_address!")
 		to_event = gen_one_distance(new_address,dest,leaveTime)
 		if (from_new_address is None) or (to_new_address is None) or (to_event is None):
+			print("from_new_address: {}, to_new_address: {}, to_event: {}".format(from_new_address,to_new_address,to_event))
 			print("(GT_interactions.get_trip_dists) DISTANCE MATRIX FAILURE! RETURNING WITHOUT GENERATING DISTANCES.")
 			return
 

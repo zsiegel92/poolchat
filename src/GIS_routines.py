@@ -27,17 +27,18 @@ emailForm=wtforms_ext.EmailForm(ng_click='getCarpoolerInfo()')
 
 # docs for gmaps https://developers.google.com/maps/documentation/distance-matrix/intro#traffic-model
 #origin is a string, leaveTime is datetime, others is list as [{id:,address:},...]
-def gen_dist_row(origin,others,leaveTime):
-	print("In gen_dist_row - origin: " + str(origin) + ". Others: " + str(others))
+def gen_dist_row(origin,others,leaveTime,numTries=0):
+	try_limit=3
+	print("In gen_dist_row - origin: " + str(origin) + ". Others (" + str(len(others)) + "): " + str(others))
 	n = len(others)
-	numAtATime=10
+	numAtATime=10 #usage limit is 25
 	distances=[]
 	durations=[]
 	durations_in_traffic=[]
 	for k in range(0,int(ceil(n/numAtATime))):
 		first= numAtATime*k
 		last = min(numAtATime*(k+1),n)
-		getter = itemgetter(*range(first,last))
+		# getter = itemgetter(*range(first,last))
 		dests = [others[i]['address'] for i in range(first,last)]
 		# best_guess
 		# optimistic
@@ -54,19 +55,24 @@ def gen_dist_row(origin,others,leaveTime):
 			if (elems0 is not None) and hasattr(elems0,'__iter__'):
 				print("Number of elements in row 0: " + str(len(elems0)))
 				matrixOK=True
+				print("matrix OK")
 			else:
 				print("ERROR! Row 0 has no elements!")
 		else:
 			print("ERROR! NO ROWS!")
-		if matrixOK is False:
+		if matrixOK is False and (numTries < try_limit):
+			print("TRYING AGAIN - numTries so far: " + str(numTries))
+			time.sleep(1)
+			return gen_dist_row(origin,others,leaveTime,numTries+1)
+		elif matrixOK is False:
 			return
 
 		# if ((matrix.get('rows') is not None) and (len(matrix.get('rows'))>0)):
 		if (last-first)>1:
-			distances.extend([ element['distance']['value'] for element in getter(matrix['rows'][0]['elements']) ])
+			distances.extend([ element['distance']['value'] for element in matrix['rows'][0]['elements'] ])
 
-			durations.extend([element['duration']['value'] for element in getter(matrix['rows'][0]['elements']) ])
-			durations_in_traffic.extend([element['duration_in_traffic']['value'] for element in getter(matrix['rows'][0]['elements']) ])
+			durations.extend([element['duration']['value'] for element in matrix['rows'][0]['elements'] ])
+			durations_in_traffic.extend([element['duration_in_traffic']['value'] for element in matrix['rows'][0]['elements'] ])
 		else:
 			distances.append(matrix['rows'][0]['elements'][0]['distance']['value'])
 			durations.append(matrix['rows'][0]['elements'][0]['duration']['value'])
@@ -79,8 +85,9 @@ def gen_dist_row(origin,others,leaveTime):
 	return labeled
 
 #dest is a string, leaveTime is datetime, others is list as [{id:,address:},...]
-def gen_dist_col(dest,others,leaveTime):
-	print("In gen_dist_col")
+def gen_dist_col(dest,others,leaveTime,numTries=0):
+	print("In gen_dist_col - dest: " + str(dest) + ". Others (" + str(len(others)) + "): " + str(others))
+	try_limit=3
 	n = len(others)
 	numAtATime=10
 	distances=[]
@@ -89,7 +96,7 @@ def gen_dist_col(dest,others,leaveTime):
 	for k in range(0,int(ceil(n/numAtATime))):
 		first= numAtATime*k
 		last = min(numAtATime*(k+1),n)
-		getter = itemgetter(*range(first,last))
+		# getter = itemgetter(*range(first,last))
 		origins = [others[i]['address'] for i in range(first,last)]
 		# best_guess
 		# optimistic
@@ -97,12 +104,33 @@ def gen_dist_col(dest,others,leaveTime):
 		matrix = gmaps.distance_matrix(origins,[dest],mode='driving',language='en',avoid='tolls',units='imperial',departure_time=leaveTime,traffic_model='best_guess')
 		# if ((matrix.get('rows') is not None) and (len(matrix.get('rows'))>0)):
 
+		matrixOK=False
+		print("GOT DISTANCE MATRIX!")
+		rows = matrix.get('rows')
+		if (rows is not None) and hasattr(rows,'__iter__'):
+			print("Number of rows: " + str(len(rows)))
+			elems0 = rows[0].get('elements')
+			if (elems0 is not None) and hasattr(elems0,'__iter__'):
+				print("Number of elements in row 0: " + str(len(elems0)))
+				matrixOK=True
+				print("matrix OK")
+			else:
+				print("ERROR! Row 0 has no elements!")
+		else:
+			print("ERROR! NO ROWS!")
+		if matrixOK is False and numTries < try_limit:
+			print("TRYING AGAIN - numTries so far: " + str(numTries))
+			time.sleep(1)
+			return gen_dist_row(dest,others,leaveTime,numTries+1)
+		elif matrixOK is False:
+			return
+
 
 
 		if (last-first)>1:
-			distances.extend([ row['elements'][0]['distance']['value'] for row in getter(matrix['rows']) ])
-			durations.extend([ row['elements'][0]['duration']['value'] for row in getter(matrix['rows']) ])
-			durations_in_traffic.extend([ row['elements'][0]['duration_in_traffic']['value'] for row in getter(matrix['rows']) ])
+			distances.extend([ row['elements'][0]['distance']['value'] for row in matrix['rows'] ])
+			durations.extend([ row['elements'][0]['duration']['value'] for row in matrix['rows'] ])
+			durations_in_traffic.extend([ row['elements'][0]['duration_in_traffic']['value'] for row in matrix['rows'] ])
 		else:
 			distances.append(matrix['rows'][0]['elements'][0]['distance']['value'])
 			durations.append(matrix['rows'][0]['elements'][0]['duration']['value'])

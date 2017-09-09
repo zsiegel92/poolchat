@@ -15,7 +15,7 @@ Hey, {{member.name}},
 You were invited because you are a member of at least one team affiliated with this event. The following teams are affiliated with this event:
 \n
 {% for team_name in team_names %}
-\n- {{team_name}} can be reached at {{team_contacts[loop.index]}}
+\n- {{team_name}} can be reached at {{team_contacts[loop.index0]}}
 {% endfor %}
 \n
 \n

@@ -46,49 +46,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                 <span ng-show="eligible_pools.length>0"> <br> <a href='#!/makePool'>Make a new event</a></span>
                 <span> <br> <b><a href='#!/joinTeam'>Join a team (and access their events)</a></b> </span>
             </div>
-            <!-- ng-src="{{trip_image_url}}" -->
-            <!-- <img class="img-responsive" alt="a" src="/assets/example/bg_10.jpg"> -->
-            <!--         <div class="col-md-12" ng-show="joinForm.$dirty && joinForm.ngPool >=0">
-                <div class="row">
-                    <div class="col-md-3">
-                        <h3><span class="label label-info">{{selectedPool_obj.date }}<br>{{selectedPool_obj.time }}</span></h3>
-                    </div>
-                    <div class="col-md-9">
-                        <strong>'{{selectedPool_obj.name}}'</strong> with <span ng-repeat="team in selectedPool_obj.teams">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{team.name}}</span><br>
-                        <em>{{selectedPool_obj.address}}</em><br>
-                        <strong>Members: <span ng-show="selectedPool_obj.members.length<1">None yet!</span><span ng-repeat="member in selectedPool_obj.members">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{member}}</span></strong>
-                        <span class="small">in  {{toDays(selectedPool_obj.seconds_til-counter)}} days, {{toHours(selectedPool_obj.seconds_til-counter)}} hours, {{toMinutes(selectedPool_obj.seconds_til-counter)}} minues, {{toSeconds(selectedPool_obj.seconds_til-counter)}} seconds</span><br>
-                        <span>Non-Organizers can arrive up to {{selectedPool_obj.latenessWindow}} minutes after {{selectedPool_obj.time}}</span><br>
-                        <span>Carpooling instructions will be sent out {{selectedPool_obj.fireNotice}}  hours before {{selectedPool_obj.time}} on {{selectedPool_obj.date}}</span><br>
-                        <span>For more details, contact {{selectedPool_obj.email}}</span>
-                    </div>
-                </div>
-                <div class="thumbnail">
-                    <div class="overlay">
-                        <i class="fa fa-share md"></i>
-                    </div>
-                    <img class="img-responsive" src="/static/img/beautiful_map/beautiful_map_200.jpg" alt="Trip Origin" style="width:100%;">
-                </div>
-            </div>
-            -->
-            <!--       <div class="demo-card-event mdl-card mdl-shadow-2dp">
-                <div class="mdl-card__title mdl-card-expand">
-                    <h4>
-                    <strong>'{{selectedPool_obj.name}}'</strong> with <span ng-repeat="team in selectedPool_obj.teams">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{team.name}}</span><br>
-                    </h4>
-                    {{selectedPool_obj.date }} at {{selectedPool_obj.time }}<br>
-                    <em>{{selectedPool_obj.address}}</em><br>
-                    Members: <span ng-show="selectedPool_obj.members.length<1">None yet!</span><span ng-repeat="member in selectedPool_obj.members">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{member}}</span>
-                </div>
-                <div class="mdl-card__actions mdl-card-border">
-                    <a class="mdl-button mdl-button-colored mdl-js-button mdl-js-ripple-effect">
-                        Join now
-                    </a>
-                    <div class="mdl-layout-spacer"></div>
-                    <i class="material-icons">event</i>
-                </div>
-            </div>
-            -->
+
             <div ng-if="resultText">
                 <h3> Query Status: </h3>
                 {{resultText}}
@@ -99,16 +57,6 @@ Make sure $scope, $route, $routeParams are injected in controller -->
             </div>
             </div><!-- Column -->
             <div class='col' style="float:right; width:50%">
-                <!--                 <h2>Teams You're a Member Of </h2>
-                <ol>
-                    <li ng-repeat="team in teams">
-                        <b> {{team.name}} </b>
-                        <ul>
-                            <li>  Contact Email: {{team.email}} </li>
-                            <li>  Codeword: '{{team.codeword}}' </li>
-                        </ul>
-                    </li>
-                </ol> -->
                 <h2> Events You Have Joined </h2>
                 <div class="panel-group" id="joined_accordion">
                     <div class="panel panel-default" ng-repeat="pool in joined_pools">
@@ -281,60 +229,4 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                 </modal-dialog> <!-- INSTRUCTION -->
                 </div> <!-- COLUMN -->
             </div>
-            <!-- </div> -->
-            <!-- EVENT LIST -->
-            <!--             <div ng-if="joined_pools" class="container">
-                <div class="row">
-                    <div class="[ col-xs-12 col-sm-offset-2 col-sm-8 ]">
-                        <ul class="event-list">
-                            <li ng-repeat="pool in joined_pools">
-                                <time datetime="{{asDateTime(pool.dateTime)}}">
-                                <span class="day">{{asDateTime(pool.dateTime) | date: 'dd'}}</span>
-                                <span class="month">{{asDateTime(pool.dateTime) | date: 'MMM'}}</span>
-                                <span class="year">{{asDateTime(pool.dateTime) | date: 'yyyy'}}</span>
-                                <span class="time">{{asDateTime(pool.dateTime) | date: 'hh:mma'}}</span>
-                                </time>
-                                <img alt="{{pool.name}}" src="/static/img/beautiful_map/beautiful_map_200.jpg" />
-                                <div class="info">
-                                    <h2 class="title">{{pool.name}}</h2>
-                                    <p class="desc">~ with <span ng-repeat="team in pool.teams">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{team.name}}</span> ~
-                                    <ul>
-                                        <li> Event Address: {{pool.address}} </li>
-                                        <li> Event Contact Email: {{pool.email}} </li>
-                                        <li> Non-Organizers can arrive up to {{pool.latenessWindow}} minutes after {{pool.time}}</li>
-                                        <li> Carpooling instructions will be sent out {{pool.fireNotice}} hours before {{pool.time}} on {{pool.date}}</li>
-                                        <li><b>Your Trip:</b>
-                                            <ul>
-                                                <li>Your origin: {{pool.trip.address}}</li>
-                                                <li>Maximum available time for the trip: {{pool.trip.preWindow}} minutes</li>
-                                                <li>Number of seats in your vehicle: {{pool.trip.num_seats}} </li>
-                                                <li>Have to drive: {{ pool.trip.must_drive | yesNo }} </li>
-                                                <li>Have to arrive exactly on time: {{ pool.trip.on_time | yesNo }}</li>
-                                            </ul>
-                                        </li>
-                                    </ul>
-                                </p>
-                            </div>
-                            <div class="social">
-                                <ul>
-                                    <li class="facebook" style="width:33%;"><a href="#facebook"><span class="fa fa-facebook"></span></a></li>
-                                    <li class="twitter" style="width:34%;"><a href="#twitter"><span class="fa fa-twitter"></span></a></li>
-                                    <li class="google-plus" style="width:33%;"><a href="#google-plus"><span class="fa fa-google-plus"></span></a></li>
-                                </ul>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div> -->
-        <!-- EVENT LIST -->
-        <!--     <ul>
-            <li ng-repeat="pool in joined_pools">
-                <time datetime="{{asDateTime(pool.dateTime)}}">
-                <span class="day">{{asDateTime(pool.dateTime) | date: 'dd'}}</span>
-                <span class="month">{{asDateTime(pool.dateTime) | date: 'MMM'}}</span>
-                <span class="year">{{asDateTime(pool.dateTime) | date: 'yyyy'}}</span>
-                <span class="time">{{asDateTime(pool.dateTime) | date: 'hh:mma'}}</span>
-                </time>
-            </li>
-        </ul> -->
+

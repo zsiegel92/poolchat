@@ -97,8 +97,8 @@ def test():
 @use_keeptest_config
 def testkeepserver():
 	import E2E
-	import atexit
-	atexit.register(testrecreate)
+	# import atexit
+	# atexit.register(testrecreate)
 	E2E.run_all_tests()
 	print("RUNNING A SERVER")
 	with keep_env():
@@ -109,8 +109,8 @@ def testkeepserver():
 @use_keeptest_config
 def testkeepshell():
 	import E2E
-	import atexit
-	atexit.register(testrecreate)
+	# import atexit
+	# atexit.register(testrecreate)
 	E2E.run_all_tests()
 	testshell()
 

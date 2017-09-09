@@ -134,13 +134,13 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                             </ul>
                         </li>
                         <li seq="{{myAssignment.arrivalTime | date: 'hh:mma'}}">
-                            Event ({{myAssignment.arrivalMinutesAfterEventStart}} minutes late):
+                            ({{myAssignment.arrivalMinutesAfterEventStart}} minutes late) Event:
                             <ul>
                                 <li>
                                     {{instruction_pool.address}}
                                 </li>
                                 <li>
-                                    {{instruction_pool.email}}
+                                    For more information, contact {{instruction_pool.email}}
                                 </li>
                             </ul>
                         </li>
@@ -173,13 +173,13 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                             </ul>
                         </li>
                         <li seq="{{ass.arrivalTime | date: 'hh:mma'}}">
-                            Event ({{ass.arrivalMinutesAfterEventStart}} minutes late):
+                            ({{ass.arrivalMinutesAfterEventStart}} minutes late) Event:
                             <ul>
                                 <li>
                                     {{instruction_pool.address}}
                                 </li>
                                 <li>
-                                    {{instruction_pool.email}}
+                                    For more information, contact {{instruction_pool.email}}
                                 </li>
                             </ul>
                         </li>

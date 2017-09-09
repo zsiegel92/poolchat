@@ -76,7 +76,7 @@ def generate_groups_bits(array_duration,boolList_canBeLate,int_minsAvailForTrans
 		#IF numPeople < k, there is an issue
 		times[k] = []
 		for ind,group in enumerate(groups[k].bax_gen(numPeople,k)):
-			print("k is " + str(k) + "; Examining group " + str(group))
+			# print("k is " + str(k) + "; Examining group " + str(group))
 			if (group&drivers[k]).any() and (not (group&mandk[k]).counts_to(2))and (not (group&mand_not_k[k]).counts_to(1)):
 				if (group&mandk[k]).counts_to(1):
 					driver=(group&mandk[k]).index(1)
@@ -345,6 +345,7 @@ def gen_assignment_fromParams(params):
 #This function outputs a list of tuples consisting of participants in each carload. The tuples are ordered with driver at index 0 in pickup-order.
 @sayname
 def gen_assignment(Aeq,x,name,email,array_duration,boolList_canBeLate,int_minsAvailForTransit,int_numCarSeats,doubleList_durs_toEvent,int_latenessWindow,must_drive,ids=None):
+	print("in groupThere.helpers.gen_assignment")
 	maxNumberSeats=max(int_numCarSeats)
 	array_duration=np.floor(array_duration/60)#convert to minutes
 	doubleList_durs_toEvent = np.floor(np.array(doubleList_durs_toEvent)/60)
@@ -386,20 +387,20 @@ def gen_assignment(Aeq,x,name,email,array_duration,boolList_canBeLate,int_minsAv
 
 def self_monitor_results(func):
 	def wrapper(*func_args, **func_kwargs):
-		print('function call ' + func.__name__ + '() with args ' + str(func_args[1:]) + ", and kwargs " + str(func_kwargs))
+		print('function call ' + func.__name__ + '(args=' + str(func_args[1:]) + ", kwargs=" + str(func_kwargs) +")")
 		retval = func(*func_args,**func_kwargs)
-		print('function ' + func.__name__ + '() returns ' + repr(retval))
+		print('returns ' + repr(retval))
 		return retval
 	wrapper.__name__ = func.__name__
 	return wrapper
-def monitor_results(func):
-	def wrapper(*func_args, **func_kwargs):
-		print('function call ' + func.__name__ + '() with args ' + str(func_args) + ", and kwargs " + str(func_kwargs))
-		retval = func(*func_args,**func_kwargs)
-		print('function ' + func.__name__ + '() returns ' + repr(retval))
-		return retval
-	wrapper.__name__ = func.__name__
-	return wrapper
+# def monitor_results(func):
+# 	def wrapper(*func_args, **func_kwargs):
+# 		print('function call ' + func.__name__ + '(args=' + str(func_args) + ", kwargs=" + str(func_kwargs) +")")
+# 		retval = func(*func_args,**func_kwargs)
+# 		print('returns ' + repr(retval))
+# 		return retval
+# 	wrapper.__name__ = func.__name__
+# 	return wrapper
 
 class shortTime:
 	def __init__(self,durs,maxNumSeats,canBeLate,minsAvail,numCarSeats,durs_toEvent,latenessWindow,must_drive):
@@ -489,10 +490,13 @@ class shortTime:
 
 
 
-
 	# minimize_mode='human_hours'
 	# @self_monitor_results
 	def getShortTimeOneDriver(self,driver,participants,numParticipantsNotDriver,minimize_mode='car_hours',returnAll=False):
+		if returnAll is True:
+			print("(COMMENT_THIS) in getShortTimeOneDriver with args " + ", ".join([str(driver),str(participants),str(numParticipantsNotDriver)]))
+			print("canBeLate (len " + str(len(self.canBeLate)) + "): " + str(self.canBeLate))
+			print("minsAvail (len " + str(len(self.minsAvail)) + "): " + str(self.minsAvail))
 		# minimize_mode='car_hours'
 		#drivers is an int
 		#participants & drivers=={}
@@ -519,55 +523,54 @@ class shortTime:
 				return (True,firstLeg+lastLeg,tuple(participants),driver,lateOK,notLatePossible,[firstLeg,lastLeg])
 			else:
 				return (False,-1,[],-1,False,False,False)
-		driverConstraint = self.minsAvail[driver]
-		constraints = itemgetter(*participants)(self.minsAvail)
-		durmat=self.durs[np.ix_(participants,participants)]
-		durs_from_driver = self.durs[np.ix_([driver],participants)].flatten()
-		durs_to_event = [self.durs_toEvent[i] for i in participants]
-
-		if all(x==1 for x in itemgetter(driver,*participants)(self.canBeLate)):
-			lateOK=True
-			constraints = [x+self.latenessWindow for x in constraints]
-			driverConstraint = driverConstraint + self.latenessWindow
 		else:
-			lateOK=False
+			driverConstraint = self.minsAvail[driver]
+			constraints = itemgetter(*participants)(self.minsAvail)
+			durmat=self.durs[np.ix_(participants,participants)]
+			durs_from_driver = self.durs[np.ix_([driver],participants)].flatten()
+			durs_to_event = [self.durs_toEvent[i] for i in participants]
+			minTime=-1
+			isPossible = False
+			notLatePossible=None
+			bestOrder=None
+			bestTimes=None
+			times = [-1 for i in range(numParticipantsNotDriver+1)]
+
+			if all(x==1 for x in itemgetter(driver,*participants)(self.canBeLate)):
+				lateOK=True
+				constraints = [x+self.latenessWindow for x in constraints]
+				driverConstraint = driverConstraint + self.latenessWindow
+			else:
+				lateOK=False
 
 
-		minTime=-1
-		isPossible = False
-		bestOrder=[]
-		bestTimes=[]
-		times = [-1 for i in range(numParticipantsNotDriver+1)]
-		for perm in permutations(range(numParticipantsNotDriver)):
-			times[0]=durs_from_driver[perm[0]]
-			times[1:numParticipantsNotDriver]=[durmat[perm[i],perm[i+1]] for i in range(numParticipantsNotDriver-1)]
-			times[-1]= durs_to_event[perm[-1]]
-			if (sum(times)<minTime) or (isPossible==False):
-				if all((self.routeAdders[numParticipantsNotDriver+1]).dot(np.array(times)) < np.array([driverConstraint]+list(itemgetter(*perm)(constraints)))):
-					if minimize_mode=='human_hours':
-						minTime=sum((self.routeAdders[numParticipantsNotDriver+1]).dot(np.array(times)))
-					elif minimize_mode == "car_hours":
-						minTime=sum(times)
-					else:
-						minTime=sum(times)
+			for perm in permutations(range(numParticipantsNotDriver)):
+				times[0]=durs_from_driver[perm[0]]
+				times[1:numParticipantsNotDriver]=[durmat[perm[i],perm[i+1]] for i in range(numParticipantsNotDriver-1)]
+				times[-1]= durs_to_event[perm[-1]]
+				if (sum(times)<minTime) or (isPossible==False):
+					if all((self.routeAdders[numParticipantsNotDriver+1]).dot(np.array(times)) < np.array([driverConstraint]+list(itemgetter(*perm)(constraints)))):
+						isPossible = True
 
-					isPossible = True
-					if returnAll:
-						bestOrder = perm[:]
-						bestTimes = times[:]
+						if minimize_mode=='human_hours':
+							minTime=sum((self.routeAdders[numParticipantsNotDriver+1]).dot(np.array(times)))
+						elif minimize_mode == "car_hours":
+							minTime=sum(times)
+						else:
+							minTime=sum(times)
+
+						if returnAll:
+							bestOrder = perm[:]
+							bestTimes = times[:]
 
 
-		if returnAll:
-
-			notLatePossible=True
-			if lateOK:
-				if len(bestTimes)>0:
-					if not all((self.routeAdders[numParticipantsNotDriver+1]).dot(np.array(bestTimes)) < np.array([driverConstraint-self.latenessWindow]+list(itemgetter(*bestOrder)([constraint - self.latenessWindow for constraint in constraints])))):
-						notLatePossible = False
-
-			bestOrder=itemgetter(*bestOrder)(participants)
-
-			return (isPossible,minTime,bestOrder,driver,lateOK,notLatePossible,bestTimes)
-		else:
-			return (isPossible,minTime)
+			if returnAll:
+				if isPossible:
+					if lateOK:
+						if len(bestTimes)>0:
+							notLatePossible=  all((self.routeAdders[numParticipantsNotDriver+1]).dot(np.array(bestTimes)) < np.array([driverConstraint-self.latenessWindow]+list(itemgetter(*bestOrder)([constraint - self.latenessWindow for constraint in constraints]))))
+					bestOrder=itemgetter(*bestOrder)(participants)
+				return (isPossible,minTime,bestOrder,driver,lateOK,notLatePossible,bestTimes)
+			else:
+				return (isPossible,minTime)
 

@@ -29,9 +29,9 @@ def gt_fromDistmattedParams(params,mailParam):
 
 
 	(groups,times) = generate_groups_fromParam(params,testing=False)
-	print("Generated groups! (gt_fromDistmattedParams)")
-	print("groups is: " + str(groups))
-	print("times is: " + str(times))
+	print("(gt_fromDistmattedParams) Generated groups!")
+	# print("groups is: " + str(groups))
+	# print("times is: " + str(times))
 	params.groups['groups']=groups
 	params.groups['times'] = times
 

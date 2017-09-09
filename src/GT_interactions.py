@@ -159,7 +159,7 @@ def doGroupThere_fromDB(pool_id=None):
 				print("did gt from distmatted params")
 				#SHOULD DO SOME DATABASE MAINTENENCE HERE, OR AT LEAST ENQUEUE IT
 				print("Successfully did groupthere! (doGroupThere_fromDB)")
-				print(params)
+				# print(params)
 				instructions = Instruction()
 				instructions.pool_id = pool_id
 				# from GTviews.GT_results:

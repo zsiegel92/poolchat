@@ -14,7 +14,7 @@ else:
 	with modified_environ(APP_SETTINGS='config.TestingConfig'):
 		from app import app, db,models, ts
 
-numTestUsers=11
+numTestUsers=25
 baseFirst='Zach'
 baseLast='Siegel'
 password='masterp123'

@@ -765,3 +765,14 @@ background-color: rgba(33,154,200,0.75);
  }
 .flash-inner {
  }
+
+ /*Custom labeled lists*/
+ ol.custom > li:before {
+  content: attr(seq) "  ";
+}
+ ol.custom > li {
+  font-weight: bold;
+}
+ol.custom{
+  list-style: none;
+}

@@ -8,7 +8,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
         <div ng-if="pool_id_message">
             {{pool_id_message}}
         </div>
- <!--        <div ng-show="!joinForm.$dirty && eligible_pools.length>1">
+        <!--        <div ng-show="!joinForm.$dirty && eligible_pools.length>1">
             <h3> Please select an event!</h3>
         </div> -->
         <div ng-show="joinFormValues.ngPool >=0">
@@ -26,7 +26,6 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                     For more information regarding this event, contact {{selectedPool_obj.email}}.
                 </div>
             </div>
-
             <div style=>
                 <form ng-show="eligible_pools" role='form' name="joinForm" ng-model="joinFormValues" ng-submit="goto_join()">
                     <select ng-change="selectedPool_obj=eligible_pools[joinFormValues.ngPool];" ng-model="joinFormValues.ngPool" name="pool" required>
@@ -46,7 +45,6 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                 <span ng-show="eligible_pools.length>0"> <br> <a href='#!/makePool'>Make a new event</a></span>
                 <span> <br> <b><a href='#!/joinTeam'>Join a team (and access their events)</a></b> </span>
             </div>
-
             <div ng-if="resultText">
                 <h3> Query Status: </h3>
                 {{resultText}}
@@ -101,7 +99,8 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                                 Carpooling instructions will be sent out {{pool.fireNotice}} hours before {{pool.time}} on {{pool.date}}<span ng-if="pool.noticeWentOut == false">, in  {{toDays(pool.seconds_til_instructions-counter)}} days, {{toHours(pool.seconds_til_instructions-counter)}} hours, and {{toMinutes(pool.seconds_til_instructions-counter)}} minutes</span></div>
                                 <!-- , {{toSeconds(pool.seconds_til_instructions-counter)}} seconds -->
                                 <br>
-                                <button type="button" class="btn btn-md btn-info" ng-disabled="disabled" ng-click="getPoolInstructions($index)" >View most recent solution!</button>
+                                <button type="button" class="btn btn-md btn-info" ng-disabled="disabled" ng-click="getPoolInstructions($index,false)" >My itinerary</button>
+                                <button type="button" class="btn btn-md btn-info" ng-disabled="disabled" ng-click="getPoolInstructions($index,true)" >Every car's itinerary</button>
                                 <div ng-show="waiting_for_instructions_text" class="alert alert-info">{{waiting_for_instructions_text}}</div>
                                 <div ng-show="waiting_for_instructions_error" class="alert alert-danger">{{waiting_for_instructions_error}}</div>
                                 <!--  <li> FOR TESTING: Generate a new solution now!<br>
@@ -120,40 +119,33 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                 <!-- MY ASSIGNMENT -->
                 <div ng-if="myAssignment">
                     <h4>
-                    My ride assignment
+                    My Itinerary:
                     </h4>
-                    <ul>
-                        <li>Departure Time: {{myAssignment.departureTime | date : 'hh:mma'}} ({{myAssignment.leaveTimeMinutesAfterEventStart * -1}} minutes before the event starts)</li>
-                        <li> Arrival Time: {{myAssignment.arrivalTime | date : 'hh:mma'}} ({{myAssignment.arrivalMinutesAfterEventStart}} minutes late)</li>
-                        <li>Driver: {{instruction.names[myAssignment.driver]}} <ul><li>thank you for your {{myAssignment.minTime}} minutes of driving</li></ul></li>
-                        <li>Addresses and Contact Information (in optimal order):
-                            <ol>
-                                <li ng-repeat="ind in myAssignment.bestOrder track by $index">
-                                    {{instruction.names[ind]}}
-                                    <ul>
-                                        <li>
-                                            {{instruction.addresses[ind]}}
-
-                                            <span ng-if="!$first"> at {{myAssignment.bestTimes.slice(0,$index).reduce(add,0) | relativeFromMins : myAssignment.departureTime | date : 'hh:mma'}}</span>
-                                            <span ng-if="$first"> at {{myAssignment.departureTime | date : 'hh:mma'}}</span>
-                                        </li>
-                                        <li>{{myAssignment.emails[$index]}}</li>
-                                        <!-- NOTE: CONSIDER SENDING ORDERED EMAIL ADDRESSES IN instruction -->
-                                    </ul>
+                    <ol class='custom'>
+                        <li ng-repeat="ind in myAssignment.bestOrder track by $index" seq="{{!$first ? (myAssignment.bestTimes.slice(0,$index).reduce(add,0) | relativeFromMins : myAssignment.departureTime | date : 'hh:mma') : (myAssignment.departureTime | date : 'hh:mma')}}">
+                            {{$first ? "- Driver - " : ""}}{{instruction.names[ind]}}
+                            <ul>
+                                <li ng-show="$first">(thank you for your {{myAssignment.minTime}} minutes of driving)</li>
+                                <li >
+                                    {{instruction.addresses[ind]}}
+                                </li>
+                                <li>{{myAssignment.emails[$index]}}</li>
+                                <!-- NOTE: CONSIDER SENDING ORDERED EMAIL ADDRESSES IN instruction -->
+                            </ul>
+                        </li>
+                        <li seq="{{myAssignment.arrivalTime | date: 'hh:mma'}}">
+                            Event ({{myAssignment.arrivalMinutesAfterEventStart}} minutes late):
+                            <ul>
+                                <li>
+                                    {{instruction_pool.address}}
                                 </li>
                                 <li>
-                                    Event:
-                                    <ul>
-                                        <li>
-                                            {{instruction_pool.address}} at {{myAssignment.arrivalTime | date: 'hh:mma'}}
-                                        </li>
-                                        <li>
-                                            {{instruction_pool.email}}
-                                        </li>
-                                    </ul>
+                                    {{instruction_pool.email}}
                                 </li>
-                            </ol>
+                            </ul>
                         </li>
+                    </ol>
+                    <ul>
                         <li ng-if="myAssignment.lateOk==true">Everyone sharing this ride can arrive up to {{instruction_pool.latenessWindow}} minutes after the event begins.<span ng-if="myAssignment.notLatePossible==true"> The ride should be able to arrive on time, though.</span><span ng-if="myAssignment.notLatePossible==false"> This ride will arrive a bit late.</span></li>
                         <li ng-if="myAssignment.lateOk==false">At least one person sharing this ride must arrive exactly on time - please be ready to go at the specified times.</li>
                     </ul>
@@ -162,56 +154,35 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                     <b>You are not currently part of a ride to this event. Feel free to check again with the button above. As folks join the event, you are more likely to find a ride.</b>
                 </div>
                 <!-- OTHER ASSIGNMENTS -->
-                <div ng-repeat="ass in instruction.assignments">
-                    <h4>
-                    {{instruction.names[ass.driver]}}'s car
+                <div ng-show="other_instructions" ng-repeat="ass in instruction.assignments">
+                    <h4 style="border-bottom: solid 1px #999;">
+                    {{instruction.names[ass.driver]}}'s Car <span style="font-size:0.8em"> departs at {{ass.departureTime | date : 'hh:mma'}} ({{ass.leaveTimeMinutesAfterEventStart * -1}} minutes before the event starts) </span>
                     </h4>
-                    <ul>
-                        <li>
-                            Departure Time: {{ass.departureTime | date : 'hh:mma'}} ({{ass.leaveTimeMinutesAfterEventStart * -1}} minutes before the event starts)
+                    <ol class="custom">
+                        <li ng-repeat="ind in ass.bestOrder"   seq="{{!$first ? (ass.bestTimes.slice(0,$index).reduce(add,0) | relativeFromMins : ass.departureTime | date : 'hh:mma') : (ass.departureTime | date : 'hh:mma')}}">
+                            {{$first ? "- Driver - " : ""}}{{instruction.names[ind]}}
+                            <ul>
+                                <li ng-show="$first">(thank you for your {{myAssignment.minTime}} minutes of driving)</li>
+                                <li>
+                                    {{instruction.addresses[ind]}}
+                                </li>
+                                <li>{{ass.emails[$index]}}</li>
+                                <!-- NOTE: CONSIDER SENDING ORDERED EMAIL ADDRESSES IN instruction -->
+                            </ul>
                         </li>
-                        <li>
-                            Arrival Time: {{ass.arrivalTime | date : 'hh:mma'}} ({{ass.arrivalMinutesAfterEventStart}} minutes late)
-                        </li>
-                        <li>
-                            Driver: {{instruction.names[ass.driver]}}
+                        <li seq="{{ass.arrivalTime | date: 'hh:mma'}}">
+                            Event ({{ass.arrivalMinutesAfterEventStart}} minutes late):
                             <ul>
                                 <li>
-                                    thank you for your {{ass.minTime}} minutes of driving
+                                    {{instruction_pool.address}}
+                                </li>
+                                <li>
+                                    {{instruction_pool.email}}
                                 </li>
                             </ul>
                         </li>
-                        <li>Addresses and Contact Information (in optimal order):
-                            <ol>
-                                <li ng-repeat="ind in ass.bestOrder">
-                                    {{instruction.names[ind]}}
-                                    <ul>
-                                        <li>
-                                            {{instruction.addresses[ind]}}
-                                            <span ng-if="!$first">
-                                                at {{ass.bestTimes.slice(0,$index).reduce(add,0) | relativeFromMins : ass.departureTime | date : 'hh:mma'}}
-                                            </span>
-                                            <span ng-if="$first">
-                                                at {{ass.departureTime | date : 'hh:mma'}}
-                                            </span>
-                                        </li>
-                                        <li>{{ass.emails[$index]}}</li>
-                                        <!-- NOTE: CONSIDER SENDING ORDERED EMAIL ADDRESSES IN instruction -->
-                                    </ul>
-                                </li>
-                                <li>
-                                    Event:
-                                    <ul>
-                                        <li>
-                                            {{instruction_pool.address}} at {{ass.arrivalTime | date: 'hh:mma'}}
-                                        </li>
-                                        <li>
-                                            {{instruction_pool.email}}
-                                        </li>
-                                    </ul>
-                                </li>
-                            </ol>
-                        </li>
+                    </ol>
+                    <ul>
                         <li ng-if="ass.lateOk==true">
                             Everyone sharing this ride can arrive up to {{instruction_pool.latenessWindow}} minutes after the event begins.
                             <span ng-if="ass.notLatePossible==true">
@@ -229,4 +200,3 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                 </modal-dialog> <!-- INSTRUCTION -->
                 </div> <!-- COLUMN -->
             </div>
-

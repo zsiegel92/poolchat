@@ -259,7 +259,7 @@ class AppTestCase(unittest.TestCase):
 		team_id = team.id
 
 		#create pool
-		name = 'meeting'
+		name = 'CARNIVAL'
 		address='1502 S Robertson Blvd, Los Angeles, CA 90035, USA'
 		dateTimeText='09-10-2017 19:30 -0700'
 		email=emails[0]

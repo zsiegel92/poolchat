@@ -148,7 +148,7 @@ angular.module('myApp.viewPool', ['ngRoute'])
     };
 
 
-
+    $scope.other_instructions = true;
     $scope.modalShown = false;
     $scope.toggleModal = function() {
       $scope.modalShown = !$scope.modalShown;
@@ -156,7 +156,7 @@ angular.module('myApp.viewPool', ['ngRoute'])
 
     $scope.getPoolInfoForUser();
 
-    $scope.getPoolInstructions = function(ind) {
+    $scope.getPoolInstructions = function(ind,viewAll) {
       $scope.disabled=true;
       $scope.waiting_for_instructions_text="Fetching instructions. Please wait.";
       var pool = $scope.joined_pools[ind];
@@ -186,6 +186,12 @@ angular.module('myApp.viewPool', ['ngRoute'])
             $log.log("Other assignments:");
             $log.log($scope.instruction.assignments);
             $scope.errorText=undefined;
+            if (viewAll===true){
+              $scope.other_instructions=true;
+            }
+            else{
+              $scope.other_instructions=false;
+            }
             $scope.toggleModal();
           }).
           catch(function(response) {

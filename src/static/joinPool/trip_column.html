@@ -1,0 +1,18 @@
+<!-- TRIP COLUMN -->
+<div class="floating-box" >
+  <div align="center">
+    <img src="/static/img/beautiful_map/beautiful_map_200.jpg" ng-src="{{trip_image_url}}" alt="Trip Origin" class="join-pool-image" >
+  </div>
+  <h2>Your Trip: <button ng-click="cancel_trip()" type="button" class="btn btn-danger btn-xs" style="white-space: normal;" ng-if="resubmit && (resubmit==true)">CANCEL TRIP</button></h2>
+  <ul>
+    <li ng-show="tripForm.ngAddress"> I'll be coming from {{tripForm.ngAddress}}</li>
+    <li ng-show="tripForm.ngNumSeats >0"> My vehicle has {{tripForm.ngNumSeats}} {{(tripForm.ngNumSeats >1) ? 'seats' : 'seat'}} (including driver).</li>
+    <li ng-show="tripForm.ngNumSeats ==0">I will not be driving!</li>
+    <li ng-show="tripForm.ngPreWindow"> I can be ready to go at {{preTime(pool_dateTime,tripForm.ngPreWindow) | date : 'hh:mm' }} ({{tripForm.ngPreWindow}} minutes before the event). </li>
+    <li ng-show="tripForm.ngOn_time"> I have to arrive on time (I am an organizer).</li>
+    <li ng-show="!tripForm.ngOn_time"> I can arrive up to {{pool.latenessWindow}} minutes late (I am not an organizer).</li>
+    <li ng-show="tripForm.ngMust_drive && tripForm.ngNumSeats >0">I have to drive. I cannot catch a ride.</li>
+    <li ng-show="!tripForm.ngMust_drive && tripForm.ngNumSeats >0">I can drive or catch a ride.</li>
+  </ul>
+</div>
+<!-- COLUMN -->

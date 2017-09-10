@@ -18,6 +18,30 @@
       font-family: 'Roboto', sans-serif;
     }
 
+
+.select2char{
+  max-width:calc(2em + 15px);
+  overflow:hidden;
+}
+
+@media only screen and (max-device-width: 480px){
+  .select2char{
+  max-width:calc(3em + 10px);
+  overflow:hidden;
+}
+}
+.address_conf_button{
+ /*word-wrap:normal;*/
+white-space: normal;
+}
+/*@media only screen and (max-device-width: 480px){
+  .address_conf_button{
+  max-width:12em;
+  word-wrap:break-word;
+}
+}*/
+
+
     /*@import url("https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css");*/
     .panel-title > a:before {
         float: right !important;
@@ -159,46 +183,151 @@
   border-bottom: solid 1px #999;
 }
 
-    /*replace the content value with the
-    corresponding value from the list below*/
-    /*--adjust (below space, before 'color', esp) as necessary--*/
- /*   .element {
-        position: relative;
-    }
+
+
+@media only screen
+    and (max-device-width: 640px),
+    only screen and (max-device-width: 667px),
+    only screen and (max-width: 480px)
+{
+        /*MODAL MODAL MODAL*/
+        /*https://github.com/adamalbrecht/ngModal*/
+
+
+        .modal-dialog-pane{
+          /*red (as test)*/
+          background-color: #cedbef;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox */
+    box-sizing: border-box;
+}
+/*        .ng-modal {
+          position: fixed;
+          z-index: 9999;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+        }
+        .ng-modal-overlay {
+          position: absolute;
+          z-index: 9999;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          opacity: 0.8;
+        }
+        .ng-modal-dialog {
+          z-index: 10000;
+          position: relative;
+          top: 50%;
+          left: 50%;
+          width: 50%;
+          transform: translate(-50%, -50%);
+          -webkit-transform: translate(-50%, -50%);
+          -moz-transform: translate(-50%, -50%);
+          -ms-transform: translate(-50%, -50%);
+          -o-transform: translate(-50%, -50%);
+          background-color: #fff;
+          box-shadow: 4px 4px 80px #000;
+          -webkit-box-shadow: 4px 4px 80px #000;
+          -moz-box-shadow: 4px 4px 80px #000;
+          -ms-box-shadow: 4px 4px 80px #000;
+          -o-box-shadow: 4px 4px 80px #000;
+          padding: 10px;
+          overflow: hidden;
+          display: flex;
+           flex-direction: column;
+            align-items: center;
+            background-color:#cbced3;
+
+        }
+
+        .ng-modal-dialog-content {
+
+            background-color: #cedbef;
+          align-items: stretch;
+          overflow-y: auto;
+              border-radius: 6px;
+            border: 2px solid black;
+            padding: 5px;
+        }
+        .ng-modal-close {
+          position: absolute;
+          top: 3px;
+          right: 5px;
+          cursor: pointer;
+          font-size: 120%;
+          padding: 5px;
+          display: inline-block;
+        }
+        .ng-modal-close-x {
+          font-weight: bold;
+          font-family: Arial, sans-serif;
+        }
+        .ng-modal-title {
+          font-weight: bold;
+          font-size: 200%;
+          display: block;
+          margin-bottom: 0px;
+          padding-bottom: 0px;
+        }
+        .ng-modal-subtitle {
+          font-weight: bold;
+          font-size: 150%;
+          display: block;
+          margin-top: 4px;
+          padding-top: 3px;
+        }
+        .ng-modal-subsubtitle{
+          font-weight: bold;
+          font-size: 125%;
+          display: block;
+          margin-top: 4px;
+          padding-top: 3px;
+        }
+        .ng-modal-sub3title{
+          font-weight: bold;
+          font-size: 100%;
+          display: block;
+          margin-top: 4px;
+          padding-top: 3px;
+        }
+        .ng-modal-underline {
+          font-weight: bold;
+          font-size: 150%;
+          display: block;
+          margin-top: 10px;
+          padding-top: 7px;
+          border-bottom: solid 1px #999;
+        }*/
+
+}
 
 
 
-    .element:before {
-        content: "\f100";
-        font-family: FontAwesome;
-        font-style: normal;
-        font-weight: normal;
-        text-decoration: inherit;
-
-        color: #000;
-        font-size: 18px;
-        padding-right: 0.5em;
-        position: absolute;
-        top: 10px;
-        left: 0;
-    }*/
-
-
-/*    .panel-title > a.collapsed:before {
-        float: right !important;
-        font-family: FontAwesome;
-        content:"\f055";
-        padding-right: 5px;
-    }*/
 
 
 
-/*    .panel-title > a:hover,
-    .panel-title > a:active,
-    .panel-title > a:focus  {
-        text-decoration:none;
-    }
-*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     nav{
       font-family: 'Ubuntu', sans-serif;
@@ -269,7 +398,7 @@
     }
     .floating-box {
         display: inline-block;
-        width: 46%;
+        /*width: 45%;*/
         margin: 4px;
         /*border: 2px solid var(--accent-color);*/
         vertical-align: top;
@@ -278,11 +407,41 @@
     border: 3px solid red;
     }
 
+
     img {
-      border: 4px solid var(--accent-color);
+
       padding: 0px;
       border-radius: 9px;
     }
+
+    .join-pool-image{
+      width:325px;
+      height:325px;
+    }
+
+.make-pool-image{
+      width:400px;
+      height:400px;
+}
+
+@media only screen
+    and (max-device-width: 640px),
+    only screen and (max-device-width: 667px),
+    only screen and (max-width: 480px)
+{
+    .join-pool-image{
+      width:100px;
+      height:100px;
+    }
+    .make-pool-image{
+      width:100px;
+      height:100px;
+    }
+
+}
+
+
+
     .lineContainer {
         overflow: hidden; /* clear the float */
         /*border: 1px solid #000*/

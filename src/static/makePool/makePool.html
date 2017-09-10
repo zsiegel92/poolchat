@@ -142,14 +142,14 @@
       </form>
       </div><!-- COLUMN -->
       <div class='col' style="float:right; width:48%;">
-        <h2>Information</h2>
-        <div ng-show="resultText" >{{resultText}} </div>
+<!--         <h2>Information</h2>
+        <div ng-show="resultText" >{{resultText}} </div> -->
         <h3> Summary </h3>
         <ul>
           <li>
             <b>Your event will be held at:</b> {{poolForm.ngAddress}}
             <div ng-if="image_url">
-              <img ng-src="{{image_url}}" alt="Confirmed Address" style="width:400px;height:400px;">
+              <img ng-src="{{image_url}}" class="make-pool-image" alt="Confirmed Address">
             </div>
           </li>
           <li>

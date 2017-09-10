@@ -4,15 +4,15 @@ angular.module('myApp.joinPool', ['ngRoute'])
 
 .config(['$routeProvider', function($routeProvider) {
   $routeProvider
-    .when('/joinPool/:id/name/:name/address/:address/date/:date/time/:time/dateTime/:dateTime/email/:email/notice/:notice/latenessWindow/:latenessWindow/carpooler/cpname/:cpname/cpfirst/:cpfirst/cplast/:cplast/cpemail/:cpemail/past_addresses/:past_addresses/max_seats/:max_seats/ever_must_drive/:ever_must_drive/ever_organizer/:ever_organizer/:resubmit/:repAddress?/:repNumSeats?/:repPreWindow?/:repOnTime?/:repMustDrive?', {
+    .when('/joinPool/:id/name/:name/address/:address/date/:date/time/:time/dateTime/:dateTime/email/:email/notice/:notice/latenessWindow/:latenessWindow/teams/:teams?/members/:members?/carpooler/cpname/:cpname/cpfirst/:cpfirst/cplast/:cplast/cpemail/:cpemail/past_addresses/:past_addresses/max_seats/:max_seats/ever_must_drive/:ever_must_drive/ever_organizer/:ever_organizer/:resubmit/:repAddress?/:repNumSeats?/:repPreWindow?/:repOnTime?/:repMustDrive?', {
       templateUrl: 'static/joinPool/joinPool.html',
       controller: 'joinPoolController',
       access: {restricted: true}
     });
 }])
 
-.controller('joinPoolController',['$scope','$rootScope','$location', 'AuthService','$route', '$routeParams','$log','$http','$filter','$window','$q',
-  function ($scope, $rootScope,$location, AuthService,$route,$routeParams,$log,$http,$filter,$window,$q){
+.controller('joinPoolController',['$scope','$rootScope','$location', 'AuthService','$route', '$routeParams','$log','$http','$timeout','$filter','$window','$q',
+  function ($scope, $rootScope,$location, AuthService,$route,$routeParams,$log,$http,$timeout,$filter,$window,$q){
 
     var f = $window.decodeURIComponent;
     var r = $routeParams;
@@ -26,11 +26,53 @@ angular.module('myApp.joinPool', ['ngRoute'])
     $scope.pool = {'id':f(r.id),'name':f(r.name),'address':f(r.address),'date':f(r.date),'time':f(r.time),'dateTime':f(r.dateTime),'email':f(r.email),'notice':f(r.notice),'latenessWindow':f(r.latenessWindow)};
     $scope.carpooler = {'name':f(r.cpname),'first':f(r.cpfirst),'last':f(r.cplast),'email':f(r.cpemail)};
     $scope.past_addresses=JSON.parse(f(r.past_addresses));
+    if (r.teams){
+      $scope.teams=JSON.parse(f(r.teams));
+    }
+    if (r.members){
+      $scope.members=JSON.parse(f(r.members));
+    }
     $scope.max_seats = f(r.max_seats);
     $scope.ever_must_drive = f(r.ever_must_drive);
     $scope.ever_organizer = f(r.ever_organizer);
 
+
     $scope.pool_dateTime = new Date(Date.parse($scope.pool.dateTime));
+
+
+    var now = new Date();
+    $scope.pool.seconds_til = Math.floor((new Date(Date.parse($scope.pool.dateTime)).getTime() - now.getTime())/1000);
+    $scope.pool.seconds_til_instructions = Math.floor((new Date(Date.parse($scope.pool.dateTime)).getTime() - $scope.pool.fireNotice*60*60*1000 - now.getTime())/1000);
+    // new Date(Date.parse(pool.dateTime)).getTime()
+    // (pool.dateTime.getTime() - now.getTime())/1000;
+
+    var hours=0;
+    var minutes = 0;
+    var seconds=0;
+    $scope.toDays = function(secs){
+      return Math.floor(secs/86400);
+    };
+    $scope.toHours = function(secs){
+      return Math.floor(secs/3600) % 24;
+    };
+    $scope.toMinutes = function(secs){
+      return Math.floor(secs/60) % 60;
+    };
+    $scope.toSeconds = function(secs){
+      return Math.floor(secs)%60;
+    };
+    $scope.counter = 0;
+    $scope.onTimeout = function(){
+        $scope.counter++;
+        mytimeout = $timeout($scope.onTimeout,1000);
+    };
+    var mytimeout = $timeout($scope.onTimeout,1000);
+
+
+
+
+
+
 
     $scope.setDefaults = function(){
       $scope.tripForm.ngOn_time = ($scope.ever_organizer==1);

@@ -177,6 +177,7 @@ angular.module('myApp.viewPool', ['ngRoute'])
             $log.log("Full instruction information:");
             $log.log(response.data);
             $scope.instruction = response.data;
+            $scope.numAssignments = $scope.instruction.assignments.length;
             if ($scope.instruction.my_ass_index > -1){
               $scope.myAssignment = $scope.instruction.assignments[$scope.instruction.my_ass_index];
               $scope.instruction.assignments.splice($scope.instruction.my_ass_index,1);

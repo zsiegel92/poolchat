@@ -62,8 +62,9 @@ myApp.directive('modalDialog', [
         show: '=',
         dialogTitle: '@',
         dialogSubtitle: '@',
-        dialogSubsubtitle: '@',
-        dialogSubsubsubtitle: '@',
+        dialogSub2title: '@',
+        dialogSub3title: '@',
+        dialogSub4title: '@',
         onClose: '&?'
       },
       replace: true,
@@ -99,7 +100,7 @@ myApp.directive('modalDialog', [
         return setupStyle();
         // ng-bind='dialogSubtitles'
       },
-      template: "<div class='ng-modal' ng-show='show'>\n  <div class='ng-modal-overlay' ng-click='hideModal()'></div>\n  <div class='ng-modal-dialog' ng-style='dialogStyle'>\n    <span class='ng-modal-title' ng-show='dialogTitle && dialogTitle.length' ng-bind='dialogTitle'></span>\n  <span class='ng-modal-subtitle' ng-show='dialogSubtitle && dialogSubtitle.length' ng-bind='dialogSubtitle'></span>\n  <span class='ng-modal-subsubtitle' ng-show='dialogSubsubtitle && dialogSubsubtitle.length' ng-bind='dialogSubsubtitle'></span>\n <span class='ng-modal-subsubtitle' ng-show='dialogSubsubsubtitle && dialogSubsubsubtitle.length' ng-bind='dialogSubsubsubtitle'></span>\n <span class='ng-modal-underline'></span>\n<div class='ng-modal-close' ng-click='hideModal()'>\n      <div ng-bind-html='closeButtonHtml'></div>\n    </div>\n    <div class='ng-modal-dialog-content' ng-transclude></div>\n  </div>\n</div>"
+      template: "<div class='ng-modal' ng-show='show'>\n  <div class='ng-modal-overlay' ng-click='hideModal()'></div>\n  <div class='ng-modal-dialog' ng-style='dialogStyle'>\n    <span class='ng-modal-title' ng-show='dialogTitle && dialogTitle.length' ng-bind='dialogTitle'></span>\n  <span class='ng-modal-subtitle' ng-show='dialogSubtitle && dialogSubtitle.length' ng-bind='dialogSubtitle'></span>\n  <span class='ng-modal-subsubtitle' ng-show='dialogSub2title && dialogSub2title.length' ng-bind='dialogSub2title'></span>\n <span class='ng-modal-sub3title' ng-show='dialogSub3title && dialogSub3title.length' ng-bind='dialogSub3title'></span>\n <span class='ng-modal-sub3title' ng-show='dialogSub4title && dialogSub4title.length' ng-bind='dialogSub4title'></span> \n<div class='ng-modal-close' ng-click='hideModal()'>\n      <div ng-bind-html='closeButtonHtml'></div>\n    </div>\n    <div class='ng-modal-dialog-content' ng-transclude></div>\n  </div>\n</div>"
     };
   }
 ]);

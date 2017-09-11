@@ -114,7 +114,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
             </div>
             <!-- INSTRUCTION -->
             <!-- ng-if="instruction"  -->
-            <modal-dialog show="modalShown" dialog-title="Instructions for '{{instruction_pool.name}}'" dialog-subtitle="{{instruction_pool.address}}" dialog-sub2title="{{instruction_pool.date}} at {{instruction_pool.time}}" dialog-sub3title="{{instruction.numel}} participants - {{(instruction.success == 1) ? 'Everyone has a ride!' : 'Not everyone can make it - invite some more drivers!!'}}" dialog-sub4title="{{numAssignments}} Cars - combined total {{instruction.totalGroupTime}} minutes driving" width='90%' height='85%'>
+            <modal-dialog show="modalShown" dialog-title="'{{instruction_pool.name}}'" dialog-subtitle="{{instruction_pool.address}}" dialog-sub2title="{{instruction_pool.date}} at {{instruction_pool.time}}" dialog-sub3title="{{instruction.numel}} participants - {{(instruction.success == 1) ? 'Everyone has a ride!' : 'Not everyone can make it - invite some more drivers!!'}}" dialog-sub4title="{{numAssignments}} Cars - combined total {{instruction.totalGroupTime}} minutes driving" width='99%' height='99%'>
             <!-- MY ASSIGNMENT -->
             <div class='modal-dialog-pane' ng-if="myAssignment">
                 <h4>
@@ -158,7 +158,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                 <br>
                 <hr>
                 <h4>
-                {{instruction.names[ass.driver]}}'s Car <span style="font-size:0.8em"> departs at {{ass.departureTime | date : 'hh:mma'}} ({{ass.leaveTimeMinutesAfterEventStart * -1}} minutes before the event starts) </span>
+                {{instruction.names[ass.driver]}}'s Car <span style="font-size:0.8em"> departs {{ass.departureTime | date : 'hh:mma'}} ({{ass.leaveTimeMinutesAfterEventStart * -1}} minutes before event) </span>
                 </h4>
                 <ol class="custom">
                     <li ng-repeat="ind in ass.bestOrder"   seq="{{!$first ? (ass.bestTimes.slice(0,$index).reduce(add,0) | relativeFromMins : ass.departureTime | date : 'hh:mma') : (ass.departureTime | date : 'hh:mma')}}">

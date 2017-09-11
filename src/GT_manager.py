@@ -15,7 +15,7 @@ from groupThere.helpers import sayname, generate_groups_fromParam, generate_mode
 # @pre: params.d_t, params. R_t, and params.dists_to_event['Distances'] and params.dists_to_event['Durations'] are all corrent
 def gt_fromDistmattedParams(params,mailParam):
 	print("in GT_manager.gt_fromDistmattedParams")
-	params.get_event_info_from_mailparam(mailParam)
+	# params.get_event_info_from_mailparam(mailParam)
 	# params.coordinate_and_clean()
 	with open("params/GTparams_"+str(datetime.now())[0:10]+".txt",'wb') as openfile:
 		pickle.dump(params.to_dict(),openfile)

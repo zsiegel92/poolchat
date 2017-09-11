@@ -121,7 +121,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                 My Itinerary:
                 </h4>
                 <ol class='custom'>
-                    <li ng-repeat="ind in myAssignment.bestOrder track by $index" seq="{{!$first ? (myAssignment.bestTimes.slice(0,$index).reduce(add,0) | relativeFromMins : myAssignment.departureTime | date : 'hh:mma') : (myAssignment.departureTime | date : 'hh:mma')}}">
+                    <li ng-repeat="ind in myAssignment.bestOrder track by $index" seq="{{!$first ? (myAssignment.bestTimes.slice(0,$index).reduce(adder,0) | relativeFromMins : myAssignment.departureTime | date : 'hh:mma') : (myAssignment.departureTime | date : 'hh:mma')}}">
                         {{$first ? "- Driver - " : ""}}{{instruction.names[ind]}}
                         <ul>
                             <li ng-show="$first">(thank you for your {{myAssignment.minTime}} minutes of driving)</li>
@@ -161,8 +161,10 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                 {{instruction.names[ass.driver]}}'s Car <span style="font-size:0.8em"> departs {{ass.departureTime | date : 'hh:mma'}} ({{ass.leaveTimeMinutesAfterEventStart * -1}} minutes before event) </span>
                 </h4>
                 <ol class="custom">
-                    <li ng-repeat="ind in ass.bestOrder"   seq="{{!$first ? (ass.bestTimes.slice(0,$index).reduce(add,0) | relativeFromMins : ass.departureTime | date : 'hh:mma') : (ass.departureTime | date : 'hh:mma')}}">
+                    <li ng-repeat="ind in ass.bestOrder"   seq="{{!$first ? ((ass.bestTimes.slice(0,$index).reduce(adder,0) | relativeFromMins : ass.departureTime) | date : 'hh:mma') : (ass.departureTime | date : 'hh:mma')}}">
+
                         {{$first ? "- Driver - " : ""}}{{instruction.names[ind]}}
+
                         <ul>
                             <li ng-show="$first">(thank you for your {{myAssignment.minTime}} minutes of driving)</li>
                             <li>

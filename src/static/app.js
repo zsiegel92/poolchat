@@ -146,14 +146,16 @@ myApp.filter('relativeFromTime', ['$filter', function ($filter) {
 
 myApp.filter('relativeFromMins', ['$filter', function ($filter) {
   return function (rel,time, format) {
+    var copy;
     if (typeof time.getTime === 'function'){
-      var copy = new Date(time.getTime());
+      copy = new Date(time.getTime());
     }
     else{
-      var copy = new Date(Date.parse(time));
+
+      copy = new Date(Date.parse(time));
     }
     copy.setMinutes(copy.getMinutes() + rel);
-    return $filter('date')(copy, format || 'hh:mma')
+    return $filter('date')(copy, format || 'hh:mma');
   };
 }]);
 

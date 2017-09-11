@@ -130,6 +130,9 @@ def api_get_recent_instructions():
 					instruct['assignments'][i]['emails']=[instruct['assignments'][i]['emails']]
 			instruct['my_ass_index']=my_ass
 
+
+			print("Returning instructions:")
+			print(instruct)
 			return jsonify(instruct),200
 		else:
 			api_re_optimize(pool_id=pool_id)

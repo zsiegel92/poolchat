@@ -642,6 +642,7 @@ background-color: rgba(33,154,200,0.75);
 .flash-inner {
  }
 
+
  /*Custom labeled lists*/
  ol.custom > li:before {
   content: attr(seq) "  ";
@@ -651,4 +652,6 @@ background-color: rgba(33,154,200,0.75);
 }
 ol.custom{
   list-style: none;
+  /*list-style-position: inside;*/
+  padding-left:2px;
 }

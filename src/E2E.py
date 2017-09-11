@@ -1,6 +1,7 @@
 
 import unittest
-# from encryption import bcrypt
+import random
+
 
 
 import json
@@ -14,12 +15,12 @@ else:
 	with modified_environ(APP_SETTINGS='config.TestingConfig'):
 		from app import app, db,models, ts
 
-numTestUsers=25
+numTestUsers=31
 baseFirst='Zach'
 baseLast='Siegel'
 password='masterp123'
 emails=['zsiegel92@gmail.com','thesouroaf@gmail.com','grouptherela@gmail.com','grouptherenow@gmail.com','ifnotnowcarpooling@gmail.com','grouptherecarpool@gmail.com','grouptheretest@gmail.com']
-
+original_len_emails = len(emails)
 
 
 addresses=[
@@ -71,7 +72,7 @@ if numTestUsers<len(emails):
 else:
 	count = 0
 	while len(emails)<numTestUsers:
-		emails.append('bb'+  str(count) + str(emails[count % len(emails)]))
+		emails.append('bb'+  str(count) + str(emails[count % original_len_emails]))
 		count+=1
 
 firsts=[]
@@ -80,14 +81,13 @@ for i in range(len(emails)):
 	firsts.append(baseFirst+ "_" + str(i))
 	lasts.append(baseLast+ "_" + str(i))
 
+numbers_of_seats=[]
+numbers_of_seats= [str(random.randint(2,4)*random.randint(0,1)) for i in range(len(emails))]
+must_drives = ['true' if ((random.randint(0,1)*random.randint(0,1)>0) and (int(numbers_of_seats[i])>0)) else 'false' for i in range(len(emails))]
+on_times=['true' if random.randint(0,1)*random.randint(0,1)>0 else 'false' for i in range(len(emails))]
+preWindows =[str(20 + random.randint(0,1)*10 + random.randint(0,1)*10+random.randint(0,1)*10) for i in range(len(emails))]
 
 
-
-
-
-
-
-addresses=addresses[:numTestUsers]
 
 class AppTestCase(unittest.TestCase):
 	def setUp(self):
@@ -193,7 +193,8 @@ class AppTestCase(unittest.TestCase):
 			firstName=firsts[i]
 			lastName=lasts[i]
 			rv = self.register(firstName,lastName,email,password)
-			assert('200' in rv.status)
+			print("rv: " + str(rv))
+			assert('20' in rv.status)
 			cp=self.getUser(email)
 			assert(cp.authenticated==False)
 			self.authenticate(email)
@@ -201,17 +202,17 @@ class AppTestCase(unittest.TestCase):
 			assert(cp is not None)
 			assert(cp.authenticated==True)
 			rv= self.login(email,password)
-			assert('200' in rv.status)
+			assert('20' in rv.status)
 			rv= json.loads(self.app.post('/api/status').data)
 			assert(rv['status'] is True)
 			rv= self.logout()
-			assert('200' in rv.status)
+			assert('20' in rv.status)
 			rv = self.login(email + 'x', password)
-			assert('200' not in rv.status)
+			assert('20' not in rv.status)
 			rv = self.login(email , str(password) + 'x')
-			assert('200' not in rv.status)
+			assert('20' not in rv.status)
 			rv= self.logout()
-			assert('200' in rv.status)
+			assert('20' in rv.status)
 		with app.app_context():
 			all_users = models.Carpooler.query.all()
 		assert(len(all_users) == len(emails))
@@ -261,7 +262,7 @@ class AppTestCase(unittest.TestCase):
 		#create pool
 		name = 'CARNIVAL'
 		address='1502 S Robertson Blvd, Los Angeles, CA 90035, USA'
-		dateTimeText='09-10-2017 19:30 -0700'
+		dateTimeText='10-10-2017 19:30 -0700'
 		email=emails[0]
 		fireNotice=6
 		latenessWindow=30
@@ -282,10 +283,10 @@ class AppTestCase(unittest.TestCase):
 		pool = models.Pool.query.filter_by(id=pool_id).first()
 		for i,email in enumerate(emails):
 			address=addresses[i]
-			must_drive='false'
-			num_seats='4'
-			on_time= 'false'
-			preWindow='30'
+			must_drive=must_drives[i]#'false'
+			num_seats=numbers_of_seats[i]
+			on_time= on_times[i]#'false'
+			preWindow=preWindows[i]#'30'
 			resubmit='false'
 
 			self.login(email,password)

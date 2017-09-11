@@ -79,7 +79,7 @@ def systemParamFromPool(pool):
 		must_drive.append(trip.must_drive) #trip.must_drive is int
 
 
-	params= SystemParam(email=email,name=name,carpooler_id=carpooler_id,address=address,numberCarSeats=numberCarSeats,minsAvail=minsAvail,extra=extra,must_drive=must_drive,pool_id=pool.id)
+	params= SystemParam(email=email,name=name,carpooler_id=carpooler_id,address=address,numberCarSeats=numberCarSeats,minsAvail=minsAvail,extra=extra,latenessWindow=int(pool.latenessWindow),eventAddress=pool.eventAddress,eventDate=pool.eventDate, eventTime= pool.eventTime, eventDateTime = pool.eventDateTime,must_drive=must_drive,pool_id=pool.id)
 	params.numel = len(email)
 	return params
 
@@ -200,8 +200,9 @@ def doGroupThere_fromDB(pool_id=None):
 						driveTimes = [sum(best[i:]) for i in range(len(best))]
 						minsAvail = itemgetter(*order)(params.minsAvail)
 
-						minArrivalMins = [driveTimes[i]-minsAvail[i] for i in range(len(driveTimes))]
 
+
+						minArrivalMins = [driveTimes[i]-minsAvail[i] for i in range(len(driveTimes))]
 
 						arrivalMins = max(max(minArrivalMins),0)
 						leaveMins = arrivalMins-plan['minTime']
@@ -213,6 +214,9 @@ def doGroupThere_fromDB(pool_id=None):
 
 					plan['arrivalTime'] = (eventDateTime + relativedelta(minutes=arrivalMins)).isoformat()
 					plan['departureTime']=(eventDateTime + relativedelta(minutes=leaveMins)).isoformat()
+
+					plan['arrivalTimeFull']=str(eventDateTime + relativedelta(minutes=arrivalMins))
+					plan['departureTimeFull']=str(eventDateTime + relativedelta(minutes=leaveMins))
 
 
 				instructions.instruction=json.dumps(instruction_helper)

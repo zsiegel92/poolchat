@@ -139,13 +139,28 @@ angular.module('myApp.viewPool', ['ngRoute'])
         });
     };
 
-    $scope.add = function(a, b) {
+    $scope.adder = function(a, b) {
       return a + b;
     };
 
     $scope.asDateTime = function(dateStr) {
       return new Date(Date.parse(dateStr));
     };
+
+    // $scope.relativeFromMinsFromString = function(rel,time){
+    //   copy = new Date(Date.parse(time));
+
+    //   $log.log("time: ");
+    //   $log.log(time);
+    //   copy.setMinutes(copy.getMinutes() + rel);
+    //   $log.log("changed to:");
+    //   $log.log(copy);
+    //   var copystr = $filter('date')(copy, format || 'hh:mma');
+    //   $log.log("returning:");
+    //   $log.log(copystr);
+
+    //   return copystr;
+    // };
 
 
     $scope.other_instructions = true;

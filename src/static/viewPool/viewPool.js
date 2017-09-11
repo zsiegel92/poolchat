@@ -209,10 +209,19 @@ angular.module('myApp.viewPool', ['ngRoute'])
               $scope.other_instructions=false;
             }
             $scope.toggleModal();
+
+            $scope.no_ride_names = [];
+            if ($scope.instruction.success!= 1){
+
+              for (var i of $scope.instruction.no_rides){
+                $scope.no_ride_names.push($scope.instruction.names[i]);
+              }
+
+            }
           }).
           catch(function(response) {
             $scope.waiting_for_instructions_text=undefined;
-            $scope.waiting_for_instructions_error="Error obtaining instructions. Please try again.";
+            $scope.waiting_for_instructions_error="Still optimizing. Please try again in one minute.";
             $scope.disabled = false;
             $scope.errorText=response.data;
           });

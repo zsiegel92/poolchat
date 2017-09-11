@@ -178,8 +178,15 @@ def doGroupThere_fromDB(pool_id=None):
 				instruction_helper['eventTime']=params.eventTime
 				instruction_helper['eventDateTime']=params.eventDateTime
 				instruction_helper['minsAvail']=params.minsAvail
-				instruction_helper['success']=params.solution['success']
 				instruction_helper['totalGroupTime']=params.solution['fun']
+
+				instruction_helper['optimization_ok']=params.solution['success']
+				instruction_helper['success']= (1 if (params.solution['all_got_rides'] is True) else 0)
+
+				instruction_helper['got_rides']= [i for i in range(len(params.solution['got_rides'])) if params.solution['got_rides'][i]==1]
+				instruction_helper['no_rides']=[i for i in range(len(params.solution['got_rides'])) if params.solution['got_rides'][i]==0]
+
+				# params.solution['got_rides']
 
 				eventDateTime= params.eventDateTime
 
@@ -219,8 +226,10 @@ def doGroupThere_fromDB(pool_id=None):
 					plan['departureTimeFull']=str(eventDateTime + relativedelta(minutes=leaveMins))
 
 
+				print("instruction_helper is " + str(instruction_helper))
 				instructions.instruction=json.dumps(instruction_helper)
-				instructions.success=str(params.solution['success'])
+				# instructions.success=str(params.solution['success'])
+				instructions.success=str(instruction_helper['success'])
 				#params.solution['success'] is a pulp.lpProblem.status, which is an lpStatus object
 				instructions.dateTime=datetime.now().isoformat()
 				db.session.add(instructions)

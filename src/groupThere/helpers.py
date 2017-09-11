@@ -322,20 +322,34 @@ def test_model(groups,times,params,n,maxSeats,verbose=False):
 
 @sayname
 def optimizePulp(model):
+	bigNumber = 9999999
 
 	Aeq=np.matrix(model['Aeq'])
 	f=np.matrix(model['f'])
 	m=Aeq.shape[0]
 	n=Aeq.shape[1]
+
 	x=pulp.LpVariable.dicts('assignments',range(0,n),lowBound=0,upBound=1,cat=pulp.LpBinary) #pulp.LpInteger
 	assignment_model=pulp.LpProblem('assignment model',pulp.LpMinimize)
-	assignment_model += pulp.lpSum([f[0,ind]*x[ind] for ind in range(0,n)])
+	# assignment_model += pulp.lpSum([f[0,ind]*x[ind] for ind in range(0,n)]) #OLD WAY
+	assignment_model += pulp.lpSum([(f[0,ind] - bigNumber*sum(Aeq[:,ind]))*x[ind] for ind in range(0,n)]) #NEW WAY
 	for l in range(0,m):
-		assignment_model += pulp.lpSum([x[ind]*Aeq[l,ind] for ind in range(0,n) if Aeq[l,ind]!=0])==1
+		# assignment_model += pulp.lpSum([x[ind]*Aeq[l,ind] for ind in range(0,n) if Aeq[l,ind]!=0])==1#OLD WAY
+		assignment_model += pulp.lpSum([x[ind]*Aeq[l,ind] for ind in range(0,n) if Aeq[l,ind]!=0])<=1 #NEW WAY
 	assignment_model.solve()
 	TOL=.00001
 	x_thresholded = np.matrix([1 if x[i].varValue > TOL else 0 for i in range(0,n)])
-	return (assignment_model.objective.value(),x_thresholded,assignment_model.status)
+
+	all_got_rides = all(Aeq.dot(x_thresholded.T))
+
+	got_rides = Aeq.dot(x_thresholded.T)
+	print("got_rides raw is: " + str(got_rides))
+	got_rides = [1 if abs(got_rides[i,0]) > 0.5 else 0 for i in range(0,m)]
+	print("got_rides is: " + str(got_rides))
+
+	ff = sum([f[0,ind]*x_thresholded[0,ind] for ind in range(0,n)])
+	# ff=assignment_model.objective.value() #OLD WAY
+	return (ff,x_thresholded,assignment_model.status,all_got_rides,got_rides)
 
 @sayname
 def gen_assignment_fromParams(params):
@@ -493,10 +507,6 @@ class shortTime:
 	# minimize_mode='human_hours'
 	# @self_monitor_results
 	def getShortTimeOneDriver(self,driver,participants,numParticipantsNotDriver,minimize_mode='car_hours',returnAll=False):
-		if returnAll is True:
-			print("(COMMENT_THIS) in getShortTimeOneDriver with args " + ", ".join([str(driver),str(participants),str(numParticipantsNotDriver)]))
-			print("canBeLate (len " + str(len(self.canBeLate)) + "): " + str(self.canBeLate))
-			print("minsAvail (len " + str(len(self.minsAvail)) + "): " + str(self.minsAvail))
 		# minimize_mode='car_hours'
 		#drivers is an int
 		#participants & drivers=={}

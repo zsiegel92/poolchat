@@ -39,8 +39,12 @@ def gt_fromDistmattedParams(params,mailParam):
 	mx=max(list(map(int,params.numberCarSeats)))
 	mx=min(mx,n)
 	params.model = generate_model(groups,times,n,mx)
-	(params.solution['fun'],params.solution['x'],params.solution['success']) = optimizePulp(params.model)
+	(params.solution['fun'],params.solution['x'],params.solution['success'],params.solution['all_got_rides'],params.solution['got_rides']) = optimizePulp(params.model)
+
+
 	print("Solution success: " + str(params.solution['success']))
+	print("All got rides: " + str(params.solution['all_got_rides']))
+
 	params.solution['assignments']=gen_assignment_fromParams(params)
 	# for ass in params.solution['assignments']:
 	# 	print(ass['names'])
@@ -71,7 +75,10 @@ def gt_fromBasicParams(params,mailParam):
 	params.groups['groups']=groups
 	params.groups['times'] = times
 	params.model = generate_model(groups,times,n,mx)
-	(params.solution['fun'],params.solution['x'],params.solution['success']) = optimizePulp(params.model)
+
+	(params.solution['fun'],params.solution['x'],params.solution['success'],params.solution['all_got_rides'],params.solution['got_rides']) = optimizePulp(params.model)
+
+
 	print("Solution success: " + str(params.solution['success']))
 	params.solution['assignments']=gen_assignment_fromParams(params)
 	# for ass in params.solution['assignments']:

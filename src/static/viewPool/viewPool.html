@@ -114,7 +114,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
             </div>
             <!-- INSTRUCTION -->
             <!-- ng-if="instruction"  -->
-            <modal-dialog show="modalShown" dialog-title="'{{instruction_pool.name}}'" dialog-subtitle="{{instruction_pool.address}}" dialog-sub2title="{{instruction_pool.date}} at {{instruction_pool.time}}" dialog-sub3title="{{instruction.numel}} participants - {{(instruction.success == 1) ? 'Everyone has a ride!' : 'Not everyone can make it - invite some more drivers!!'}}" dialog-sub4title="{{numAssignments}} Cars - combined total {{instruction.totalGroupTime}} minutes driving" width='99%' height='99%'>
+            <modal-dialog show="modalShown" dialog-title="'{{instruction_pool.name}}'" dialog-subtitle="{{instruction_pool.address}}" dialog-sub2title="{{instruction_pool.date}} at {{instruction_pool.time}}" dialog-sub3title="{{instruction.numel}} participants - {{(instruction.success == 1) ? 'Everyone has a ride!' : 'Not everyone can make it - invite some more drivers!! (' + no_ride_names.join(', ') + ' have no rides)'}}" dialog-sub4title="{{numAssignments}} Cars - combined total {{instruction.totalGroupTime}} minutes driving" width='99%' height='99%'>
             <!-- MY ASSIGNMENT -->
             <div class='modal-dialog-pane' ng-if="myAssignment">
                 <h4>
@@ -150,7 +150,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
                 </ul>
             </div>
             <div class='modal-dialog-pane' ng-if="!myAssignment">
-                <b>You are not currently part of a ride to this event. Feel free to check again with the button above. As folks join the event, you are more likely to find a ride.</b>
+                <b>You are not currently part of a ride to this event. Feel free to check again soon. As folks join the event, you are more likely to find a ride.</b>
             </div>
             <!-- OTHER ASSIGNMENTS -->
             <div class='modal-dialog-pane' ng-show="other_instructions" ng-repeat="ass in instruction.assignments">

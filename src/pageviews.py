@@ -136,7 +136,7 @@ def api_get_recent_instructions():
 			return jsonify(instruct),200
 		else:
 			api_re_optimize(pool_id=pool_id)
-			return "No instructions generated yet!",404
+			return "No instructions generated yet! Please try again in 1-5 minutes.",404
 
 
 

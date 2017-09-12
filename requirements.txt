@@ -1,9 +1,7 @@
 alembic==0.9.1
-appdirs==1.4.3
 bcrypt
 bitarray==0.8.1
 cffi
-click==6.7
 Flask==0.12.2
 flask-bcrypt
 Flask-Login==0.4.0
@@ -16,16 +14,12 @@ itsdangerous==0.24
 Jinja2==2.9.6
 Mako==1.0.6
 MarkupSafe==1.0
-packaging==16.8
 psycopg2==2.7.1
 PuLP-py3==1.5.5
-pycparser
-pyparsing==2.2.0
 python-editor==1.0.3
 redis==2.10.5
 requests==2.10.0
 rq==0.7.1
-six==1.10.0
 SQLAlchemy==1.1.9
 Werkzeug==0.12.1
 WTForms==2.1

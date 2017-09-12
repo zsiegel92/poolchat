@@ -31,7 +31,7 @@ class ProductionConfig(Config):
 	EMAIL = os.environ['EMAIL']
 	EMAIL_PASSWORD = os.environ['EMAIL_PASSWORD']
 	SEND_FILE_MAX_AGE_DEFAULT = 1200#seconds
-	URL_BASE='https://poolchat.herokuapp.com/'
+	URL_BASE='https://groupthere.herokuapp.com/'
 	# URL_BASE='www.grouptherenow.com/' #NO SSL!
 
 #NOTE: I can change this to:
@@ -89,5 +89,5 @@ class DevelopmentConfig(Config):
 	EMAIL = str(os.environ.get('EMAIL'))
 	EMAIL_PASSWORD = str(os.environ.get('EMAIL_PASSWORD'))
 	SEND_FILE_MAX_AGE_DEFAULT = 0#seconds
-	URL_BASE='https://poolchat.ngrok.io/'
+	URL_BASE='https://groupthere.ngrok.io/'
 	print("setting URL_BASE to " + str(URL_BASE))

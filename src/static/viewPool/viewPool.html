@@ -134,7 +134,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
 			<div class="panel panel-default" ng-repeat="pool in past_pools">
 				<div class="panel-heading">
 					<div class="panel-title">
-						<a data-toggle="collapse" class="collapsed" data-parent="#past_accordion" href="#collapse{{$index}}" style="font-family: 'Roboto', sans-serif; font-weight: bold; color: black;" onclick="return false;">
+						<a data-toggle="collapse" class="collapsed" data-parent="#past_accordion" href="#collapsepast{{$index}}" style="font-family: 'Roboto', sans-serif; font-weight: bold; color: black;" onclick="return false;">
 							<h4>
 							'{{pool.name}}' with <span ng-repeat="team in pool.teams">{{$first ? '' : ', '}}{{$last && !$first ? 'and ': ''}}{{team.name}}</span>
 							</h4>
@@ -143,7 +143,7 @@ Make sure $scope, $route, $routeParams are injected in controller -->
 						</a>
 					</div>
 				</div>
-				<div id="collapse{{$index}}" class="panel-collapse collapse">
+				<div id="collapsepast{{$index}}" class="panel-collapse collapse">
 					<div class="panel-body">
 						<h4 style="border-bottom: solid 1px #999;">         {{pool.address}}
 						</h4>

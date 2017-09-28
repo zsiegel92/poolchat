@@ -4,46 +4,46 @@ angular.module('myApp.viewPool', ['ngRoute'])
 
 .config(['$routeProvider', function($routeProvider) {
   $routeProvider
-    .when('/viewPool', {
-      templateUrl: 'static/viewPool/viewPool.html',
-      controller: 'viewPoolController',
-      access: {restricted: true}
-    })
-    .when('/viewPool/join_pool/:go_to_pool_id?', {
-      templateUrl: 'static/viewPool/viewPool.html',
-      controller: 'viewPoolController',
-      access: {restricted: true}
-    });
+  .when('/viewPool', {
+    templateUrl: 'static/viewPool/viewPool.html',
+    controller: 'viewPoolController',
+    access: {restricted: true}
+  })
+  .when('/viewPool/join_pool/:go_to_pool_id?', {
+    templateUrl: 'static/viewPool/viewPool.html',
+    controller: 'viewPoolController',
+    access: {restricted: true}
+  });
 }])
 .controller('viewPoolController',
-  ['$scope', '$location', 'AuthService','$route', '$routeParams','$log','$http','$window','$timeout','$filter',
-  function ($scope, $location, AuthService,$route,$routeParams,$log,$http,$window,$timeout,$filter) {
+            ['$scope', '$location', 'AuthService','$route', '$routeParams','$log','$http','$window','$timeout','$filter',
+            function ($scope, $location, AuthService,$route,$routeParams,$log,$http,$window,$timeout,$filter) {
 
 
-    var hours=0;
-    var minutes = 0;
-    var seconds=0;
-    $scope.toDays = function(secs){
-      return Math.floor(secs/86400);
-    };
-    $scope.toHours = function(secs){
-      return Math.floor(secs/3600) % 24;
-    };
-    $scope.toMinutes = function(secs){
-      return Math.floor(secs/60) % 60;
-    };
-    $scope.toSeconds = function(secs){
-      return Math.floor(secs)%60;
-    };
+              var hours=0;
+              var minutes = 0;
+              var seconds=0;
+              $scope.toDays = function(secs){
+                return Math.floor(secs/86400);
+              };
+              $scope.toHours = function(secs){
+                return Math.floor(secs/3600) % 24;
+              };
+              $scope.toMinutes = function(secs){
+                return Math.floor(secs/60) % 60;
+              };
+              $scope.toSeconds = function(secs){
+                return Math.floor(secs)%60;
+              };
 
 
 
-    $scope.counter = 0;
-    $scope.onTimeout = function(){
-        $scope.counter++;
-        mytimeout = $timeout($scope.onTimeout,1000);
-    };
-    var mytimeout = $timeout($scope.onTimeout,1000);
+              $scope.counter = 0;
+              $scope.onTimeout = function(){
+                $scope.counter++;
+                mytimeout = $timeout($scope.onTimeout,1000);
+              };
+              var mytimeout = $timeout($scope.onTimeout,1000);
     // $scope.stop = function(){
     //     $timeout.cancel(mytimeout);
     // };
@@ -62,12 +62,13 @@ angular.module('myApp.viewPool', ['ngRoute'])
 
 
 
-    $scope.getPoolInfoForUser = function() {
-      $log.log("Getting pool info");
-      $http.post('api/get_pool_info_for_user')
+      $scope.getPoolInfoForUser = function() {
+        $log.log("Getting pool info");
+        $http.post('api/get_pool_info_for_user')
         .then(function(response){
           $scope.teams = response.data.teams;
           $scope.joined_pools = response.data.joined_pools;
+          $scope.past_pools = response.data.past_pools;
           $scope.eligible_pools = response.data.eligible_pools;
           $scope.carpooler = response.data.carpooler;
           $scope.rawResponse= response.data;
@@ -94,12 +95,30 @@ angular.module('myApp.viewPool', ['ngRoute'])
               }
             }
             if (pool.trip.num_seats && pool.trip.num_seats > $scope.max_num_seats){
-                $scope.max_num_seats = $scope.joined_pools[i].trip.num_seats;
+              $scope.max_num_seats = pool.trip.num_seats;
             }
             if (!$scope.ever_organizer && pool.trip.on_time && pool.trip.on_time==1){
               $scope.ever_organizer=1;
             }
-           if (!$scope.ever_must_drive && pool.trip.must_drive && pool.trip.must_drive==1){
+            if (!$scope.ever_must_drive && pool.trip.must_drive && pool.trip.must_drive==1){
+              $scope.ever_must_drive=1;
+            }
+          }
+          for (var i = 0; i < $scope.past_pools.length; i++) {
+            pool = $scope.past_pools[i];
+            ad = pool.trip.address;
+            if (ad){
+              if ($scope.past_addresses.indexOf(ad) == -1 && ad !=''){
+                $scope.past_addresses.push(pool.trip.address);
+              }
+            }
+            if (pool.trip.num_seats && pool.trip.num_seats > $scope.max_num_seats){
+              $scope.max_num_seats = pool.trip.num_seats;
+            }
+            if (!$scope.ever_organizer && pool.trip.on_time && pool.trip.on_time==1){
+              $scope.ever_organizer=1;
+            }
+            if (!$scope.ever_must_drive && pool.trip.must_drive && pool.trip.must_drive==1){
               $scope.ever_must_drive=1;
             }
           }
@@ -131,21 +150,21 @@ angular.module('myApp.viewPool', ['ngRoute'])
               }
             }
           }
-       })
+        })
         .catch(function(response) {
           $scope.errorText=response.data;
           $log.log(response.data);
           $log.log("Error in getPoolInfo calling api/get_pool_info API");
         });
-    };
+      };
 
-    $scope.adder = function(a, b) {
-      return a + b;
-    };
+      $scope.adder = function(a, b) {
+        return a + b;
+      };
 
-    $scope.asDateTime = function(dateStr) {
-      return new Date(Date.parse(dateStr));
-    };
+      $scope.asDateTime = function(dateStr) {
+        return new Date(Date.parse(dateStr));
+      };
 
     // $scope.relativeFromMinsFromString = function(rel,time){
     //   copy = new Date(Date.parse(time));
@@ -171,82 +190,91 @@ angular.module('myApp.viewPool', ['ngRoute'])
 
     $scope.getPoolInfoForUser();
 
-    $scope.getPoolInstructions = function(ind,viewAll) {
+    $scope.getPoolInstructions = function(ind,viewAll,past=false) {
       $scope.disabled=true;
       $scope.waiting_for_instructions_text="Fetching instructions. Please wait.";
-      var pool = $scope.joined_pools[ind];
-      $scope.instruction_pool =$scope.joined_pools[ind];
-      $scope.current_instruction=ind;
+
+      $log.log("getting instructions for a past pool: " + String(past));
+      if (past===false){
+      	$scope.instruction_pool =$scope.joined_pools[ind];
+      	var pool = $scope.joined_pools[ind];
+      }
+      else {
+      	$scope.instruction_pool =$scope.past_pools[ind];
+      	var pool = $scope.past_pools[ind];
+      }
+
+      // $scope.current_instruction=ind;
       $http.post('/api/get_most_recent_instructions',
-                  $.param(
-                    {
-                      pool_id:pool.id
-                    }
-                  ),
-                  {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+                 $.param(
+                 {
+                  pool_id:pool.id
+                }
+                ),
+                 {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
 
-          .then(function(response) {
-            $scope.disabled = false;
-            $scope.waiting_for_instructions_error=undefined;
-            $scope.waiting_for_instructions_text=undefined;
-            $log.log("Full instruction information:");
-            $log.log(response.data);
-            $scope.instruction = response.data;
-            $scope.numAssignments = $scope.instruction.assignments.length;
-            if ($scope.instruction.my_ass_index > -1){
-              $scope.myAssignment = $scope.instruction.assignments[$scope.instruction.my_ass_index];
-              $scope.instruction.assignments.splice($scope.instruction.my_ass_index,1);
-            }
-            $log.log("My assignment:");
-            $log.log($scope.myAssignment);
-            $log.log("Other assignments:");
-            $log.log($scope.instruction.assignments);
-            $scope.errorText=undefined;
-            if (viewAll===true){
-              $scope.other_instructions=true;
-            }
-            else{
-              $scope.other_instructions=false;
-            }
-            $scope.toggleModal();
+      .then(function(response) {
+        $scope.disabled = false;
+        $scope.waiting_for_instructions_error=undefined;
+        $scope.waiting_for_instructions_text=undefined;
+        $log.log("Full instruction information:");
+        $log.log(response.data);
+        $scope.instruction = response.data;
+        $scope.numAssignments = $scope.instruction.assignments.length;
+        if ($scope.instruction.my_ass_index > -1){
+          $scope.myAssignment = $scope.instruction.assignments[$scope.instruction.my_ass_index];
+          $scope.instruction.assignments.splice($scope.instruction.my_ass_index,1);
+        }
+        $log.log("My assignment:");
+        $log.log($scope.myAssignment);
+        $log.log("Other assignments:");
+        $log.log($scope.instruction.assignments);
+        $scope.errorText=undefined;
+        if (viewAll===true){
+          $scope.other_instructions=true;
+        }
+        else{
+          $scope.other_instructions=false;
+        }
+        $scope.toggleModal();
 
-            $scope.no_ride_names = [];
-            if ($scope.instruction.success!= 1){
+        $scope.no_ride_names = [];
+        if ($scope.instruction.success!= 1){
 
-              for (var i of $scope.instruction.no_rides){
-                $scope.no_ride_names.push($scope.instruction.names[i]);
-              }
+          for (var i of $scope.instruction.no_rides){
+            $scope.no_ride_names.push($scope.instruction.names[i]);
+          }
 
-            }
-          }).
-          catch(function(response) {
-            $scope.waiting_for_instructions_text=undefined;
-            $scope.waiting_for_instructions_error="Still optimizing. Please try again in one minute.";
-            $scope.disabled = false;
-            $scope.errorText=response.data;
-          });
+        }
+      }).
+      catch(function(response) {
+        $scope.waiting_for_instructions_text=undefined;
+        $scope.waiting_for_instructions_error="Still optimizing. Please try again in one minute.";
+        $scope.disabled = false;
+        $scope.errorText=response.data;
+      });
     };
     $scope.redoPool = function(ind) {
       var pool = $scope.joined_pools[ind];
 
       $http.post('/api/re_optimize',
-                  $.param(
-                    {
-                      pool_id:pool.id
-                    }
-                  ),
-                  {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+                 $.param(
+                 {
+                  pool_id:pool.id
+                }
+                ),
+                 {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
 
-          .then(function(response) {
-            $scope.disabled = false;
-            $log.log("Re-Optimizing");
-            $scope.resultText=response.data;
-            $scope.errorText=undefined;
-          }).
-          catch(function(response) {
-            $scope.disabled = false;
-            $scope.errorText=response.data;
-          });
+      .then(function(response) {
+        $scope.disabled = false;
+        $log.log("Re-Optimizing");
+        $scope.resultText=response.data;
+        $scope.errorText=undefined;
+      }).
+      catch(function(response) {
+        $scope.disabled = false;
+        $scope.errorText=response.data;
+      });
     };
 
 
@@ -273,7 +301,7 @@ angular.module('myApp.viewPool', ['ngRoute'])
       // $log.log($window.encodeURIComponent(pth));
       // $location.path($window.encodeURIComponent(pth));
       $location.path(pth);
-  };
+    };
 
 
-}]);
+  }]);

@@ -19,7 +19,6 @@ from rq.job import Job
 from worker import conn
 q = Queue(connection=conn)
 
-
 from interactions import newPool
 from models import  Carpooler,Pool, Trip,ensure_carpooler_notNone,Team,TempTeam,Trip_Distance,Event_Distance,Instruction
 
@@ -161,6 +160,7 @@ def api_get_pool_info_for_user():
 
 
 	joined_pools =[{'id':trip.pool.id,'name':trip.pool.poolName,'date':trip.pool.eventDate,'time':trip.pool.eventTime,'address':trip.pool.eventAddress,'email':trip.pool.eventEmail,'fireNotice':trip.pool.fireNotice,'latenessWindow':trip.pool.latenessWindow,'dateTime':trip.pool.eventDateTime.isoformat(),'noticeWentOut':trip.pool.noticeWentOut,'members':[other_trip.member.name for other_trip in trip.pool.members],'trip':{'address':trip.address,'num_seats':trip.num_seats,'preWindow':trip.preWindow,'on_time':trip.on_time,'must_drive':trip.must_drive},'teams':[team.to_dict() for team in trip.pool.teams]} for trip in current_user.pools if trip.pool.eventDateTime > datetime.now(tz=trip.pool.eventDateTime.tzinfo)]
+	past_pools =[{'id':trip.pool.id,'name':trip.pool.poolName,'date':trip.pool.eventDate,'time':trip.pool.eventTime,'address':trip.pool.eventAddress,'email':trip.pool.eventEmail,'fireNotice':trip.pool.fireNotice,'latenessWindow':trip.pool.latenessWindow,'dateTime':trip.pool.eventDateTime.isoformat(),'noticeWentOut':trip.pool.noticeWentOut,'members':[other_trip.member.name for other_trip in trip.pool.members],'trip':{'address':trip.address,'num_seats':trip.num_seats,'preWindow':trip.preWindow,'on_time':trip.on_time,'must_drive':trip.must_drive},'teams':[team.to_dict() for team in trip.pool.teams]} for trip in current_user.pools if trip.pool.eventDateTime < datetime.now(tz=trip.pool.eventDateTime.tzinfo)]
 	unjoined_pools=[{'id':pool.id,'name':pool.poolName,'date':pool.eventDate,'time':pool.eventTime,'address':pool.eventAddress,'email':pool.eventEmail,'fireNotice':pool.fireNotice,'latenessWindow':pool.latenessWindow,'dateTime':pool.eventDateTime.isoformat(),'noticeWentOut':pool.noticeWentOut,'teams':[poolTeam.to_dict() for poolTeam in pool.teams],'members':[other_trip.member.name for other_trip in pool.members],'team_names':[poolTeam.name for poolTeam in pool.teams]} for team in current_user.teams for pool in team.pools if ((pool.id in unjoined_pool_ids) and (pool.eventDateTime > datetime.now(tz=pool.eventDateTime.tzinfo))) ]
 	carpooler={'name':current_user.name,'first':current_user.firstname,'last':current_user.lastname,'email':current_user.email}
 
@@ -176,10 +176,10 @@ def api_get_pool_info_for_user():
 	eligible_pools=unique_unjoined
 
 	joined_pools = sorted(joined_pools, key= lambda x: x['dateTime'])
+	past_pools = sorted(past_pools, key= lambda x: x['dateTime'])
 	eligible_pools=sorted(eligible_pools,key=lambda x: x['dateTime'])
 
-
-	return jsonify({'teams':teams,'joined_pools':joined_pools,'eligible_pools':eligible_pools,'carpooler':carpooler}),200
+	return jsonify({'teams':teams,'joined_pools':joined_pools,'eligible_pools':eligible_pools,'past_pools':past_pools,'carpooler':carpooler}),200
 
 
 

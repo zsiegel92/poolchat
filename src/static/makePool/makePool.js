@@ -4,19 +4,19 @@ angular.module('myApp.makePool', ['ngRoute'])
 
 .config(['$routeProvider', function($routeProvider) {
   $routeProvider
-    .when('/makePool', {
-      templateUrl: 'static/makePool/makePool.html',
-      controller: 'makePoolController',
-      access: {restricted: true}
-    });
+  .when('/makePool', {
+    templateUrl: 'static/makePool/makePool.html',
+    controller: 'makePoolController',
+    access: {restricted: true}
+  });
 }])
 
 .controller('makePoolController',
-  ['$scope', '$location','$log', '$http','$filter','AuthService','$rootScope',
-  function ($scope, $location, $log, $http,$filter,AuthService,$rootScope) {
-    $log.log('in makePool.js');
+            ['$scope', '$location','$log', '$http','$filter','AuthService','$rootScope',
+            function ($scope, $location, $log, $http,$filter,AuthService,$rootScope) {
+              $log.log('in makePool.js');
 
-    $scope.presetting=false;
+              $scope.presetting=false;
     // $log.log("tomorrow is: ");
     // $log.log(relativeDateText(1));
     var relativeDateText = function(rel,format) {
@@ -84,29 +84,29 @@ angular.module('myApp.makePool', ['ngRoute'])
       // fire the API request
       // returns: {'team_names':team_names,'team_ids':team_ids,'message':message,}
       $http.post('/api/get_teams/')
-        .then(function(response) {
-          $log.log("Teams for user:");
-          $log.log(response.data);
-          $log.log("http request successful");
-          return response;
-        })
-        .then(function(response) {
-          $scope.teams=response.data.teams;
+      .then(function(response) {
+        $log.log("Teams for user:");
+        $log.log(response.data);
+        $log.log("http request successful");
+        return response;
+      })
+      .then(function(response) {
+        $scope.teams=response.data.teams;
 
-          $scope.self=response.data.self;
-          $scope.message = response.data.makePoolMessage;
-          $scope.resultText = response.data.makePoolMessage;
+        $scope.self=response.data.self;
+        $scope.message = response.data.makePoolMessage;
+        $scope.resultText = response.data.makePoolMessage;
 
-          $scope.teamSelection = [];
-          $scope.teamSelection_ids=[];
-          $scope.poolForm.selectedTeams = {};
-          for (var i=0; i< $scope.teams.length;i++){
-            $scope.poolForm.selectedTeams[String(i)]=true;
-            $scope.teamSelection_ids[i]=$scope.teams[i].id;
-            $scope.teamSelection[i]=$scope.teams[i].name;
-          }
-        })
-        .catch(function(error) {
+        $scope.teamSelection = [];
+        $scope.teamSelection_ids=[];
+        $scope.poolForm.selectedTeams = {};
+        for (var i=0; i< $scope.teams.length;i++){
+          $scope.poolForm.selectedTeams[String(i)]=true;
+          $scope.teamSelection_ids[i]=$scope.teams[i].id;
+          $scope.teamSelection[i]=$scope.teams[i].name;
+        }
+      })
+      .catch(function(error) {
           // Note: if exception thrown in second .then, response will be undefined.
           $log.log("ERROR in /api/get_teams/ request");
           $log.log(error);
@@ -122,55 +122,55 @@ angular.module('myApp.makePool', ['ngRoute'])
       // fire the API request
       // returns: {'team_names':team_names,'team_ids':team_ids,'message':message,}
       $http.post('/api/confirm_address/',
-              $.param(
-                {
+                 $.param(
+                 {
                   address:$scope.poolForm.ngAddress
                 }
-              ),
-              {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
-        .then(function(response) {
-          $scope.disabled = false;
-          $log.log("Confirmed address!");
-          $log.log(response.data);
-          $scope.resultText="Confirmed address!";
-          $scope.poolForm.ngAddress=response.data.formatted_address;
-          $scope.image_url=response.data.image_url;
-          $scope.address_confirmed=true;
-        }).
-        catch(function(response) {
-          $scope.disabled = false;
-          $log.log(response.data);
-          $scope.resultText="error confirming address.";
-        });
+                ),
+                 {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+      .then(function(response) {
+        $scope.disabled = false;
+        $log.log("Confirmed address!");
+        $log.log(response.data);
+        $scope.resultText="Confirmed address!";
+        $scope.poolForm.ngAddress=response.data.formatted_address;
+        $scope.image_url=response.data.image_url;
+        $scope.address_confirmed=true;
+      }).
+      catch(function(response) {
+        $scope.disabled = false;
+        $log.log(response.data);
+        $scope.resultText="error confirming address.";
+      });
     };
 
 
 
 
-  $scope.register = function() {
-    $scope.initial.ngTime.setDate($scope.initial.ngDate.getDate());
-    $scope.initial.ngTime.setMonth($scope.initial.ngDate.getMonth());
-    $scope.initial.ngTime.setFullYear($scope.initial.ngDate.getFullYear());
-    var dateTime=$filter('date')($scope.initial.ngTime,'MM-dd-yyyy HH:mm Z');
+    $scope.register = function() {
+      $scope.initial.ngTime.setDate($scope.initial.ngDate.getDate());
+      $scope.initial.ngTime.setMonth($scope.initial.ngDate.getMonth());
+      $scope.initial.ngTime.setFullYear($scope.initial.ngDate.getFullYear());
+      var dateTime=$filter('date')($scope.initial.ngTime,'MM-dd-yyyy HH:mm Z');
 
 
-    $scope.disabled = true;
+      $scope.disabled = true;
 
-    $log.log("Registering:");
-    $log.log(                {
-                  name:$scope.poolForm.ngName,
-                  address:$scope.poolForm.ngAddress,
-                  dateTimeText:dateTime,
-                  email:$scope.poolForm.ngEmail,
-                  fireNotice:$scope.poolForm.ngFireNotice,
-                  latenessWindow:$scope.poolForm.ngLatenessWindow,
-                  team_ids:angular.toJson($scope.teamSelection_ids),
-                  teams:$scope.teamSelection,
-                  teams2:$scope.poolForm.selectedTeams
-                });
-    $http.post('/api/create_pool/',
-              $.param(
-                {
+      $log.log("Registering:");
+      $log.log(                {
+        name:$scope.poolForm.ngName,
+        address:$scope.poolForm.ngAddress,
+        dateTimeText:dateTime,
+        email:$scope.poolForm.ngEmail,
+        fireNotice:$scope.poolForm.ngFireNotice,
+        latenessWindow:$scope.poolForm.ngLatenessWindow,
+        team_ids:angular.toJson($scope.teamSelection_ids),
+        teams:$scope.teamSelection,
+        teams2:$scope.poolForm.selectedTeams
+      });
+      $http.post('/api/create_pool/',
+                 $.param(
+                 {
                   name:$scope.poolForm.ngName,
                   address:$scope.poolForm.ngAddress,
                   dateTimeText:dateTime,
@@ -179,20 +179,20 @@ angular.module('myApp.makePool', ['ngRoute'])
                   latenessWindow:$scope.poolForm.ngLatenessWindow,
                   team_ids:angular.toJson($scope.teamSelection_ids)
                 }
-              ),
-              {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+                ),
+                 {headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
 
       .then(function(response) {
         var baseURL = $location.$$absUrl.replace($location.$$url, '');
     // $scope.fullURL = $location.$$absUrl;
-        $scope.disabled = false;
-        $log.log("Registration response::");
-        $log.log(response.data);
-        $scope.resultText=response.data;
-        alert("You have created this event, but you are NOT an atendee until you register! You're on your way there now ("+ baseURL + '/viewPool/)');
-        $location.path('/viewPool');
+    $scope.disabled = false;
+    $log.log("Registration response::");
+    $log.log(response.data);
+    $scope.resultText=response.data;
+    alert("You have created this event, but you are NOT an atendee until you register! You're on your way there now ("+ baseURL + '/viewPool/)');
+    $location.path('/viewPool');
 
-      }).
+  }).
       catch(function(response) {
         $scope.disabled = false;
         if (response.status==409){
@@ -204,17 +204,17 @@ angular.module('myApp.makePool', ['ngRoute'])
           $scope.resultText="Error registering Pool.";
         }
       });
-  };
+    };
 
 
 
   // Called in ng-init of $poolForm.ngEmail
   $scope.setEmail=function(){
     AuthService.requestMyEmail()
-        .then(function(){
-          $rootScope.myEmail=AuthService.getMyEmail();
-          $scope.poolForm.ngEmail= $rootScope.myEmail;
-        });
+    .then(function(){
+      $rootScope.myEmail=AuthService.getMyEmail();
+      $scope.poolForm.ngEmail= $rootScope.myEmail;
+    });
   };
 
   $scope.getTeams();

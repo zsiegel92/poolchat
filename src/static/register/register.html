@@ -5,7 +5,7 @@
     <!-- First Name -->
     <div class="form-group">
       <label>First Name</label>
-      <input type="text" class="form-control" name="first" ng-model="registerFormValues.ngFirst" placeholder="First Name, 3-25 characters" ng-minlength="1" ng-maxlength="25" required>
+      <input type="text" class="form-control" name="first" ng-model="registerFormValues.ngFirst" placeholder="First Name, 1-25 characters" ng-minlength="1" ng-maxlength="25" required>
       <span class="invalid" ng-show="registerForm.first.$error.minlength || registerForm.first.$error.maxlength">First Name must be between 1 and 25 characters
       </span>
     </div>

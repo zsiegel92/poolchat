@@ -66,8 +66,8 @@ class RegistrationForm(wtforms.Form):
 
 
 class ngRegistrationForm(wtforms.Form):
-	firstName = StringField('First Name', [validators.Length(min=4, max=25)])
-	lastName = StringField('Last Name', [validators.Length(min=4, max=25)])
+	firstName = StringField('First Name', [validators.Length(min=1, max=25)])
+	lastName = StringField('Last Name', [validators.Length(min=1, max=25)])
 	email = StringField('Email Address', [validators.Length(min=6, max=35),validators.Required("Please enter your email address."), validators.Email("Please enter your email address.")])
 	password = PasswordField('New Password', [validators.Length(min=4, max=25),
 		validators.DataRequired(),

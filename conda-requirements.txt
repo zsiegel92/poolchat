@@ -1,7 +1,7 @@
 # This file may be used to create an environment using:
 # $ conda create --name <env> --file <this file>
 # platform: osx-64
-numpy=1.9.2=py34_0
-python=3.4.3=0
-python-dateutil=2.6.0=py34_0
-scipy=0.16.0=np19py34_0
+numpy
+python
+python-dateutil
+scipy

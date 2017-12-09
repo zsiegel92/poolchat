@@ -1,0 +1,37 @@
+requirements:
+
+alembic==0.9.1
+bcrypt
+bitarray==0.8.1
+cffi
+Flask==0.12.2
+flask-bcrypt
+Flask-Login==0.4.0
+Flask-Migrate==2.0.3
+Flask-Script==2.0.5
+Flask-SQLAlchemy==2.2
+Flask-SSLify==0.1.5
+gunicorn==19.6.0
+itsdangerous==0.24
+Jinja2==2.9.6
+Mako==1.0.6
+MarkupSafe==1.0
+psycopg2==2.7.1
+PuLP-py3==1.5.5
+python-editor==1.0.3
+redis==2.10.5
+requests==2.10.0
+rq==0.7.1
+SQLAlchemy==1.1.9
+Werkzeug==0.12.1
+WTForms==2.1
+
+conda-requirements:
+
+# This file may be used to create an environment using:
+# $ conda create --name <env> --file <this file>
+# platform: osx-64
+numpy=1.9.2=py34_0
+python=3.4.3=0
+python-dateutil=2.6.0=py34_0
+scipy=0.16.0=np19py34_0

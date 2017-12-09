@@ -3,6 +3,7 @@
 src/Scratch/
 src/groupThere/Inputs
 src/__pycache__/
+src/env/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

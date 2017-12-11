@@ -190,19 +190,36 @@ angular.module('myApp.viewPool', ['ngRoute'])
 
     $scope.getPoolInfoForUser();
 
-    $scope.getPoolInstructions = function(ind,viewAll,past=false) {
+    $scope.getPoolInstructions = function(ind,viewAll,past=false,eligible=false) {
       $scope.disabled=true;
       $scope.waiting_for_instructions_text="Fetching instructions. Please wait.";
 
       $log.log("getting instructions for a past pool: " + String(past));
-      if (past===false){
-      	$scope.instruction_pool =$scope.joined_pools[ind];
-      	var pool = $scope.joined_pools[ind];
+
+      if (past===true){
+        $scope.instruction_pool =$scope.past_pools[ind];
+        var pool = $scope.past_pools[ind];
+      }
+      else if (eligible===true){
+        $log.log("Getting a merely ELIGIBLE pool instructions.");
+        $log.log($scope.eligible_pools);
+        $log.log(ind);
+        $scope.instruction_pool=$scope.eligible_pools[ind];
+        var pool = $scope.eligible_pools[ind];
       }
       else {
-      	$scope.instruction_pool =$scope.past_pools[ind];
-      	var pool = $scope.past_pools[ind];
+        $scope.instruction_pool =$scope.joined_pools[ind];
+        var pool = $scope.joined_pools[ind];
       }
+
+      // if (past===false){
+      // 	$scope.instruction_pool =$scope.joined_pools[ind];
+      // 	var pool = $scope.joined_pools[ind];
+      // }
+      // else {
+      // 	$scope.instruction_pool =$scope.past_pools[ind];
+      // 	var pool = $scope.past_pools[ind];
+      // }
 
       // $scope.current_instruction=ind;
       $http.post('/api/get_most_recent_instructions',

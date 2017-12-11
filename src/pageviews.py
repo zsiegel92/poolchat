@@ -85,6 +85,12 @@ def post_call_view_pool():
 
 	return jsonify(poolDict),status
 
+def user_on_participating_team(user,pool):
+	for team in user.teams:
+		if team in pool.teams:
+			return True
+	return False
+
 @app.route('/api/re_optimize',methods=['POST'])
 @login_required
 def api_re_optimize(pool_id=None):
@@ -93,7 +99,8 @@ def api_re_optimize(pool_id=None):
 	pool = Pool.query.filter_by(id=pool_id).first()
 	if pool is None:
 		return "No such event!",404
-	if current_user not in [trip.member for trip in pool.members]:
+
+	if (current_user not in [trip.member for trip in pool.members]) and (not user_on_participating_team(current_user,pool)):
 		return "Not a member of this pool! Access denied.",401
 	else:
 		q.enqueue_call(func=doGroupThere_fromDB,kwargs={'pool_id':pool_id},result_ttl=5000)
@@ -105,7 +112,8 @@ def api_re_optimize(pool_id=None):
 def api_get_recent_instructions():
 	pool_id=request.values.get('pool_id')
 	pool = Pool.query.filter_by(id=pool_id).first()
-	if current_user not in [trip.member for trip in pool.members]:
+
+	if (current_user not in [trip.member for trip in pool.members]) and (not user_on_participating_team(current_user,pool)):
 		return "Not a member of this pool! Access denied.",401
 	else:
 		instruction = Instruction.query.filter_by(pool_id=pool_id).order_by(Instruction.dateTime.desc()).first()

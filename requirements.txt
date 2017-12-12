@@ -14,7 +14,7 @@ Jinja2
 Mako
 MarkupSafe
 nomkl
-numpy=1.13.1=*nomkl*
+numpy
 psycopg2
 PuLP-py3
 python-dateutil

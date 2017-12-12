@@ -13,7 +13,6 @@ itsdangerous
 Jinja2
 Mako
 MarkupSafe
-nomkl
 numpy
 psycopg2
 PuLP-py3

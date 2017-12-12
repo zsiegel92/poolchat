@@ -1,341 +1,372 @@
-    :root{
-        --background-color:#bedfd9;
-        --GT-color-1:white;
-        --GT-color-2:#d9534f;
+    :root {
+        --background-color: #bedfd9;
+        --GT-color-1: white;
+        --GT-color-2: #d9534f;
         /*--background-color:#8ac4d1; blue*/
-        /*--background-color:#E288A0;*/ /*pink*/
+        /*--background-color:#E288A0;*/
+        /*pink*/
+
         --accent-color: #d6abd0;
     }
-
+    html {
+        height: 100%;
+    }
     body {
-      height:100%;
-      min-height:100%;
-      width:100%;
-      margin: 0;
-      padding: 0;
-      background-color: var(--background-color);
-      /*background-color: #E288A0;*/
-      font-family: 'Roboto', sans-serif;
+        height: 100%;
+        min-height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: var(--background-color);
+        /*background-color: #E288A0;*/
+
+        font-family: 'Roboto', sans-serif;
+    }
+    .non-nav-content {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
     }
 
+    .ngcontent {
+      flex: 1 0 auto;
+    }
 
-.select2char{
-  max-width:calc(2em + 15px);
-  overflow:hidden;
-}
+    /* FOOTER STUFF */
 
-@media only screen and (max-device-width: 480px){
-  .select2char{
-  max-width:calc(3em + 10px);
-  overflow:hidden;
-}
-}
-.address_conf_button{
- /*word-wrap:normal;*/
-white-space: normal;
-}
-/*@media only screen and (max-device-width: 480px){
-  .address_conf_button{
-  max-width:12em;
-  word-wrap:break-word;
-}
+    .footer-distributed {
+        background-color: #292c2f;
+        box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.12);
+        box-sizing: border-box;
+        width: 100%;
+        font: bold 16px sans-serif;
+        text-align: left;
+        padding: 50px 60px 40px;
+        margin-top: 80px;
+        overflow: hidden;
+        vertical-align: bottom;
+        flex-shrink: 0;
+    }
+    /* Footer left */
+
+    .footer-distributed .footer-left {
+        float: left;
+    }
+    /* The company logo */
+
+    .footer-distributed h3 {
+        color: var(--GT-color-1);
+        font: normal 36px 'Ubuntu';
+        margin: 0 0 10px;
+    }
+    .footer-distributed h3 span {
+        color: var(--GT-color-2);
+    }
+    /* Footer links */
+
+    .footer-distributed .footer-links {
+        color: #ffffff;
+        margin: 0 0 10px;
+        padding: 0;
+    }
+    .footer-distributed .footer-links a {
+        display: inline-block;
+        line-height: 1.8;
+        text-decoration: none;
+        color: inherit;
+    }
+    .footer-distributed .footer-company-name {
+        color: #8f9296;
+        font-size: 14px;
+        font-weight: normal;
+        margin: 0;
+    }
+    /* Footer social icons */
+
+    .footer-distributed .footer-icons {
+        margin-top: 40px;
+    }
+    .footer-distributed .footer-icons a {
+        display: inline-block;
+        width: 35px;
+        height: 35px;
+        cursor: pointer;
+        background-color: #33383b;
+        border-radius: 2px;
+        font-size: 20px;
+        color: #ffffff;
+        text-align: center;
+        line-height: 35px;
+        margin-right: 3px;
+        margin-bottom: 5px;
+    }
+    /* Footer Right */
+
+    .footer-distributed .footer-right {
+        float: right;
+    }
+    .footer-distributed .footer-right p {
+        display: inline-block;
+        vertical-align: top;
+        margin: 15px 42px 0 0;
+        color: #ffffff;
+    }
+    /* The contact form */
+
+    .footer-distributed form {
+        display: inline-block;
+    }
+    .footer-distributed form input,
+    .footer-distributed form textarea {
+        display: block;
+        border-radius: 3px;
+        box-sizing: border-box;
+        background-color: #1f2022;
+        box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.1);
+        border: none;
+        resize: none;
+        font: inherit;
+        font-size: 14px;
+        font-weight: normal;
+        color: #d1d2d2;
+        width: 400px;
+        padding: 18px;
+    }
+    /*textarea.ng-invalid{
+      border:2px solid red;
 }*/
 
-
-    /*@import url("https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css");*/
-    .panel-title > a:before {
-        float: right !important;
-        font-family: FontAwesome;
-        content:"\f196";/*"\f055"*/
-        padding-right: 5px;
+    .footer-distributed .footForm.ng-dirty.ng-invalid textarea.ng-invalid {
+        border: 1px solid red;
     }
-
-    .panel-title > a:not(.collapsed):before {
-       /* float: right !important;*/
-        /*font-family: FontAwesome;*/
-        content:"\f147";/*"\f056"*/
-        /*padding-right: 5px;*/
+    .footer-distributed .footForm.ng-dirty.ng-invalid input.ng-invalid {
+        border: 1px solid red;
     }
-
-    .thinBorder {
-      border:1px solid black;
-      padding: 5px;
-      margin: 3px;
-      border-radius: 4px;
+    .footer-distributed::-webkit-input-placeholder {
+        color: #5c666b;
     }
-/*MODAL MODAL MODAL*/
-/*https://github.com/adamalbrecht/ngModal*/
-.ng-modal {
-  position: fixed;
-  z-index: 9999;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-.ng-modal-overlay {
-  position: absolute;
-  z-index: 9999;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0.8;
-}
-.ng-modal-dialog {
-  z-index: 10000;
-  /*position:relative absolute;*/ /* CAME WITH THIS*/
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 50%;
-  transform: translate(-50%, -50%);
-  -webkit-transform: translate(-50%, -50%);
-  -moz-transform: translate(-50%, -50%);
-  -ms-transform: translate(-50%, -50%);
-  -o-transform: translate(-50%, -50%);
-  background-color: #fff;
-  box-shadow: 4px 4px 80px #000;
-  -webkit-box-shadow: 4px 4px 80px #000;
-  -moz-box-shadow: 4px 4px 80px #000;
-  -ms-box-shadow: 4px 4px 80px #000;
-  -o-box-shadow: 4px 4px 80px #000;
-  padding: 10px;
-  overflow: hidden;
-  /*justify-content: center;*/
-  /*overflow-y: scroll;*/
-
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color:#cbced3;
-
-}
-.ng-modal-dialog-pane{
-/*  word-wrap: break-word;
-    overflow-wrap: break-word;*/
-    word-wrap: break-word;
-    word-break: break-all;
-
-}
-.ng-modal-dialog-content {
-
-    background-color: #cedbef;
-
-  overflow-y: scroll;
-
-
-    /*word-break: break-all;*/
-
-      border-radius: 6px;
-    border: 2px solid black;
-
-    width: 95%;
-}
-
-.ng-modal-close {
-  position: absolute;
-  top: 3px;
-  right: 5px;
-  cursor: pointer;
-  font-size: 120%;
-  padding: 5px;
-  display: inline-block;
-}
-.ng-modal-close-x {
-  font-weight: bold;
-  font-family: Arial, sans-serif;
-}
-.ng-modal-title {
-  font-weight: bold;
-  font-size: 200%;
-  display: block;
-  margin-bottom: 0px;
-  padding-bottom: 0px;
-  /*border-bottom: solid 1px #999;*/
-}
-.ng-modal-subtitle {
-  font-weight: bold;
-  font-size: 135%;
-  display: block;
-  margin-top: 4px;
-  padding-top: 3px;
-  /*border-bottom: solid 1px #999;*/
-}
-.ng-modal-subsubtitle{
-  font-weight: bold;
-  font-size: 115%;
-  display: block;
-  margin-top: 4px;
-  padding-top: 3px;
-  /*border-bottom: solid 1px #999;*/
-}
-.ng-modal-sub3title{
-  font-weight: bold;
-  font-size: 100%;
-  display: block;
-  margin-top: 4px;
-  padding-top: 3px;
-  /*border-bottom: solid 1px #999;*/
-}
-.ng-modal-underline {
-  font-weight: bold;
-  font-size: 150%;
-  display: block;
-  margin-top: 10px;
-  padding-top: 7px;
-  border-bottom: solid 1px #999;
-}
-
-
-        /*MODAL MODAL MODAL*/
-        /*https://github.com/adamalbrecht/ngModal*/
-/*@media only screen
-    and (max-device-width: 640px),
-    only screen and (max-device-width: 667px),
-    only screen and (max-width: 480px)
-{
-
-
-
-        .modal-dialog-pane{
-          background-color: #cedbef;
-          -webkit-box-sizing: border-box;
-          -moz-box-sizing: border-box;
-          box-sizing: border-box;
-
-          width: 100%;
-          height: 100%;
-          left: 20px;
-          top: 20px;
-}
-}*/
-
-
-
-
-
-
-
-
-
-
-    nav{
-      font-family: 'Ubuntu', sans-serif;
+    .footer-distributed::-moz-placeholder {
+        color: #5c666b;
+        opacity: 1;
     }
-    .navbar-brand{
-      color:var(--GT-color-1);
+    .footer-distributed:-ms-input-placeholder {
+        color: #5c666b;
     }
-    .navbar-brand span{
-      color: var(--GT-color-2);
+    .footer-distributed form input {
+        height: 55px;
+        margin-bottom: 15px;
     }
+    .footer-distributed form textarea {
+        height: 100px;
+        margin-bottom: 20px;
+    }
+    .footer-distributed form button {
+        border-radius: 3px;
+        background-color: #33383b;
+        color: #ffffff;
+        border: 0;
+        padding: 15px 50px;
+        font-weight: bold;
+        float: right;
+    }
+    /* If you don't want the footer to be responsive, remove these media queries */
 
+    @media (max-width: 1000px) {
+        .footer-distributed {
+            font: bold 14px sans-serif;
+        }
+        .footer-distributed .footer-company-name {
+            font-size: 12px;
+        }
+        .footer-distributed form input,
+        .footer-distributed form textarea {
+            width: 250px;
+        }
+        .footer-distributed form button {
+            padding: 10px 35px;
+        }
+    }
+    @media (max-width: 800px) {
+        .footer-distributed {
+            padding: 30px;
+        }
+        .footer-distributed .footer-left,
+        .footer-distributed .footer-right {
+            float: none;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        .footer-distributed .footer-left {
+            margin-bottom: 40px;
+        }
+        .footer-distributed form {
+            margin-top: 30px;
+        }
+        .footer-distributed form {
+            display: block;
+        }
+        .footer-distributed form button {
+            float: none;
+        }
+    }
+    /*event 'demo card' attempt in viewPool*/
+
+    .demo-card-event.mdl-card {
+        /*width: 100%;*/
+
+        background: #3E4EB8;
+    }
+    .demo-card-event > .mdl-card__actions {
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    .demo-card-event > .mdl-card__title {
+        /*align-items: flex-start;*/
+    }
+    .demo-card-event > .mdl-card__title > h4 {
+        /*margin-top: 0;*/
+    }
+    .demo-card-event > .mdl-card__actions {
+        /*display: flex;*/
+        /*box-sizing:border-box;*/
+        /*align-items: center;*/
+    }
+    .demo-card-event > .mdl-card__title,
+    .demo-card-event > .mdl-card__actions,
+    .demo-card-event > .mdl-card__actions > .mdl-button {
+        color: #fff;
+    }
+    /*Event 'Overlay' attempt in viewPool*/
+
+    .overlay:hover {
+        opacity: 1;
+        cursor: pointer;
+    }
+    .overlay {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        transition: all 0.35s ease;
+        -webkit-transition: all 0.35s ease;
+        -moz-transition: all 0.35s ease;
+        -o-transition: all 0.35s ease;
+        -ms-transition: all 0.35s ease;
+        border-radius: inherit;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        right: 0;
+    }
+    .overlay {
+        background-color: rgba(33, 154, 200, 0.75);
+    }
+    /*NAV STUFF*/
+
+    nav {
+        font-family: 'Ubuntu', sans-serif;
+    }
+    .navbar-brand {
+        color: var(--GT-color-1);
+    }
+    .navbar-brand span {
+        color: var(--GT-color-2);
+    }
     /*Example usage:*/
     /*.foo  {
         color : var(--background-color);
     }*/
+
     .container {
         max-width: 1000px;
     }
-    #c1, #c2, #c3{
-        display:inline-block;
+    #c1,
+    #c2,
+    #c3 {
+        display: inline-block;
         width: 25%;
-        height:20;
+        height: 20;
     }
-    input.ng-invalid
-    {
-      border:2px solid #f00;
+    input.ng-invalid {
+        border: 2px solid #f00;
     }
-
     .invalid {
-      /*border:2px solid #f00;*/
-      color: #f00;
+        /*border:2px solid #f00;*/
+
+        color: #f00;
     }
     button {
-      /*box-shadow:rgb(255, 255, 255) 0px 1px 0px 0px inset;*/
-      background: linear-gradient(rgb(249, 249, 249) 5%, rgb(233, 233, 233) 100%) rgb(249, 249, 249);
-      /*border-radius: 6px;*/
-      /*border: 2px solid var(--accent-color);*/
-      /*border:clear;*/
-      cursor: pointer;
-      color: rgb(102, 102, 102);
-      font-family: Arial;
-      font-size: 15px;
-      font-weight: bold;
-      padding: 6px 24px;
-      /*text-decoration: none;*/
-      text-shadow: rgb(255, 255, 255) 0px 1px 0px;
+        /*box-shadow:rgb(255, 255, 255) 0px 1px 0px 0px inset;*/
+
+        background: linear-gradient(rgb(249, 249, 249) 5%, rgb(233, 233, 233) 100%) rgb(249, 249, 249);
+        /*border-radius: 6px;*/
+        /*border: 2px solid var(--accent-color);*/
+        /*border:clear;*/
+
+        cursor: pointer;
+        color: rgb(102, 102, 102);
+        font-family: Arial;
+        font-size: 15px;
+        font-weight: bold;
+        padding: 6px 24px;
+        /*text-decoration: none;*/
+
+        text-shadow: rgb(255, 255, 255) 0px 1px 0px;
     }
-    button:disabled
-    .roundBorder {
-      border: 2px solid black;
-      border-radius: 5px;
+    button:disabled .roundBorder {
+        border: 2px solid black;
+        border-radius: 5px;
     }
     .errorBorder {
-      border: 1px solid #f00;
-      border-radius: 5px;
+        border: 1px solid #f00;
+        border-radius: 5px;
     }
-
     .padded {
-      margin: 15px 15px 15px 15px;
-
+        margin: 15px 15px 15px 15px;
     }
-
     /* style */
 
-
     .clear {
-      clear:both;
+        clear: both;
     }
     .floating-box {
         display: inline-block;
         /*width: 45%;*/
+
         margin: 4px;
         /*border: 2px solid var(--accent-color);*/
+
         vertical-align: top;
     }
     .after-box {
-    border: 3px solid red;
+        border: 3px solid red;
     }
-
-
     img {
-
-      padding: 0px;
-      border-radius: 9px;
+        padding: 0px;
+        border-radius: 9px;
     }
-
-    .join-pool-image{
-      width:325px;
-      height:325px;
+    .join-pool-image {
+        width: 325px;
+        height: 325px;
     }
-
-.make-pool-image{
-      width:400px;
-      height:400px;
-}
-
-@media only screen
-    and (max-device-width: 640px),
+    .make-pool-image {
+        width: 400px;
+        height: 400px;
+    }
+    @media only screen and (max-device-width: 640px),
     only screen and (max-device-width: 667px),
-    only screen and (max-width: 480px)
-{
-    .join-pool-image{
-      width:100px;
-      height:100px;
+    only screen and (max-width: 480px) {
+        .join-pool-image {
+            width: 100px;
+            height: 100px;
+        }
+        .make-pool-image {
+            width: 100px;
+            height: 100px;
+        }
     }
-    .make-pool-image{
-      width:100px;
-      height:100px;
-    }
-
-}
-
-
-
     .lineContainer {
-        overflow: hidden; /* clear the float */
+        overflow: hidden;
+        /* clear the float */
         /*border: 1px solid #000*/
     }
     .lineContainer div {
@@ -343,6 +374,7 @@ white-space: normal;
     }
     .left {
         /*width: 100px;*/
+
         float: left;
         vertical-align: middle;
         /*border-right: 1px solid #000*/
@@ -350,308 +382,195 @@ white-space: normal;
     .right {
         overflow: hidden;
         /*background: #ccc*/
+
         vertical-align: middle;
     }
+    /*END OF NAV STUFF*/
+    /*FLASH CONTAINER*/
 
-/* FOOTER STUFF */
-/*footer {
-    clear: both;
-    position: relative;
-    z-index: 10;
-    height: 3em;
-    margin-top: -3em;
-}*/
+    .flash {
+        position: absolute;
+        top: auto;
+        left: 0;
+        width: 100%;
+        display: none;
+    }
+    .flash-inner {}
+    /*Custom labeled lists*/
 
-.footer-distributed{
-  background-color: #292c2f;
-  box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.12);
-  box-sizing: border-box;
-  width: 100%;
-  font: bold 16px sans-serif;
-  text-align: left;
-  padding: 50px 60px 40px;
-  margin-top: 80px;
-  overflow: hidden;
-  vertical-align: bottom;
-}
+    ol.custom > li:before {
+        content: attr(seq) "  ";
+    }
+    ol.custom > li {
+        font-weight: bold;
+    }
+    ol.custom {
+        list-style: none;
+        /*list-style-position: inside;*/
 
-/* Footer left */
+        padding-left: 2px;
+    }
+    /*ACCORDION STUFF*/
 
-.footer-distributed .footer-left{
-  float: left;
-}
+    .panel-title > a:before {
+        float: right !important;
+        font-family: FontAwesome;
+        content: "\f196";
+        /*"\f055"*/
 
-/* The company logo */
+        padding-right: 5px;
+    }
+    .panel-title > a:not(.collapsed):before {
+        /* float: right !important;*/
+        /*font-family: FontAwesome;*/
 
-.footer-distributed h3{
-  color: var(--GT-color-1);
-  font: normal 36px 'Ubuntu';
-  margin: 0 0 10px;
-}
+        content: "\f147";
+        /*"\f056"*/
+        /*padding-right: 5px;*/
+    }
+    .thinBorder {
+        border: 1px solid black;
+        padding: 5px;
+        margin: 3px;
+        border-radius: 4px;
+    }
+    /*END OF ACCORDION*/
+    /*MODAL MODAL MODAL*/
+    /*https://github.com/adamalbrecht/ngModal*/
 
-.footer-distributed h3 span{
-  color: var(--GT-color-2);
-}
+    .ng-modal {
+        position: fixed;
+        z-index: 9999;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+    .ng-modal-overlay {
+        position: absolute;
+        z-index: 9999;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.8;
+    }
+    .ng-modal-dialog {
+        z-index: 10000;
+        /*position:relative absolute;*/
+        /* CAME WITH THIS*/
 
-/* Footer links */
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 50%;
+        transform: translate(-50%, -50%);
+        -webkit-transform: translate(-50%, -50%);
+        -moz-transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+        -o-transform: translate(-50%, -50%);
+        background-color: #fff;
+        box-shadow: 4px 4px 80px #000;
+        -webkit-box-shadow: 4px 4px 80px #000;
+        -moz-box-shadow: 4px 4px 80px #000;
+        -ms-box-shadow: 4px 4px 80px #000;
+        -o-box-shadow: 4px 4px 80px #000;
+        padding: 10px;
+        overflow: hidden;
+        /*justify-content: center;*/
+        /*overflow-y: scroll;*/
 
-.footer-distributed .footer-links{
-  color:  #ffffff;
-  margin: 0 0 10px;
-  padding: 0;
-}
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: #cbced3;
+    }
+    .ng-modal-dialog-pane {
+        /*  word-wrap: break-word;
+    overflow-wrap: break-word;*/
 
-.footer-distributed .footer-links a{
-  display:inline-block;
-  line-height: 1.8;
-  text-decoration: none;
-  color:  inherit;
-}
+        word-wrap: break-word;
+        word-break: break-all;
+    }
+    .ng-modal-dialog-content {
+        background-color: #cedbef;
+        overflow-y: scroll;
+        /*word-break: break-all;*/
 
-.footer-distributed .footer-company-name{
-  color:  #8f9296;
-  font-size: 14px;
-  font-weight: normal;
-  margin: 0;
-}
-
-/* Footer social icons */
-
-.footer-distributed .footer-icons{
-  margin-top: 40px;
-}
-
-.footer-distributed .footer-icons a{
-  display: inline-block;
-  width: 35px;
-  height: 35px;
-  cursor: pointer;
-  background-color:  #33383b;
-  border-radius: 2px;
-
-  font-size: 20px;
-  color: #ffffff;
-  text-align: center;
-  line-height: 35px;
-
-  margin-right: 3px;
-  margin-bottom: 5px;
-}
-
-/* Footer Right */
-
-.footer-distributed .footer-right{
-  float: right;
-}
-
-.footer-distributed .footer-right p{
-  display: inline-block;
-  vertical-align: top;
-  margin: 15px 42px 0 0;
-  color: #ffffff;
-}
-
-/* The contact form */
-
-.footer-distributed form{
-  display: inline-block;
-}
-
-.footer-distributed form input,
-.footer-distributed form textarea{
-  display: block;
-  border-radius: 3px;
-  box-sizing: border-box;
-  background-color:  #1f2022;
-  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.1);
-  border: none;
-  resize: none;
-
-  font: inherit;
-  font-size: 14px;
-  font-weight: normal;
-  color:  #d1d2d2;
-
-  width: 400px;
-  padding: 18px;
-}
-/*textarea.ng-invalid{
-      border:2px solid red;
-}*/
-.footer-distributed .footForm.ng-dirty.ng-invalid textarea.ng-invalid{
-      border:1px solid red;
-}
-.footer-distributed .footForm.ng-dirty.ng-invalid input.ng-invalid{
-      border:1px solid red;
-}
-.footer-distributed ::-webkit-input-placeholder {
-  color:  #5c666b;
-}
-
-.footer-distributed ::-moz-placeholder {
-  color:  #5c666b;
-  opacity: 1;
-}
-
-.footer-distributed :-ms-input-placeholder{
-  color:  #5c666b;
-}
-
-
-.footer-distributed form input{
-  height: 55px;
-  margin-bottom: 15px;
-}
-
-.footer-distributed form textarea{
-  height: 100px;
-  margin-bottom: 20px;
-}
-
-.footer-distributed form button{
-  border-radius: 3px;
-  background-color:  #33383b;
-  color: #ffffff;
-  border: 0;
-  padding: 15px 50px;
-  font-weight: bold;
-  float: right;
-}
-
-/* If you don't want the footer to be responsive, remove these media queries */
-
-@media (max-width: 1000px) {
-
-  .footer-distributed {
-    font: bold 14px sans-serif;
-  }
-
-  .footer-distributed .footer-company-name{
-    font-size: 12px;
-  }
-
-  .footer-distributed form input,
-  .footer-distributed form textarea{
-    width: 250px;
-  }
-
-  .footer-distributed form button{
-    padding: 10px 35px;
-  }
-
-}
-
-@media (max-width: 800px) {
-
-  .footer-distributed{
-    padding: 30px;
-  }
-
-  .footer-distributed .footer-left,
-  .footer-distributed .footer-right{
-    float: none;
-    max-width: 300px;
-    margin: 0 auto;
-  }
-
-  .footer-distributed .footer-left{
-    margin-bottom: 40px;
-  }
-
-  .footer-distributed form{
-    margin-top: 30px;
-  }
-
-  .footer-distributed form{
-    display: block;
-  }
-
-  .footer-distributed form button{
-    float: none;
-  }
-}
+        border-radius: 6px;
+        border: 2px solid black;
+        width: 95%;
+    }
+    .ng-modal-close {
+        position: absolute;
+        top: 3px;
+        right: 5px;
+        cursor: pointer;
+        font-size: 120%;
+        padding: 5px;
+        display: inline-block;
+    }
+    .ng-modal-close-x {
+        font-weight: bold;
+        font-family: Arial, sans-serif;
+    }
+    .ng-modal-title {
+        font-weight: bold;
+        font-size: 200%;
+        display: block;
+        margin-bottom: 0px;
+        padding-bottom: 0px;
+        /*border-bottom: solid 1px #999;*/
+    }
+    .ng-modal-subtitle {
+        font-weight: bold;
+        font-size: 135%;
+        display: block;
+        margin-top: 4px;
+        padding-top: 3px;
+        /*border-bottom: solid 1px #999;*/
+    }
+    .ng-modal-subsubtitle {
+        font-weight: bold;
+        font-size: 115%;
+        display: block;
+        margin-top: 4px;
+        padding-top: 3px;
+        /*border-bottom: solid 1px #999;*/
+    }
+    .ng-modal-sub3title {
+        font-weight: bold;
+        font-size: 100%;
+        display: block;
+        margin-top: 4px;
+        padding-top: 3px;
+        /*border-bottom: solid 1px #999;*/
+    }
+    .ng-modal-underline {
+        font-weight: bold;
+        font-size: 150%;
+        display: block;
+        margin-top: 10px;
+        padding-top: 7px;
+        border-bottom: solid 1px #999;
+    }
+    /*MODAL MODAL MODAL*/
+    /*https://github.com/adamalbrecht/ngModal*/
 
 
+    /*For minutes selection in joinpool*/
+    .select2char {
+        max-width: calc(2em + 15px);
+        overflow: hidden;
+    }
+    @media only screen and (max-device-width: 480px) {
+        .select2char {
+            max-width: calc(3em + 10px);
+            overflow: hidden;
+        }
+    }
+    .address_conf_button {
+        /*word-wrap:normal;*/
 
-/*event 'demo card' attempt in viewPool*/
-.demo-card-event.mdl-card {
-  /*width: 100%;*/
-  background: #3E4EB8;
-}
-.demo-card-event > .mdl-card__actions {
-  border-color: rgba(255, 255, 255, 0.2);
-}
-.demo-card-event > .mdl-card__title {
-  /*align-items: flex-start;*/
-}
-.demo-card-event > .mdl-card__title > h4 {
-  /*margin-top: 0;*/
-}
-.demo-card-event > .mdl-card__actions {
-  /*display: flex;*/
-  /*box-sizing:border-box;*/
-  /*align-items: center;*/
-}
-.demo-card-event > .mdl-card__title,
-.demo-card-event > .mdl-card__actions,
-.demo-card-event > .mdl-card__actions > .mdl-button {
-  color: #fff;
-}
-
-
-
-
-/*Event 'Overlay' attempt in viewPool*/
-.overlay:hover {
-opacity: 1;
-cursor: pointer;
-}
-.overlay {
-position: absolute;
-width: 100%;
-height: 100%;
-opacity: 0;
-transition: all 0.35s ease;
--webkit-transition: all 0.35s ease;
--moz-transition: all 0.35s ease;
--o-transition: all 0.35s ease;
--ms-transition: all 0.35s ease;
-border-radius: inherit;
-left: 0;
-top: 0;
-bottom: 0;
-right: 0;
-}
-.overlay {
-background-color: rgba(33,154,200,0.75);
-}
-
-
-
-
-
-
-/*FLASH CONTAINER*/
-.flash {
- position: absolute;
- top: auto;
- left: 0;
- width: 100%;
- display: none;
- }
-.flash-inner {
- }
-
-
- /*Custom labeled lists*/
- ol.custom > li:before {
-  content: attr(seq) "  ";
-}
- ol.custom > li {
-  font-weight: bold;
-}
-ol.custom{
-  list-style: none;
-  /*list-style-position: inside;*/
-  padding-left:2px;
-}
+        white-space: normal;
+    }

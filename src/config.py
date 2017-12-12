@@ -34,7 +34,7 @@ class ProductionConfig(Config):
 	URL_BASE='https://groupthere.herokuapp.com/'
 	# URL_BASE='www.grouptherenow.com/' #NO SSL!
 
-#NOTE: I can change this to:
+##NOTE: I can change this to:
 
 #    MESSENGER_PLATFORM_ACCESS_TOKEN=os.environ.get('MESSENGER_PLATFORM_ACCESS_TOKEN')
 
@@ -42,9 +42,10 @@ class ProductionConfig(Config):
 
 #heroku config:set MESSENGER_PLATFORM_ACCESS_TOKEN=TOKEN_FROM_ABOVE --remote pro
 
-class StagingConfig(Config):
+class StagingConfig(ProductionConfig):
 	DEVELOPMENT = True
 	DEBUG = False
+	URL_BASE='https://groupthere-stage.herokuapp.com/'
 
 class TestingConfig(Config):
 	TESTING = True

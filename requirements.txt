@@ -13,8 +13,11 @@ itsdangerous
 Jinja2
 Mako
 MarkupSafe
+nomkl
+numpy=1.13.1=*nomkl*
 psycopg2
 PuLP-py3
+python-dateutil
 python-editor
 redis
 requests
@@ -22,3 +25,6 @@ rq
 SQLAlchemy
 Werkzeug
 WTForms
+
+
+

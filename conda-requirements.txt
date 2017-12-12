@@ -1,6 +1,0 @@
-# This file may be used to create an environment using:
-# $ conda create --name <env> --file <this file>
-# platform: osx-64
-nomkl
-numpy=1.13.1=*nomkl*
-python-dateutil

@@ -79,14 +79,14 @@ class ngRegistrationForm(wtforms.Form):
 
 # emtoken?/:teamusertoken?/:eventid?/:name?
 class oneClickRegistrationForm(ngRegistrationForm):
-	emtoken = StringField("Email Token",[validators.Length(min=1,max=25)])
+	emtoken = StringField("Email Token",[validators.Length(min=1)])
 
 
 class oneClickRegistrationFormPlusTeam(oneClickRegistrationForm):
-	teamUserToken = StringField("Team User Token",[validators.Length(max=25)])
+	teamusertoken = StringField("Team User Token",[validators.Length(min=1)])
 
 class oneClickRegistrationFormPlusTeamAndEvent(oneClickRegistrationFormPlusTeam):
-	eventId = StringField("Event ID",[validators.Length(max=25)])
+	eventid = StringField("Event ID",[validators.Length(min=1)])
 
 class ngPasswordChangeRequestForm(wtforms.Form):
 	email = StringField('Email Address', [validators.Length(min=6, max=35),validators.Required("Please enter your email address."), validators.Email("Please enter your email address.")])

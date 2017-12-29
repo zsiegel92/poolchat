@@ -50,12 +50,16 @@ def api_register():
 	# form_oneclick = oneClickRegistrationForm(request.form)
 	# form_oneclick_team = oneClickRegistrationFormPlusTeam(request.form)
 	# form_oneclick_team_event = oneClickRegistrationFormPlusTeamAndEvent(request.form)
+	print("request.form is:\n\n{}\n\n".format(request.form))
 
 	validationLevel=-1
 	for formtype in [ngRegistrationForm,oneClickRegistrationForm,oneClickRegistrationFormPlusTeam,oneClickRegistrationFormPlusTeamAndEvent]:
 		if formtype(request.form).validate():
 			form = formtype(request.form)
 			validationLevel += 1
+
+	validationMeanings={-1:"invalid form",0:"valid form",1:"valid form and oneclick auth",2:"valid form, oneclick auth, and team token",3:"valid form, oneclick auth, team token, and event"}
+	print("validationLevel is: {}, which means: {}".format(validationLevel,validationMeanings.get(validationLevel,"")))
 
 	if validationLevel >=0:
 		email=form.email.data.lower()
@@ -69,29 +73,37 @@ def api_register():
 
 			#see register.js for status explanation
 			if (validationLevel > 0):
-				oneclickLevel = try_oneclick(carpooler,form,validationLevel)
-				returndict={}
+				returndict = try_oneclick(carpooler,form,validationLevel)
+				oneclickLevel = returndict['oneclickLevel']
+				del returndict['oneclickLevel']
 				if oneclickLevel >= 1:
-					# authenticate, login user
+					#email token valid, email accepted
 					carpooler.authenticated=True
 					login_user(carpooler,remember=True)
 					db.session.commit()
 					#send "congrats" email
 					status=201
 				if oneclickLevel >= 2:
-					#send "congrats" email
-					teamname = 'hey'
-					returndict['teamname']=teamname
+					team = Team.query.filter_by(name=returndict['teamname']).first()
+					team.members.append(carpooler)
+					db.session.commit()
+					#email token valid, email accepted
+					#team token valid, team joined
+					# returndict['teamname']=teamname
+					#TODO - join team procedure
 					status=202
 				if oneclickLevel ==3:
-					go_to_pool_id = 0
-					eventname = 'hey'
-					returndict['eventname']=eventname
-					returndict['go_to_pool_id']=go_to_pool_id
+					#email token valid, email accepted
+					#team token valid, team joined
+					#event id exists, affiliated with joined team, event navigated
+					# returndict['eventname']=eventname
+					# returndict['go_to_pool_id']=go_to_pool_id
 					status=203
+				print("response of /api/register is: \n\n{}\n\n".format(returndict))
 				return jsonify(returndict), status
 			try:
 				send_register_email(email)
+				print("response of /api/register is: \n\n{}\n\n".format(app.config['URL_BASE'] + str(url_for('login'))))
 				return app.config['URL_BASE'] + str(url_for('login')),200
 			except Exception as exc:
 				print("ERROR IN api_register WITH SENDING EMAIL!")
@@ -103,7 +115,7 @@ def api_register():
 	return 'Form does not validate! Errors: ' + str(form.errors),422
 
 
-# in: form.email.data, form.emtoken.data, form.team.data, form.teamuserToken.data, form.eventId.data
+# in: form.email.data, form.emtoken.data, form.team.data, form.teamusertoken.data, form.eventid.data
 # validationLevel = 1 if only emtoken
 # validationLevel = 2 if team
 # validationLevel = 3 if team and event
@@ -114,39 +126,42 @@ def api_register():
 # emtoken=ts.dumps(email,salt=app.config['REGISTRATION_TOKEN_KEY']+"emailtoken")
 # teamUserToken=ts.dumps("++++".join([email, team.id, team.password]),salt=app.config['REGISTRATION_TOKEN_KEY']+"teamUserToken")
 def try_oneclick(carpooler, form, validationLevel):
-	oneclickLevel=0
+	d={}
+	d['oneclickLevel']=0
 	try:
 		email_encrypted = ts.loads(form.emtoken.data, salt=app.config['REGISTRATION_TOKEN_KEY']+"emailtoken", max_age=190000)
 		if email_encrypted.lower() == form.email.data.lower():
-			oneclickLevel=1
+			d['oneclickLevel']=1
 		else:
-			return oneclickLevel
+			return d
 	except:
-		return oneclickLevel
+		return d
 
 	if (validationLevel >= 2):
 		try:
-			teamUserToken = ts.loads(form.teamuserToken.data, salt=app.config['REGISTRATION_TOKEN_KEY']+"teamUserToken", max_age=190000)
-			teamUserArgs = teamUserToken.split('++++')
+			teamUserToken = ts.loads(form.teamusertoken.data, salt=app.config['REGISTRATION_TOKEN_KEY']+"teamUserToken", max_age=190000)
+			teamUserArgs = teamUserToken.split('++++') #[email,team.id,team.password]
 			team = Team.query.filter_by(id=teamUserArgs[1]).first()
 			if (teamUserArgs[0]==carpooler.email) and (team is not None) and (team.password==teamUserArgs[2]):
-				oneclickLevel=2
+				d['oneclickLevel']=2
+				d['teamname']=team.name
 			else:
-				return oneclickLevel
+				return d
 		except:
-			return oneclickLevel
+			return d
 
 	if (validationLevel >=3):
 		try:
-			event = Pool.query.filter_by(id=form.eventId.data).first()
-			affiliation = team_affiliation.query.filter_by(pool_id=form.eventId.data,team_id=team.id).first()
-			if (event is not None) and (affiliation is not None):
-				oneclickLevel = 3
+			event = Pool.query.filter_by(id=form.eventid.data).first()
+			if (event is not None) and (event in team.pools):
+				d['oneclickLevel'] = 3
+				d['eventname']=event.poolName
+				d['go_to_pool_id']=event.id
 			else:
-				return oneclickLevel
+				return d
 		except:
-			return oneclickLevel
-	return oneclickLevel
+			return d
+	return d
 
 @app.route('/api/send_register_email',methods=['POST'])
 def send_register_email(email=None):
@@ -279,9 +294,7 @@ def api_login():
 	if form.validate():
 		email=form.email.data
 		email=email.lower()
-		print("attempting to query for carpooler")
 		carpooler = Carpooler.query.filter_by(email=email).first()
-		print("Successfully queried for carpooler")
 		if carpooler is not None:
 			if carpooler.is_authenticated():
 				if carpooler.is_correct_password(password):

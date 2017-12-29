@@ -164,9 +164,22 @@ def testshell():
 	shell.run(False,False)
 
 
-# :email?/:emtoken?/:teamusertoken?/:eventid?/:firstname?/:lastname?'
-# take team_name or team_id
+
 @manager.command
+def drop_user(user_id):
+	with app.app_context():
+		cp = Carpooler.query.filter_by(id=user_id).first()
+		db.session.delete(cp)
+		db.session.commit()
+
+
+# '/register/:email?/:emtoken?/:teamusertoken?/:eventid?/:firstname?/:lastname?'
+@manager.option('-e', '--email', dest='email')
+@manager.option('-t', '--teamname', dest='team_name', default=None)
+@manager.option('-T', '--teamid', dest='team_id', default=None)
+@manager.option('-E', '--eventid', dest='event_id', default=None)
+@manager.option('-f', '--first', dest='first_name', default=None)
+@manager.option('-l', '--last', dest='last_name', default=None)
 def generate_oneclick(email,team_name=None,team_id=None,event_id = None,first_name=None,last_name=None):
 	with app.app_context():
 
@@ -177,15 +190,18 @@ def generate_oneclick(email,team_name=None,team_id=None,event_id = None,first_na
 
 		link = '{}?#!/register/{}/{}/'.format(URL_BASE, email,emtoken)
 
+		team=None
 		if team_name is not None:
 			team = Team.query.filter_by(name=team_name).first()
 		if team_id is not None:
-			team = Team.query.filter_by(id=team_id).first()
+			team = Team.query.filter_by(id=int(team_id)).first()
+
 		if team is not None:
-			teamUserToken=ts.dumps("++++".join([email, team.id, team.password]),salt=REGISTRATION_TOKEN_KEY+"teamUserToken")
+			teamUserToken=ts.dumps("++++".join([email, str(team.id), team.password]),salt=REGISTRATION_TOKEN_KEY+"teamUserToken")
+			link += teamUserToken + '/'
 		else:
 			teamUserToken = None
-		link += teamUserToken + '/'
+
 		if event_id is not None and teamUserToken is not None:
 			link += event_id + '/'
 
@@ -194,7 +210,19 @@ def generate_oneclick(email,team_name=None,team_id=None,event_id = None,first_na
 		if (last_name is not None) and (first_name is not None) and (teamUserToken is not None) and (event_id is not None):
 			link += last_name + '/'
 
-		print(link)
-		return link
+		print('\n\n\n\nLimited link:\n{}\n\n'.format(link))
+
+
+		link = '{}?#!/register/{}/{}/{}/{}/{}/{}/'.format(URL_BASE, email,emtoken,teamUserToken,event_id,first_name,last_name)
+		print('\n\n\n\n Full link:\n{}\n\n'.format(link))
+
+
+
 if __name__ == '__main__':
 	manager.run()
+
+
+
+
+
+

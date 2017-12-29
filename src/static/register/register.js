@@ -24,12 +24,14 @@ angular.module('myApp.register', ['ngRoute'])
       }
     }
 
+
     $scope.prefillVals = {};
-    for (var prefillKey in ['emtoken','teamusertoken','eventid']){
+
+    ['emtoken','teamusertoken','eventid'].forEach(function(prefillKey, index) {
       if (prefillKey in r){
-        $scope.prefillVals[prefillKey] = f(r[prefillKey]);
+        $scope.prefillVals[prefillKey] = r[prefillKey]; //raw! Do not decode keys!
       }
-    }
+    });
 
 
     $scope.register = function () {
@@ -64,7 +66,7 @@ angular.module('myApp.register', ['ngRoute'])
             else {
               alert("Your account has been validated. You are ready to join events with team " + teamname + "!");
               // response.data in this case contains pool id. see api_register
-              $location.path('/viewPool/';
+              $location.path('/viewPool/');
             }
           }
           else{

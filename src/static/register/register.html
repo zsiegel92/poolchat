@@ -1,6 +1,16 @@
 <div class="col-md-4">
   <h1>Register</h1>
-  <div ng-show="errorMessage" class="alert alert-danger">{{errorMessage}}</div>
+  <div ng-show="error" class="alert alert-danger">
+    Something went wrong with registration. It's possible that this email address is already in use.
+    <br>
+    <br>
+    Try <a href='/#!/login'>logging in</a>, or <a href='/#!/forgotPassword'>password recovery</a>.
+    <br>
+    <br>
+    If you've used a 1-click link, please <a href='/#!/login'>log in</a> and click the link again to automatically join a team or event.
+    <br>
+    {{errorMessage}}
+  </div>
   <form class="form"  ng-model="registerFormValues" name="registerForm" ng-submit="register()">
     <!-- First Name -->
     <div class="form-group">

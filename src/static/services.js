@@ -115,9 +115,8 @@ angular.module('myApp').factory('AuthService',
       var resp= $http.post('/api/register', $.param(registrationParams),{headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
         // handle success
         .then(function (response) {
-          if(response.status === 200){
+          if(response.status >= 200 && response.status < 300){
             // deferred.resolve();
-            $log.log("Registered");
             return response;
           } else {
             // deferred.reject();

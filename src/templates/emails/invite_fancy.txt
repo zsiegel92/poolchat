@@ -37,6 +37,9 @@ Anyone who is part of {{team.name}} can join {{pool.poolName}}.
 {% endif %}
 \n
 \n
+If you are already registered with GroupThere, you may be asked to log in and then click the expedited link again.
+\n
+\n
 Thank you,
 \n
 GroupThere

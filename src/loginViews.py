@@ -46,11 +46,6 @@ def redirect_back(endpoint, **values):
 # wtforms_ext has oneClickRegistrationForm, oneClickRegistrationFormPlusTeam, and oneClickRegistrationFormPlusTeamAndEvent
 @app.route('/api/register', methods=['POST'])
 def api_register():
-	# form = ngRegistrationForm(request.form)
-	# form_oneclick = oneClickRegistrationForm(request.form)
-	# form_oneclick_team = oneClickRegistrationFormPlusTeam(request.form)
-	# form_oneclick_team_event = oneClickRegistrationFormPlusTeamAndEvent(request.form)
-	print("request.form is:\n\n{}\n\n".format(request.form))
 
 	validationLevel=-1
 	for formtype in [ngRegistrationForm,oneClickRegistrationForm,oneClickRegistrationFormPlusTeam,oneClickRegistrationFormPlusTeamAndEvent]:
@@ -81,26 +76,21 @@ def api_register():
 					carpooler.authenticated=True
 					login_user(carpooler,remember=True)
 					db.session.commit()
-					#send "congrats" email
 					status=201
 				if oneclickLevel >= 2:
 					team = Team.query.filter_by(name=returndict['teamname']).first()
 					team.members.append(carpooler)
 					db.session.commit()
-					#email token valid, email accepted
 					#team token valid, team joined
-					# returndict['teamname']=teamname
-					#TODO - join team procedure
+					# returndict['teamname'] defined
 					status=202
 				if oneclickLevel ==3:
-					#email token valid, email accepted
-					#team token valid, team joined
 					#event id exists, affiliated with joined team, event navigated
-					# returndict['eventname']=eventname
-					# returndict['go_to_pool_id']=go_to_pool_id
+					# returndict['eventname'], returndict['go_to_pool_id'] defined
 					status=203
 				print("response of /api/register is: \n\n{}\n\n".format(returndict))
-				return jsonify(returndict), status
+				returndict['status']=status
+				return jsonify(returndict), 200
 			try:
 				send_register_email(email)
 				print("response of /api/register is: \n\n{}\n\n".format(app.config['URL_BASE'] + str(url_for('login'))))
@@ -109,6 +99,23 @@ def api_register():
 				print("ERROR IN api_register WITH SENDING EMAIL!")
 				print(exc)
 				return 'Error sending confirmation email - user added.',400
+
+		elif (hasattr(current_user.is_anonymous,'__call__') and (current_user.is_anonymous() is False)) and (email == current_user.email):
+			returndict = try_oneclick(current_user,form,validationLevel)
+			oneclickLevel = returndict['oneclickLevel']
+			del returndict['oneclickLevel']
+			if oneclickLevel >= 2:
+				team = Team.query.filter_by(name=returndict['teamname']).first()
+				if current_user not in team.members:
+					team.members.append(carpooler)
+					db.session.commit()
+				status=204
+			if oneclickLevel ==3:
+				status=205
+			print("response of /api/register is: \n\n{}\n\n".format(returndict))
+			print("RETURNING FROM HERE")
+			returndict['status']=status
+			return jsonify(returndict), 200
 		else:
 			return 'User email already in use!',409
 

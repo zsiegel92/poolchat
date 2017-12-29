@@ -116,6 +116,7 @@ class Carpooler(db.Model):
 
 	def is_active(self):
 		return True
+
 	def is_anonymous(self):
 		return False
 

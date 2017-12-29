@@ -50,7 +50,7 @@ def use_keeptest_config(func):
 
 testing=False
 for arg in sys.argv:
-	if 'test' in arg:
+	if arg=='testserver':
 		testing = True
 
 

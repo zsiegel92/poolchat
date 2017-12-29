@@ -2,6 +2,7 @@ import os
 import sys
 from flask_script import Manager,Shell,Server,prompt_bool
 from flask_migrate import Migrate, MigrateCommand
+from flask import render_template
 from functools import wraps
 
 from utils import modified_environ
@@ -9,6 +10,8 @@ from utils import modified_environ
 from database import db
 from login import login_manager
 from encryption import bcrypt
+
+
 
 import models
 from models import Carpooler, Pool, Trip, Team,team_membership,team_affiliation
@@ -181,6 +184,8 @@ def drop_user(user_id):
 @manager.option('-f', '--first', dest='first_name', default=None)
 @manager.option('-l', '--last', dest='last_name', default=None)
 def generate_oneclick(email,team_name=None,team_id=None,event_id = None,first_name=None,last_name=None):
+	from emailer import Emailer
+	emailer=Emailer()
 	with app.app_context():
 
 		REGISTRATION_TOKEN_KEY = app.config['REGISTRATION_TOKEN_KEY']
@@ -210,12 +215,25 @@ def generate_oneclick(email,team_name=None,team_id=None,event_id = None,first_na
 		if (last_name is not None) and (first_name is not None) and (teamUserToken is not None) and (event_id is not None):
 			link += last_name + '/'
 
-		print('\n\n\n\nLimited link:\n{}\n\n'.format(link))
+		# print('\n\n\n\nLimited link:\n{}\n\n'.format(link))
 
 
 		link = '{}?#!/register/{}/{}/{}/{}/{}/{}/'.format(URL_BASE, email,emtoken,teamUserToken,event_id,first_name,last_name)
 		print('\n\n\n\n Full link:\n{}\n\n'.format(link))
 
+		pool = Pool.query.filter_by(id=event_id).first()
+		subject = "Register for GroupThere Carpooling"
+		if team is not None:
+			if pool is not None:
+				subject += " - You've been invited to " + str(pool.poolName) + " with " + str(team.name)
+			else:
+				subject += " - You've been invited to join" + str(team.name)
+
+		html_body= render_template('emails/invite_fancy.html',link=link,email=email,first_name=first_name,last_name=last_name,team=team,pool=pool)
+		text_message=render_template('emails/invite_fancy.txt',link=link,email=email,first_name=first_name,last_name=last_name,team=team,pool=pool)
+		html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
+		emailer.send_html(email,html_message=html,subject=subject,text_message=text_message)
+		print("{} emailed!".format(email))
 
 
 if __name__ == '__main__':

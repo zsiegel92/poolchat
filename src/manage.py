@@ -164,5 +164,37 @@ def testshell():
 	shell.run(False,False)
 
 
+# :email?/:emtoken?/:teamusertoken?/:eventid?/:firstname?/:lastname?'
+# take team_name or team_id
+@manager.command
+def generate_oneclick(email,team_name=None,team_id=None,event_id = None,first_name=None,last_name=None):
+	with app.app_context():
+
+		REGISTRATION_TOKEN_KEY = app.config['REGISTRATION_TOKEN_KEY']
+		URL_BASE = app.config['URL_BASE']
+
+		emtoken=ts.dumps(email,salt=REGISTRATION_TOKEN_KEY+"emailtoken")
+
+		link = '{}?#!/register/{}/{}/'.format(URL_BASE, email,emtoken)
+
+		if team_name is not None:
+			team = Team.query.filter_by(name=team_name).first()
+		if team_id is not None:
+			team = Team.query.filter_by(id=team_id).first()
+		if team is not None:
+			teamUserToken=ts.dumps("++++".join([email, team.id, team.password]),salt=REGISTRATION_TOKEN_KEY+"teamUserToken")
+		else:
+			teamUserToken = None
+		link += teamUserToken + '/'
+		if event_id is not None and teamUserToken is not None:
+			link += event_id + '/'
+
+		if (first_name is not None) and (teamUserToken is not None) and (event_id is not None):
+			link += first_name + '/'
+		if (last_name is not None) and (first_name is not None) and (teamUserToken is not None) and (event_id is not None):
+			link += last_name + '/'
+
+		print(link)
+		return link
 if __name__ == '__main__':
 	manager.run()

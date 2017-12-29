@@ -1,0 +1,31 @@
+<div class="col-md-4">
+  <h1>Change Forgotten Password</h1>
+  <div ng-show="errorMessage" class="alert alert-danger">{{errorMessage}}</div>
+  <!-- name="loginForm" -->
+  <div ng-show="resultText" class="alert alert-info">{{resultText}}</div>
+  <div ng-show="successMessage" class="alert alert-success">{{successMessage}}</div>
+
+
+  <form class="form"  ng-model="changePassFormValues" name="changePassForm" ng-submit="change_pass()">
+    <!-- First Name -->
+
+
+    <!-- PASSWORD  -->
+    <div class="form-group">
+      <label>New Password</label>
+      <input type="password" class="form-control" name="password" ng-model="changePassFormValues.ngPassword" ng-minlength="4" ng-maxlength="25" placeholder="Password 4-25 characters" required>
+      <span class="invalid" ng-show="changePassForm.password.$error.minlength || changePassForm.password.$error.maxlength"><b>Password must be between 4 and 25 characters</b>
+      </span>
+    </div>
+    <div class="form-group">
+      <label>Confirm New Password</label>
+      <input type="password"  class="form-control" name="confirm_password" placeholder="matching password" ng-model="changePassFormValues.ngConfirm" ng-minlength="4" ng-maxlength="25" required>
+      <span class="invalid" ng-show="changePassFormValues.ngConfirm != changePassFormValues.ngPassword"><b>PASSWORDS MUST MATCH</b>
+      </span>
+    </div>
+
+    <div>
+      <button type="submit" class="btn btn-primary" ng-disabled="disabled || changePassForm.$invalid || changePassFormValues.ngConfirm != changePassFormValues.ngPassword">Change Password</button>
+    </div>
+  </form>
+</div>

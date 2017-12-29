@@ -3,14 +3,14 @@ import flask
 
 from urllib.parse import urlparse, urljoin
 
-from wtforms_ext import LoginForm, RegistrationForm,ngRegistrationForm,EmailForm,ngPasswordChangeRequestForm, ngForgotPasswordChangeForm, ngPasswordChangeForm
+from wtforms_ext import LoginForm, RegistrationForm,ngRegistrationForm,EmailForm,ngPasswordChangeRequestForm, ngForgotPasswordChangeForm, ngPasswordChangeForm, oneClickRegistrationForm,oneClickRegistrationFormPlusTeam,oneClickRegistrationFormPlusTeamAndEvent
 
 from rq import Queue
 from rq.job import Job
 from worker import conn
 q = Queue(connection=conn)
 
-from models import Carpooler,Pool, Trip
+from models import Carpooler,Pool, Trip,Team,team_affiliation
 
 from app import app, ts
 from database import db
@@ -39,11 +39,25 @@ def redirect_back(endpoint, **values):
 	return redirect(target)
 
 
-
+# return 200 for standard registration
+# return 201 for one-click validation
+# return 202 for one-click validation plus event-join
+# request.form can have any keys in ['emtoken','teamusertoken','eventid'], in that precedence
+# wtforms_ext has oneClickRegistrationForm, oneClickRegistrationFormPlusTeam, and oneClickRegistrationFormPlusTeamAndEvent
 @app.route('/api/register', methods=['POST'])
 def api_register():
-	form = ngRegistrationForm(request.form)
-	if form.validate():
+	# form = ngRegistrationForm(request.form)
+	# form_oneclick = oneClickRegistrationForm(request.form)
+	# form_oneclick_team = oneClickRegistrationFormPlusTeam(request.form)
+	# form_oneclick_team_event = oneClickRegistrationFormPlusTeamAndEvent(request.form)
+
+	validationLevel=-1
+	for formtype in [ngRegistrationForm,oneClickRegistrationForm,oneClickRegistrationFormPlusTeam,oneClickRegistrationFormPlusTeamAndEvent]:
+		if formtype(request.form).validate():
+			form = formtype(request.form)
+			validationLevel += 1
+
+	if validationLevel >=0:
 		email=form.email.data.lower()
 		if Carpooler.query.filter_by(email=email).first() is None:
 			try:
@@ -52,6 +66,30 @@ def api_register():
 				db.session.commit()
 			except Exception as exc:
 				return 'Database error! ' + str(exc),400
+
+			#see register.js for status explanation
+			if (validationLevel > 0):
+				oneclickLevel = try_oneclick(carpooler,form,validationLevel)
+				returndict={}
+				if oneclickLevel >= 1:
+					# authenticate, login user
+					carpooler.authenticated=True
+					login_user(carpooler,remember=True)
+					db.session.commit()
+					#send "congrats" email
+					status=201
+				if oneclickLevel >= 2:
+					#send "congrats" email
+					teamname = 'hey'
+					returndict['teamname']=teamname
+					status=202
+				if oneclickLevel ==3:
+					go_to_pool_id = 0
+					eventname = 'hey'
+					returndict['eventname']=eventname
+					returndict['go_to_pool_id']=go_to_pool_id
+					status=203
+				return jsonify(returndict), status
 			try:
 				send_register_email(email)
 				return app.config['URL_BASE'] + str(url_for('login')),200
@@ -63,6 +101,52 @@ def api_register():
 			return 'User email already in use!',409
 
 	return 'Form does not validate! Errors: ' + str(form.errors),422
+
+
+# in: form.email.data, form.emtoken.data, form.team.data, form.teamuserToken.data, form.eventId.data
+# validationLevel = 1 if only emtoken
+# validationLevel = 2 if team
+# validationLevel = 3 if team and event
+# returns 0 if no oneclick succeeds
+# returns 1 if oneclick email succeeds
+# returns 2 if oneclick email and team succeed
+# returns 3 if oneclick email, team, and event succeed
+# emtoken=ts.dumps(email,salt=app.config['REGISTRATION_TOKEN_KEY']+"emailtoken")
+# teamUserToken=ts.dumps("++++".join([email, team.id, team.password]),salt=app.config['REGISTRATION_TOKEN_KEY']+"teamUserToken")
+def try_oneclick(carpooler, form, validationLevel):
+	oneclickLevel=0
+	try:
+		email_encrypted = ts.loads(form.emtoken.data, salt=app.config['REGISTRATION_TOKEN_KEY']+"emailtoken", max_age=190000)
+		if email_encrypted.lower() == form.email.data.lower():
+			oneclickLevel=1
+		else:
+			return oneclickLevel
+	except:
+		return oneclickLevel
+
+	if (validationLevel >= 2):
+		try:
+			teamUserToken = ts.loads(form.teamuserToken.data, salt=app.config['REGISTRATION_TOKEN_KEY']+"teamUserToken", max_age=190000)
+			teamUserArgs = teamUserToken.split('++++')
+			team = Team.query.filter_by(id=teamUserArgs[1]).first()
+			if (teamUserArgs[0]==carpooler.email) and (team is not None) and (team.password==teamUserArgs[2]):
+				oneclickLevel=2
+			else:
+				return oneclickLevel
+		except:
+			return oneclickLevel
+
+	if (validationLevel >=3):
+		try:
+			event = Pool.query.filter_by(id=form.eventId.data).first()
+			affiliation = team_affiliation.query.filter_by(pool_id=form.eventId.data,team_id=team.id).first()
+			if (event is not None) and (affiliation is not None):
+				oneclickLevel = 3
+			else:
+				return oneclickLevel
+		except:
+			return oneclickLevel
+	return oneclickLevel
 
 @app.route('/api/send_register_email',methods=['POST'])
 def send_register_email(email=None):

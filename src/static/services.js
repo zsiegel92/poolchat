@@ -100,17 +100,19 @@ angular.module('myApp').factory('AuthService',
         $log.log(response);
       });
     }
+
     function getMyEmail(){
       return myEmail;
     }
 
-    function register(first,last,email, password,confirm,accept_tos) {
+    function register(first,last,email, password,confirm,accept_tos,prefillVals={}) {
 
-// ,firstname,lastname,accept_tos
-      // create a new instance of deferred
-      // var deferred = $q.defer();
-      // send a post request to the server
-      var resp= $http.post('/api/register', $.param({firstName: first, lastName: last, email: email, password: password,confirm: confirm, accept_tos: accept_tos}),{headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
+      var registrationParams = {firstName: first, lastName: last, email: email, password: password,confirm: confirm, accept_tos: accept_tos};
+      for (var k in prefillVals){
+        registrationParams[k]=prefillVals[k];
+      }
+
+      var resp= $http.post('/api/register', $.param(registrationParams),{headers: {'Content-Type': 'application/x-www-form-urlencoded'}})
         // handle success
         .then(function (response) {
           if(response.status === 200){

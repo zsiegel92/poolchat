@@ -5,6 +5,7 @@ src/groupThere/Inputs
 src/__pycache__/
 src/env/
 env/
+mass_signup_dump/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

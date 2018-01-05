@@ -13,9 +13,12 @@ import csv
 app = 'groupthere-stage'
 teamid='1'
 eventid='11'
+message = None
 # users = [{'email':'grouptheretest@gmail.com','first':'Zach','last':'Siegel'}]
-filein = open('signups.csv', 'r')
-bash_filename = 'signups.sh'
+filename = 'Tribe_Retreat_Contact_Formatted.csv'
+# filename = 'signups.csv'
+filein = open(filename, 'r')
+bash_filename = 'contact__' + ".".join(filename.split(".")[:-1]) + '.sh'
 reader = csv.reader(filein)
 headers = next(reader, None)
 users = [{headers[i] : row[i] for i in range(len(headers)) if ((row[i] is not None) and (row[i] is not ''))} for row in reader]
@@ -25,8 +28,6 @@ fileout = open(bash_filename,'w')
 
 ## PROCESS
 
-print("\n\n\n\n\nheroku run bash --app {};\n\n\n\n".format(app))
-
 cmd = "cd src;"
 
 for user in users:
@@ -35,17 +36,18 @@ for user in users:
         info['teamidPart'] = " --teamid '{}'".format(teamid)
     if eventid is not None:
         info['eventidPart'] = " --eventid '{}'".format(eventid)
+    if message is not None:
+        info['messagePart'] = " --message '{}'".format(message)
     if user.get('first') is not None:
         info['firstPart'] = " --first '{}'".format(user['first'])
     if user.get('last') is not None:
         info['lastPart'] = " --last '{}'".format(user['last'])
+    cmd += " python manage.py generate_oneclick --email '{}'{}{}{}{}{};".format(user['email'],info.get('teamidPart') or '',info.get('eventidPart') or '',info.get('firstPart') or '',info.get('lastPart') or '',info.get('messagePart') or '')
 
-    cmd += " python manage.py generate_oneclick --email '{}'{}{}{}{};".format(user['email'],info.get('teamidPart') or '',info.get('eventidPart') or '',info.get('firstPart') or '',info.get('lastPart') or '')
+cmd = "heroku run bash -c \"{}\" --app {};\n\n".format(cmd, app)
+fileout.write(cmd)
 
-
-fileout.write("heroku run bash -c \"{}\" --app {};\n\n".format(cmd, app))
-
-print("\n\nheroku run bash -c \"{}\" --app {};\n\n".format(cmd, app))
+print(cmd)
 print(f'\n\nUse:\n\nsh {bash_filename}\n\n')
 filein.close()
 fileout.close()

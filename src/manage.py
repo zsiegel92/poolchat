@@ -183,7 +183,8 @@ def drop_user(user_id):
 @manager.option('-E', '--eventid', dest='event_id', default=None)
 @manager.option('-f', '--first', dest='first_name', default=None)
 @manager.option('-l', '--last', dest='last_name', default=None)
-def generate_oneclick(email,team_name=None,team_id=None,event_id = None,first_name=None,last_name=None):
+@manager.option('-m', '--message', dest='message', default=None)
+def generate_oneclick(email,team_name=None,team_id=None,event_id = None,first_name=None,last_name=None,message=None):
 	from emailer import Emailer
 	emailer=Emailer()
 	with app.app_context():
@@ -229,8 +230,8 @@ def generate_oneclick(email,team_name=None,team_id=None,event_id = None,first_na
 			else:
 				subject += " - You've been invited to join" + str(team.name)
 
-		html_body= render_template('emails/invite_fancy.html',link=link,email=email,first_name=first_name,last_name=last_name,team=team,pool=pool)
-		text_message=render_template('emails/invite_fancy.txt',link=link,email=email,first_name=first_name,last_name=last_name,team=team,pool=pool)
+		html_body= render_template('emails/invite_fancy.html',link=link,email=email,first_name=first_name,last_name=last_name,team=team,pool=pool,message=message)
+		text_message=render_template('emails/invite_fancy.txt',link=link,email=email,first_name=first_name,last_name=last_name,team=team,pool=pool,message=message)
 		html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
 		emailer.send_html(email,html_message=html,subject=subject,text_message=text_message)
 		print("{} emailed!".format(email))

@@ -129,7 +129,7 @@
               <option value="0">Nobody can arrive late</option>
             </select>
             <span ng-show="poolForm.ngLatenessWindow>0">
-            minutes after the event (which starts at {{initial.ngTime | date:'hh:mma'}}).</span>
+            after the event (which starts at {{initial.ngTime | date:'hh:mma'}}).</span>
             <span ng-show="poolForm.ngLatenessWindow==0">
             before the event at {{initial.ngTime | date:'hh:mma'}}.</span>
           </span>

@@ -117,7 +117,7 @@ angular.module('myApp.joinPool', ['ngRoute'])
       let relDt = new Date(dt.getTime() - preWindow*60*1000);
       return relDt;
     };
-    $scope.preTimes = [15,20,25,30,35,40,45,50,55,60];
+    $scope.preTimes = [15,20,25,30,35,40,45,50,55,60,80,100,120,150,180,210,240];
 
     $scope.backto_view = function(){
       $location.path('/viewPool');

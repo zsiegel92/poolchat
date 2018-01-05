@@ -13,12 +13,14 @@ import csv
 app = 'groupthere-stage'
 teamid='1'
 eventid='11'
-message = None
+message = "Hey all, check this out! I am sending a message!"
 # users = [{'email':'grouptheretest@gmail.com','first':'Zach','last':'Siegel'}]
-filename = 'Tribe_Retreat_Contact_Formatted.csv'
+# filename = 'Tribe_Retreat_Contact_Formatted.csv'
 # filename = 'signups.csv'
+filename= "/Users/Zach/poolchat/mass_signup_dump/signups.csv"
 filein = open(filename, 'r')
-bash_filename = 'contact__' + ".".join(filename.split(".")[:-1]) + '.sh'
+filepath = filename.split('/')
+bash_filename = "/".join(filepath[:-1] + ['contact__' + ".".join(filepath[-1].split(".")[:-1]) + '.sh'])
 reader = csv.reader(filein)
 headers = next(reader, None)
 users = [{headers[i] : row[i] for i in range(len(headers)) if ((row[i] is not None) and (row[i] is not ''))} for row in reader]

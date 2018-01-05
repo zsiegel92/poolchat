@@ -38,7 +38,10 @@ Anyone who is part of {{team.name}} can join {{pool.poolName}}.
 \n
 \n
 {% if message is not none %}
-{{message}}
+Here is a message about this invitation:
+\n
+\n
+"{{message}}"
 \n
 \n
 {% endif %}

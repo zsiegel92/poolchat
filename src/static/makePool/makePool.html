@@ -120,6 +120,8 @@
             <span ng-show="poolForm.ngLatenessWindow==0"> Neither participants nor organizers can arrive late. </span>
             <br>
             <select ng-model="poolForm.ngLatenessWindow" name="latenessWindow" ng-init="poolForm.ngLatenessWindow=30;" convert-to-number>
+              <option value="120">2 hours</option>
+              <option value="90">90 minutes</option>
               <option value="60">1 hour</option>
               <option value="45">45 minutes</option>
               <option value="30">30 minutes</option>

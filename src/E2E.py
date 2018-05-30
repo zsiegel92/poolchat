@@ -19,26 +19,11 @@ numTestUsers=31
 baseFirst='Zach'
 baseLast='Siegel'
 password='masterp123'
-emails=['zsiegel92@gmail.com','thesouroaf@gmail.com','grouptherela@gmail.com','grouptherenow@gmail.com','ifnotnowcarpooling@gmail.com','grouptherecarpool@gmail.com','grouptheretest@gmail.com']
+emails=['zsiegel92@gmail.com']
 original_len_emails = len(emails)
 
 
 addresses=[
-	  "153 N New Hampshire Ave, LA, CA 90004",
-	  "3103 Livonia Ave, LA, CA 90034",
-	  "1131 Elden Avenue, Los Angeles, CA 90006",
-	  "3560 Hughes Ave, Los Angeles, CA 90034",
-	  "3970 Sepulveda Blvd, Culver City, CA 90230",
-	  "3970 Sepulveda Blvd, Culver City, CA 90230",
-	  "5922 N Figueroa St, Los Angeles, CA 93759 W",
-	  "27th St, Los Angeles, CA 90018-2309",
-	  "3759 W 27th St, Los Angeles, CA 90018-2309",
-	  "1829 7th St, Santa Monica, CA 90401",
-	  "2559 Ocean Front Walk, Santa Monica, CA 90401",
-	  "3640 S Sepulveda Blvd, Los Angeles, CA 90034",
-	  "8339 W 3rd St, Los Angeles, CA 90048",
-	  "4207 Lockwood Ave Los Angeles, CA 90029",
-	  "4230 Burns Ave Los Angeles, CA 90029",
 	  "317 S Broadway, Los Angeles, CA 90013",
 	  "1441 S Bedford St, LA, CA 90035",
 	  "1459 W 54th St, LA, CA",

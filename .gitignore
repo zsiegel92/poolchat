@@ -4,9 +4,11 @@ src/Scratch/
 src/groupThere/Inputs
 src/__pycache__/
 src/env/
+src/params
 env/
 mass_signup_dump/
 READMEs/
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

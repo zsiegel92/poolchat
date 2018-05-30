@@ -10,16 +10,16 @@ import csv
 ## PARAMS
 
 # app = 'groupthere'
-app = 'groupthere-stage'
-teamid='1'
-eventid='11'
+app = 'groupthere'
+teamid='4'
+eventid=None
 message = "Please ensure that everyone participating signs up for the event. If you are leaving from the same location as someone else, you will almost definitely be placed in the same car, but you will both need to sign up separately. There are 4 arrival times. Please sign up for the one for which you are most available."
 
 
 # users = [{'email':'grouptheretest@gmail.com','first':'Zach','last':'Siegel'}]
-# filename = 'Tribe_Retreat_Contact_Formatted.csv'
+filename = '/Users/Zach/poolchat/mass_signup_dump/Tribe_Retreat_Contact_Formatted.csv'
 # filename = 'signups.csv'
-filename= "/Users/Zach/poolchat/mass_signup_dump/signups.csv"
+# filename= "/Users/Zach/poolchat/mass_signup_dump/signups.csv"
 filein = open(filename, 'r')
 filepath = filename.split('/')
 bash_filename = "/".join(filepath[:-1] + ['contact__' + ".".join(filepath[-1].split(".")[:-1]) + '.sh'])

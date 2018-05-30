@@ -6,6 +6,7 @@ src/__pycache__/
 src/env/
 env/
 mass_signup_dump/
+READMEs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -228,7 +228,7 @@ def generate_oneclick(email,team_name=None,team_id=None,event_id = None,first_na
 			if pool is not None:
 				subject += " - You've been invited to " + str(pool.poolName) + " with " + str(team.name)
 			else:
-				subject += " - You've been invited to join" + str(team.name)
+				subject += " - You've been invited to join " + str(team.name)
 
 		html_body= render_template('emails/invite_fancy.html',link=link,email=email,first_name=first_name,last_name=last_name,team=team,pool=pool,message=message)
 		text_message=render_template('emails/invite_fancy.txt',link=link,email=email,first_name=first_name,last_name=last_name,team=team,pool=pool,message=message)

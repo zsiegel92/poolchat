@@ -25,7 +25,7 @@ from models import  Carpooler,Pool, Trip,ensure_carpooler_notNone,Team,TempTeam,
 from groupThere.GroupThere import GroupThere
 
 from GT_manager import create_generic_parameters
-from GT_interactions import doGroupThere_fromDB
+from GT_interactions import  _fromDB
 
 from app import app,request,abort
 from database import db

@@ -1,8 +1,9 @@
 #!/bin/bash
 cd src
 tester=${isLocal:-no}
-if [[ $tester != yes ]]
-then
+echo "Tester is"
+echo $tester
+if [ "$tester" != "yes" ]; then
 	gunicorn app:app --access-logfile "-" --log-syslog --daemon
 	echo “RUNNING APP AS DAEMON, for external Deployment.“
 	unset tester

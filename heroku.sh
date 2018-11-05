@@ -8,7 +8,7 @@ then
 	unset tester
 	python worker.py
 else
-	gunicorn app:app --access-logfile '-' --daemon
+	gunicorn app:app --access-logfile --log-syslog True '-' --daemon
 	echo “running as daemon with kill sequence, for local deployment.“
 	unset tester
 	python worker.py

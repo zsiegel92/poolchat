@@ -29,10 +29,15 @@ import models
 # 		testdb.create_all()
 # 	return testapp
 
-
+# import logging
 def create_app(name=__name__):
 	app = Flask(name)
 	app.config.from_object(os.environ['APP_SETTINGS'])
+
+	app.logger.log("STARTING APP!")
+	# gunicorn_logger = logging.getLogger('gunicorn.error')
+	# app.logger.handlers = gunicorn_logger.handlers
+	# app.logger.setLevel(gunicorn_logger.level)
 
 	# app.logger.handlers.extend(gunicorn_error_logger.handlers)
 	# app.logger.setLevel(logging.DEBUG)

@@ -60,6 +60,7 @@ def api_register():
 	if validationLevel >=0:
 		email=form.email.data.lower()
 		if Carpooler.query.filter_by(email=email).first() is None:
+			print("CARPOOLER IS NOT NONE!")
 			try:
 				carpooler = Carpooler(firstname=form.firstName.data, lastname=form.lastName.data,name= str(form.firstName.data) + " " + str(form.lastName.data), email=email,password=form.password.data)
 				db.session.add(carpooler)
@@ -94,14 +95,15 @@ def api_register():
 				return jsonify(returndict), 200
 			try:
 				send_register_email(email)
-				print("response of /api/register is: \n\n{}\n\n".format(app.config['URL_BASE'] + str(url_for('login'))))
-				return app.config['URL_BASE'] + str(url_for('login')),200
+				print("response of /api/register is: \n\n{}\n\n".format(app.config['URL_BASE'][:-1] + str(url_for('login'))))
+				return app.config['URL_BASE'][:-1] + str(url_for('login')),200
 			except Exception as exc:
 				print("ERROR IN api_register WITH SENDING EMAIL!")
 				print(exc)
 				return 'Error sending confirmation email - user added.',400
 
 		elif (hasattr(current_user.is_anonymous,'__call__') and (current_user.is_anonymous() is False)) and (email == current_user.email):
+			print("current user is anonymous!")
 			returndict = try_oneclick(current_user,form,validationLevel)
 			oneclickLevel = returndict['oneclickLevel']
 			del returndict['oneclickLevel']
@@ -118,6 +120,7 @@ def api_register():
 			returndict['status']=status
 			return jsonify(returndict), 200
 		else:
+			print("email already in use!")
 			return 'User email already in use!',409
 
 	return 'Form does not validate! Errors: ' + str(form.errors),422
@@ -197,6 +200,7 @@ def send_register_email(email=None):
 	else:
 		print("carpooler is not None!")
 		if not carpooler.is_authenticated():
+			print("carpooler not authenticated")
 			subject = "GroupThere confirmation for " + str(carpooler.name)
 
 			token=ts.dumps(email,salt='email-confirm-key')
@@ -206,8 +210,9 @@ def send_register_email(email=None):
 			text_message=render_template('emails/confirm_email.txt',carpooler=carpooler, link=link)
 			html = '<html><head></head><body>{body}</body></html>'.format(body=html_body)
 			emailer.send_html(email,html_message=html,subject=subject,text_message=text_message)
-			return "Sent registrration email",200
+			return "Sent registration email",200
 		else:
+			print("carpooler already authenticated")
 			return "User already authenticated",200
 
 #post with form {email:}

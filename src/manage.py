@@ -16,8 +16,8 @@ from encryption import bcrypt
 import models
 from models import Carpooler, Pool, Trip, Team,team_membership,team_affiliation
 
-testing_env_dict={"APP_SETTINGS":"config.TestingConfig","EMAIL":''}#{"APP_SETTINGS":"config.TestingConfig","EMAIL":''}
-testing_runserver_env_dict ={"APP_SETTINGS":"config.TestingConfig","EMAIL":'','FLASKDEBUG':'False'}
+testing_env_dict={"APP_SETTINGS":"config.TestingConfig","EMAIL":'grouptherenow@gmail.com'}#{"APP_SETTINGS":"config.TestingConfig","EMAIL":''}
+testing_runserver_env_dict ={"APP_SETTINGS":"config.TestingConfig","EMAIL":'grouptherenow@gmail.com','FLASKDEBUG':'False'}
 
 def test_env():
 	return modified_environ(**testing_env_dict)

@@ -50,7 +50,7 @@ class StagingConfig(ProductionConfig):
 
 class TestingConfig(Config):
 	TESTING = True
-	SQLALCHEMY_DATABASE_URI = "postgresql://localhost/testing"
+	SQLALCHEMY_DATABASE_URI = "postgresql://localhost/poolchat"
 	print("Setting SQLALCHEMY_DATABASE_URI TO " + str(SQLALCHEMY_DATABASE_URI))
 	APP_NAME = "GroupThere"
 	DEVELOPMENT = True

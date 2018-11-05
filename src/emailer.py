@@ -19,8 +19,9 @@ class Emailer:
 
 	def __init__(self,queue=None):
 		self.queue=queue
-		self.gmail_user = os.environ['EMAIL']
-		self.gmail_password=os.environ['EMAIL_PASSWORD']
+		self.gmail_user = os.environ.get('EMAIL')
+		self.gmail_password=os.environ.get('EMAIL_PASSWORD')
+		print("SETTING UP EMAILER - EMAIL IS {} with pword {}".format(self.gmail_user,self.gmail_password))
 
 	def get_email(self):
 		return self.gmail_user
@@ -70,6 +71,7 @@ class Emailer:
 
 	@classmethod
 	def send_from_server(cls,fromAddress,password,toAddress,message):
+		print("Sending from {} to {} with pword {} and message {}".format(fromAddress, toAddress, password, message))
 		if fromAddress=='':
 			return
 		server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
@@ -109,8 +111,10 @@ class Emailer:
 		msg.attach(part2)
 
 		if self.queue is None:
+			print("Sending without worker.")
 			self.send_from_server(msg['From'],self.gmail_password,msg['To'],msg.as_string())
 		else:
+			print("Sending from worker")
 			self.queue.enqueue_call(func=self.send_from_server,args=(msg['From'],self.gmail_password,msg['To'],msg.as_string(),),result_ttl=5000)
 
 

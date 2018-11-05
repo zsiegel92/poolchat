@@ -52,7 +52,7 @@ angular.module('myApp.register', ['ngRoute'])
 					// handle success
 					.then(function(response) {
 						// console.log(response);
-						console.log("response is " + response);
+						// console.log("response is " + response);
 						var status = response.status;
 						$scope.disabled = false;
 						if (status == 200) {

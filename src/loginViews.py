@@ -46,6 +46,7 @@ def redirect_back(endpoint, **values):
 # wtforms_ext has oneClickRegistrationForm, oneClickRegistrationFormPlusTeam, and oneClickRegistrationFormPlusTeamAndEvent
 @app.route('/api/register', methods=['POST'])
 def api_register():
+	app.logger.info("QUERYING /api/register !")
 	print("In /api/register")
 	validationLevel=-1
 	for formtype in [ngRegistrationForm,oneClickRegistrationForm,oneClickRegistrationFormPlusTeam,oneClickRegistrationFormPlusTeamAndEvent]:

@@ -3,7 +3,7 @@ cd src
 tester=${isLocal:-no}
 if [[ $tester != yes ]]
 then
-	gunicorn app:app --daemon
+	gunicorn app:app --access-logfile "-" --log-syslog --daemon
 	echo “RUNNING APP AS DAEMON, for external Deployment.“
 	unset tester
 	python worker.py

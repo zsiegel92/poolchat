@@ -98,7 +98,7 @@ class Carpooler(db.Model):
 		self.selfFormalRep="{}"
 		self.mode = "fields"
 		print("Trying to set password")
-		self._set_password(password)
+		self.password= password
 		print("Successfully set password")
 		for arg in kwargs:
 			print("setting attribute {}: {}".format(arg, kwargs[arg]))
@@ -109,7 +109,7 @@ class Carpooler(db.Model):
 		return self._password
 
 	@password.setter
-	def _set_password(self, plaintext):
+	def password(self, plaintext):
 		print("setting a password")
 		self._password = bcrypt.generate_password_hash(plaintext).decode('utf-8')
 		print("password set")

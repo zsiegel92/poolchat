@@ -97,8 +97,11 @@ class Carpooler(db.Model):
 		self.selfRep = "{}"
 		self.selfFormalRep="{}"
 		self.mode = "fields"
+		print("Trying to set password")
 		self.password = password
+		print("Successfully set password")
 		for arg in kwargs:
+			print("setting attribute {}: {}".format(arg, kwargs[arg]))
 			if hasattr(self,arg):
 				setattr(self,arg,kwargs[arg])
 	@hybrid_property

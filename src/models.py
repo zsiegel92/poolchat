@@ -88,7 +88,7 @@ class Carpooler(db.Model):
 	menu = db.Column(db.String())
 	mode = db.Column(db.String())
 
-	def __init__(self, fbId="",**kwargs):
+	def __init__(self, fbId="",password="",**kwargs):
 		super().__init__()
 		self.authenticated=False
 		self.fbId = fbId #facebook id of user
@@ -97,6 +97,7 @@ class Carpooler(db.Model):
 		self.selfRep = "{}"
 		self.selfFormalRep="{}"
 		self.mode = "fields"
+		self.password = password
 		for arg in kwargs:
 			if hasattr(self,arg):
 				setattr(self,arg,kwargs[arg])
@@ -106,7 +107,9 @@ class Carpooler(db.Model):
 
 	@password.setter
 	def _set_password(self, plaintext):
+		print("setting a password")
 		self._password = bcrypt.generate_password_hash(plaintext).decode('utf-8')
+		print("password set")
 
 	def is_correct_password(self, plaintext):
 		return bcrypt.check_password_hash(self._password, plaintext)

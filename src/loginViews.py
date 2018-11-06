@@ -61,7 +61,7 @@ def api_register():
 		if Carpooler.query.filter_by(email=email).first() is None:
 			print("CARPOOLER IS NOT NONE!")
 			try:
-				carpooler = Carpooler(firstname=form.firstName.data, lastname=form.lastName.data,name= str(form.firstName.data) + " " + str(form.lastName.data), email=email,password=form.password.data)
+				carpooler = Carpooler(firstname=str(form.firstName.data), lastname=str(form.lastName.data),name= "{} {}".format(form.firstName.data,form.lastName.data), email=str(email),password=str(form.password.data))
 				db.session.add(carpooler)
 				db.session.commit()
 				print("successfully added new carpooler.")

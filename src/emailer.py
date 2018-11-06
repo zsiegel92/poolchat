@@ -21,7 +21,7 @@ class Emailer:
 		self.queue=queue
 		self.gmail_user = os.environ.get('EMAIL')
 		self.gmail_password=os.environ.get('EMAIL_PASSWORD')
-		print("SETTING UP EMAILER - EMAIL IS {} with pword {}".format(self.gmail_user,self.gmail_password))
+
 
 	def get_email(self):
 		return self.gmail_user
@@ -71,7 +71,6 @@ class Emailer:
 
 	@classmethod
 	def send_from_server(cls,fromAddress,password,toAddress,message):
-		print("Sending from {} to {} with pword {} and message {}".format(fromAddress, toAddress, password, message))
 		if fromAddress=='':
 			return
 		server = smtplib.SMTP_SSL('smtp.gmail.com', 465)

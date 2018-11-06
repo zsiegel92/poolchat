@@ -46,7 +46,6 @@ def redirect_back(endpoint, **values):
 # wtforms_ext has oneClickRegistrationForm, oneClickRegistrationFormPlusTeam, and oneClickRegistrationFormPlusTeamAndEvent
 @app.route('/api/register', methods=['POST'])
 def api_register():
-	app.logger.info("QUERYING /api/register !")
 	print("In /api/register")
 	validationLevel=-1
 	for formtype in [ngRegistrationForm,oneClickRegistrationForm,oneClickRegistrationFormPlusTeam,oneClickRegistrationFormPlusTeamAndEvent]:
@@ -65,7 +64,9 @@ def api_register():
 				carpooler = Carpooler(firstname=form.firstName.data, lastname=form.lastName.data,name= str(form.firstName.data) + " " + str(form.lastName.data), email=email,password=form.password.data)
 				db.session.add(carpooler)
 				db.session.commit()
+				print("successfully added new carpooler.")
 			except Exception as exc:
+				print("database error: '{}'".format(exc))
 				return 'Database error! ' + str(exc),400
 
 			#see register.js for status explanation

@@ -98,7 +98,7 @@ class Carpooler(db.Model):
 		self.selfFormalRep="{}"
 		self.mode = "fields"
 		print("Trying to set password")
-		self.password = password
+		self._set_password(password)
 		print("Successfully set password")
 		for arg in kwargs:
 			print("setting attribute {}: {}".format(arg, kwargs[arg]))
